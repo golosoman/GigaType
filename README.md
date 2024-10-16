@@ -1,7 +1,5 @@
 # GigaType
 
-# samoleti-begemoti
-
 1. Открыть ваш проект (backend/frontend) в VSCode.
 ## установка
 1. `https://github.com/golosoman/GigaType.git`
