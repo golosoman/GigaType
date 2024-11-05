@@ -4,7 +4,7 @@
 ## установка
 1. `https://github.com/golosoman/GigaType.git`
 2. `cd GigaType`
-3. `git checkout {имя вашей ветки} (frontend/backend)`
+3. `git checkout {имя вашей ветки} (golosoman)`
 4. Вы великолепны. Репозиторий успешно скопирован
 ## установка дубль 2
 1. Открыть вашу папку проекта (backend/frontend) в VSCode.
