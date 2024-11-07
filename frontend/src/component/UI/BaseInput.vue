@@ -1,5 +1,6 @@
 <script lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
+import { setUniqId } from './util';
 export default {
     props: {
         modelValue: {
@@ -16,59 +17,75 @@ export default {
             type: String,
             required: true,
             default: 'text'
+        },
+        width: {
+            type: String,
+            default: 'auto'
+        },
+        height: {
+            type: String,
+            default: 'auto'
+        },
+        id: { // Новый пропс для id
+            type: String,
+            default: ''
         }
     },
-    setup() {
-        let id = ref('')
-
-        const setUniqId = () => {
-            const date = new Date()
-            const timestamp = date.getTime()
-            const randomString = Math.random().toString(36).substring(7)
-            const randomNumber = Math.floor(Math.random() * 10000)
-            const uniqueId = `id-${timestamp}-${randomString}-${randomNumber}`
-            return uniqueId
-        }
-
+    setup(props) {
+        const id = ref(props.id || ''); // Используем переданный id или пустую строку
         onMounted(() => {
-            id.value = setUniqId()
-        })
-
-        return { id }
+            if (!id.value) {
+                id.value = setUniqId(); // Генерируем уникальный id, если id не был передан
+            }
+        });
+        const computedStyles = computed(() => ({
+            width: props.width,
+            height: props.height,
+        }));
+        return { id, computedStyles }
     },
     methods: {
-        updateInput(event: { target: { value: any; }; }) {
-            this.$emit('update:modelValue', event.target.value)
+        updateInput(event: Event) {
+            const target = event.target as HTMLInputElement; // Приведение типа
+            this.$emit('update:modelValue', target.value); // Получаем значение из target
         }
     }
 }
 </script>
-
 <template>
-    <input
+    <input 
         :value="modelValue"
         @input="updateInput"
         class="baseInputBody baseInputText"
         :id="id"
         :type="inputType"
         :placeholder="inputPlaceholder"
+        :style="computedStyles"
     />
 </template>
-
 <style scoped>
     .baseInputBody {
-        border-radius: 15px;
-        border-width: 0;
-        background-color: #81BECE;
-        outline: none;
+        border-radius: 15px; /* Скругление углов */
+        border: none; /* Убираем границу полностью */
+        background-color: #81BECE; /* Цвет фона */
+        outline: none; /* Убираем обводку при фокусировке */
+        padding-left: 10px; /* Внутренний отступ слева для улучшения читаемости */
+        transition: box-shadow 0.3s ease; /* Плавный переход для эффекта фокуса */
     }
-
+    .baseInputBody:focus {
+        box-shadow: 0 0 5px #012e4a88; /* Эффект фокуса */
+    }
     .baseInputText {
-        font-family: var(--font-family);
-        color: #012e4a;
+        font-family: "Alegreya Sans SC", sans-serif; /* Шрифт */
+        color: #012e4a; /* Цвет текста */
+        border: none; /* Убираем границу у текста */
+        width: 100%; /* Полная ширина для текста */
+        outline: none; /* Убираем обводку при фокусировке */
     }
-
     .baseInputText::placeholder {
-        color:#012e4a88;
+        color: #012e4a88; /* Цвет плейсхолдера с прозрачностью */
+    }
+    .baseInputText:focus {
+        color: #012e4a; /* Цвет текста при фокусировке */
     }
 </style>
