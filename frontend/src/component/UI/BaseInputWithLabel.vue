@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import BaseInput from './BaseInput.vue'; // Убедитесь, что путь к вашему компоненту верный
 import { setUniqId } from './util';
 export default defineComponent({
@@ -19,13 +19,13 @@ export default defineComponent({
             type: String,
             default: 'text'
         },
-        inputWidth: {
+        customStyleForInput: { // Новый пропс для стилей поля ввода
             type: String,
-            default: 'auto'
+            default: ''
         },
-        inputHeight: {
+        customStyleForLabel: { // Новый пропс для стилей метки
             type: String,
-            default: 'auto'
+            default: ''
         },
         label: {
             type: String,
@@ -40,26 +40,21 @@ export default defineComponent({
 </script>
 <template>
     <div class="inputWithLabel">
-        <label :for="inputId" class="label">{{ label }}</label>
-        <BaseInput
-            v-model="modelValue"
-            :inputPlaceholder="inputPlaceholder"
-            :inputType="inputType"
-            :width="inputWidth"
-            :height="inputHeight"
-            :id="inputId"
-        />
+        <label :for="inputId" class="label" :style="customStyleForLabel">{{ label }}</label>
+        <BaseInput v-model="modelValue" :inputPlaceholder="inputPlaceholder" :inputType="inputType"
+            :customStyle="customStyleForInput" :id="inputId" />
     </div>
 </template>
 <style scoped>
 .inputWithLabel {
     display: flex;
     flex-direction: column;
-    margin-bottom: 1rem; /* Отступ между полями ввода */
 }
+
 .label {
-    font-family: "Alegreya Sans SC", sans-serif; /* Шрифт для метки */
-    color: #012E4A; /* Цвет текста метки */
-    margin-bottom: 0.5rem; /* Отступ между меткой и полем ввода */
+    font-family: "Alegreya Sans SC";
+    /* Шрифт для метки */
+    color: #012E4A;
+    /* Цвет текста метки */
 }
 </style>
