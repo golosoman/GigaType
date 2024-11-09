@@ -1,17 +1,37 @@
 <template>
-    <img src="@/assets/logo.jpg" alt="Логотип" class="logoImg" />
+    <div class="logoContainer">
+        <img src="@/assets/logo.jpg" alt="Логотип" class="logoImg" :style="customStyleForImg" />
+        <span class="logoText" :style="customStyleForText">GIGATYPE</span>
+    </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-    name: 'Logo'
+    name: 'Logo',
+    props: {
+        customStyleForImg: {
+            type: String,
+            default: ''
+        },
+        customStyleForText: {
+            type: String,
+            default: ''
+        },
+    }
 });
 </script>
 <style scoped>
+.logoContainer {
+    position: relative;
+}
+
 .logoImg {
     max-width: 100%;
-    /* Адаптивный размер */
     height: auto;
-    /* Сохраняет пропорции */
+}
+
+.logoText {
+    font-family: "Alata";
+    color: #012E4A;
 }
 </style>
