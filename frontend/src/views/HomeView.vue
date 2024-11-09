@@ -52,6 +52,7 @@ const handleCompletion = (completedText: string) => {
     </div>
     <div>
       <h2>Поле для тренировки</h2>
+      <!-- Кнопки клавы блочатся -->
       <!-- <TrainingField :textToType="textToType" @completed="handleCompletion"
         customStyle="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px; "></TrainingField> -->
     </div>
