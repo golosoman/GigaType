@@ -4,12 +4,15 @@ import BaseButton from '@/component/UI/BaseButton.vue';
 import BaseInputWithLabel from '@/component/UI/BaseInputWithLabel.vue';
 import AuthForm from '@/component/Auth/AuthForm.vue';
 import Logo from '@/component/UI/Logo.vue';
+import BaseDropdown from '@/component/UI/BaseDropDown.vue';
 import TrainingField from '@/component/Trainer/TrainingField.vue';
 import { ref } from 'vue';
-let a = ref("1");
-const login = ref('')
-const password = ref('')
-const textToType = ref("фыва олдж фыва олдж фыва олдж фыва олдж фыва олдж фыва олдж");
+let a = ref("1"); // Просто для теста базовых input
+const login = ref('') // Двусторонняя привязка с полем логин в форме auth
+const password = ref('') // Двусторонняя привязка с полем пароль в форме auth
+const textToType = ref("фыва олдж фыва олдж фыва олдж фыва олдж фыва олдж фыва олдж"); // Текст для поля тренажера
+const options = ['Упражнение 1', 'Упражнение 2', 'Упражнение 3']; // Опции для выпадающего списка
+const selectedOption = ref(null); // Двусторонняя привязка с опциями
 const handleCompletion = (completedText: string) => {
   console.log('Завершено! Введенный текст:', completedText);
 };
@@ -25,22 +28,30 @@ const handleCompletion = (completedText: string) => {
     <div>
       <h2>Базовая кнопка</h2>
       <BaseButton customStyle="width: 200px; height: 50px; background-color: #012E4A; color: #E8EDE7;"
-        v-on:click="() => console.log(423423)">
+        v-on:click="() => console.log('Базовая кнопка работает! (первая)')">
         click me</BaseButton>
-      <BaseButton customStyle="width: 200px; height: 50px;" v-on:click="() => console.log(423423)">
+      <BaseButton customStyle="width: 200px; height: 50px;"
+        v-on:click="() => console.log('Базовая кнопка работает! (вторая)')">
         click me</BaseButton>
 
-      <BaseButton>
+      <BaseButton v-on:click="() => console.log('Базовая кнопка работает! (третья)')">
         click me</BaseButton>
     </div>
     <div>
       <h2>Базовое поле ввода</h2>
       <BaseInput customStyle="width: 800px; height: 50px;" v-model="a"></BaseInput>
+      <p>a: {{ a }}</p>
     </div>
     <div>
       <h2>Базовое поле ввода с биркой</h2>
       <BaseInputWithLabel customStyleForInput="width: 800px; height: 50px;" v-model="a" label="Что?!">
       </BaseInputWithLabel>
+      <p>a: {{ a }}</p>
+    </div>
+    <div>
+      <h2>Выпадающий список</h2>
+      <BaseDropdown v-model="selectedOption" :options="options" placeholder="Выберите упражнение" />
+      <p>Выбранное упражнение: {{ selectedOption }}</p>
     </div>
     <div>
       <h2>Форма авторизации</h2>
@@ -56,5 +67,6 @@ const handleCompletion = (completedText: string) => {
       <!-- <TrainingField :textToType="textToType" @completed="handleCompletion"
         customStyle="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px; "></TrainingField> -->
     </div>
+
   </main>
 </template>

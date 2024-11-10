@@ -1,13 +1,13 @@
 <script lang="ts">
 import BaseInputWithLabel from '../UI/BaseInputWithLabel.vue';
 import BaseButton from '../UI/BaseButton.vue';
-import Logo from '../UI/Logo.vue';
-import { ref } from 'vue';
+import BaseLogo from '../UI/BaseLogo.vue';
+import { defineComponent } from 'vue';
 
-export default {
+export default defineComponent({
     components: {
         BaseButton,
-        Logo,
+        BaseLogo,
         BaseInputWithLabel
     },
     props: {
@@ -29,13 +29,13 @@ export default {
             this.$emit('update:login', login) // previously was `this.$emit('input', title)`
         },
     }
-}
+})
 </script>
 
 <template>
     <div>
         <div>
-            <Logo customStyleForText="font-size: 64px;"></Logo>
+            <BaseLogo customStyleForText="font-size: 64px;"></BaseLogo>
         </div>
         <div class="formContent">
             <div>
