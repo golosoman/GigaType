@@ -4,6 +4,7 @@ import BaseInput from './BaseInput.vue';
 import { setUniqId } from './util';
 
 export default defineComponent({
+    name: 'BaseInputWithLabel',
     components: {
         BaseInput
     },
