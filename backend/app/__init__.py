@@ -11,6 +11,8 @@ app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 db = SQLAlchemy(app)
 
-# from backend.app.models import *
+from backend.app.models import *
 
+# with app.app_context():
+#     print(db.session.execute(select(Status)).all())
 # CORS(app, resources={r'/*': {'origins': '*'}})
