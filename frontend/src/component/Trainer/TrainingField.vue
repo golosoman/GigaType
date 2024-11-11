@@ -6,10 +6,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { defineComponent, ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 
 export default defineComponent({
-    name: 'TypingTrainer',
+    name: 'TrainingField',
     props: {
         textToType: {
             type: String,
@@ -17,54 +17,74 @@ export default defineComponent({
         },
         customStyle: {
             type: String,
-            required: false,
+            default: ''
+        },
+        inputControl: {
+            type: Boolean,
+            default: true
+        },
+        modelValue: { // Изменено на modelValue для v-model
+            type: String,
             default: ''
         },
     },
     setup(props, { emit }) {
-        const inputText = ref<string>(''); // текст, который пользователь ввел
-        const textToType = ref<string>(props.textToType); // текст, который нужно ввести
+        const inputText = ref<string>(props.modelValue);
+
+        // Смотрите за изменениями modelValue и обновляйте inputText
+        watch(() => props.modelValue, (newValue) => {
+            inputText.value = newValue;
+        });
+
+        const specialKeys = new Set([
+            'Backspace', 'Tab', 'Enter', 'Shift', 'Control', 'Alt', 'Meta',
+            'CapsLock', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+            'Insert', 'Delete', 'Home', 'End', 'PageUp', 'PageDown', 'PrintScreen',
+            'ScrollLock', 'Pause', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7',
+            'F8', 'F9', 'F10', 'F11', 'F12'
+        ]);
+
+        const visibleTextToType = computed(() => props.textToType.slice(inputText.value.length));
+        const visibleInputText = computed(() => inputText.value);
 
         const handleKeydown = (event: KeyboardEvent) => {
-            const nextChar = textToType.value[0]; // первый символ текста, который нужно ввести
+            if (!props.inputControl) return;
+
+            const nextChar = visibleTextToType.value[0];
             if (event.key === nextChar) {
-                inputText.value += event.key; // добавляем символ в введенный текст
-                textToType.value = textToType.value.slice(1); // удаляем символ из текста, который нужно ввести
-            } else if (event.key === 'Backspace') {
-                // Удаление текста запрещено, просто игнорируем нажатие Backspace
+                inputText.value += event.key;
+                emit('update:modelValue', inputText.value); // Эмитим обновление
+                emit('right-character', inputText.value);
+            } else if (specialKeys.has(event.key)) {
                 event.preventDefault();
             } else {
-                // Отменяем ввод, если символ неверный
+                emit('invalid-character', event.key);
                 event.preventDefault();
             }
-            // Проверка завершения ввода
-            if (textToType.value.length === 0) {
-                emit('completed', inputText.value); // Генерируем событие при завершении ввода
+
+            if (visibleTextToType.value.length === 0) {
+                emit('completed', inputText.value);
                 console.log('Вы ввели текст правильно!');
-                // Удаляем слушатель событий, так как ввод завершен
-                window.removeEventListener('keydown', handleKeydown);
             }
         };
 
         onMounted(() => {
-            window.addEventListener('keydown', handleKeydown); // Добавляем слушатель событий при монтировании
+            window.addEventListener('keydown', handleKeydown);
         });
 
         onBeforeUnmount(() => {
-            window.removeEventListener('keydown', handleKeydown); // Удаляем слушатель событий при размонтировании
+            window.removeEventListener('keydown', handleKeydown);
         });
 
-        const visibleTextToType = computed(() => {
-            return textToType.value;
-        });
-
-        const visibleInputText = computed(() => {
-            return inputText.value;
-        });
+        const reset = () => {
+            inputText.value = '';
+            emit('update:modelValue', ''); // Сбрасываем значение в родительском компоненте
+        };
 
         return {
             visibleTextToType,
             visibleInputText,
+            reset,
         };
     },
 });
@@ -84,7 +104,8 @@ export default defineComponent({
     color: gray;
     white-space: pre;
     overflow: hidden;
-    text-overflow: ellipsis;
+    /* text-overflow: ellipsis; */
+    /* Убрано многоточие */
     flex: 1;
 }
 
@@ -95,7 +116,8 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     overflow: hidden;
-    text-overflow: ellipsis;
+    /* text-overflow: ellipsis; */
+    /* Убрано многоточие */
     flex: 1;
 }
 </style>
