@@ -144,20 +144,25 @@ class Statistic(Base):
     timestamp: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now())
     used_time: Mapped[float]
     mistakes: Mapped[int]
-    average_key_press_time: Mapped[float]
+    # average_key_press_time: Mapped[float]
+    clicks_number: Mapped[int]
+    score: Mapped[int]
+
 
     def __init__(self,
                  user_id: int,
                  task_id: int,
                  used_time: float,
                  mistakes: int,
-                 average_key_press_time: float,
+                 clicks_number: int,
+                 score: int,
                  timestamp: datetime.datetime = None
                  ):
         self.user_id = user_id
         self.task_id = task_id
         self.used_time = used_time
         self.mistakes = mistakes
-        self.average_key_press_time = average_key_press_time
+        self.clicks_number = clicks_number
+        self.score = score
         if timestamp:
             self.timestamp = timestamp
