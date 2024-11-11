@@ -77,8 +77,13 @@ export default defineComponent({
     cursor: pointer;
     border: none;
     background-color: #81BECE;
-
+    transition: background-color 0.3s, opacity 0.3s, transform 0.1s;
     border-radius: 10px;
+}
+
+.dropdown-toggle:active {
+    transform: scale(0.95);
+    opacity: 0.9;
 }
 
 .dropdown-toggle:hover {
