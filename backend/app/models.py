@@ -61,7 +61,7 @@ difficulty_zone = Table(
 
 class KeyBoardZone(Base):
     uid: Mapped[str] = mapped_column(String(36), unique=True)
-    keys: Mapped[str] = mapped_column(String(16), unique=True)
+    keys: Mapped[str] = mapped_column(String(32), unique=True)
     difficulty: Mapped[List["Difficulty"]] = relationship(
         secondary=difficulty_zone,
         back_populates="zones",
