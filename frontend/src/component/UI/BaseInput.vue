@@ -1,91 +1,81 @@
 <script lang="ts">
-import { onMounted, ref, computed } from 'vue'
-import { setUniqId } from './util';
-export default {
+import { defineComponent, ref, watch } from 'vue';
+
+export default defineComponent({
+    name: 'BaseInput',
     props: {
         modelValue: {
             type: [String, Number],
             required: true,
-            default: ''
         },
         inputPlaceholder: {
             type: String,
-            required: true,
             default: 'Ввод: '
         },
         inputType: {
             type: String,
-            required: true,
             default: 'text'
         },
-        width: {
+        customStyle: {
             type: String,
-            default: 'auto'
+            default: ''
         },
-        height: {
-            type: String,
-            default: 'auto'
-        },
-        id: { // Новый пропс для id
+        id: {
             type: String,
             default: ''
         }
     },
-    setup(props) {
-        const id = ref(props.id || ''); // Используем переданный id или пустую строку
-        onMounted(() => {
-            if (!id.value) {
-                id.value = setUniqId(); // Генерируем уникальный id, если id не был передан
-            }
+    emits: ['update:modelValue'],
+    setup(props, { emit }) {
+        const inputValue = ref(props.modelValue);
+
+        watch(() => props.modelValue, (newValue) => {
+            inputValue.value = newValue; // Обновляем локальное состояние
         });
-        const computedStyles = computed(() => ({
-            width: props.width,
-            height: props.height,
-        }));
-        return { id, computedStyles }
-    },
-    methods: {
-        updateInput(event: Event) {
-            const target = event.target as HTMLInputElement; // Приведение типа
-            this.$emit('update:modelValue', target.value); // Получаем значение из target
-        }
+
+        const updateInput = (event: Event) => {
+            const target = event.target as HTMLInputElement;
+            inputValue.value = target.value; // Обновляем локальное состояние
+            emit('update:modelValue', target.value); // Эмитируем новое значение
+        };
+
+        return { inputValue, updateInput };
     }
-}
+});
 </script>
+
 <template>
-    <input 
-        :value="modelValue"
-        @input="updateInput"
-        class="baseInputBody baseInputText"
-        :id="id"
-        :type="inputType"
-        :placeholder="inputPlaceholder"
-        :style="computedStyles"
-    />
+    <input :value="inputValue" @input="updateInput" class="baseInputBody baseInputText" :id="id" :type="inputType"
+        :placeholder="inputPlaceholder" :style="customStyle" />
 </template>
+
 <style scoped>
-    .baseInputBody {
-        border-radius: 15px; /* Скругление углов */
-        border: none; /* Убираем границу полностью */
-        background-color: #81BECE; /* Цвет фона */
-        outline: none; /* Убираем обводку при фокусировке */
-        padding-left: 10px; /* Внутренний отступ слева для улучшения читаемости */
-        transition: box-shadow 0.3s ease; /* Плавный переход для эффекта фокуса */
-    }
-    .baseInputBody:focus {
-        box-shadow: 0 0 5px #012e4a88; /* Эффект фокуса */
-    }
-    .baseInputText {
-        font-family: "Alegreya Sans SC", sans-serif; /* Шрифт */
-        color: #012e4a; /* Цвет текста */
-        border: none; /* Убираем границу у текста */
-        width: 100%; /* Полная ширина для текста */
-        outline: none; /* Убираем обводку при фокусировке */
-    }
-    .baseInputText::placeholder {
-        color: #012e4a88; /* Цвет плейсхолдера с прозрачностью */
-    }
-    .baseInputText:focus {
-        color: #012e4a; /* Цвет текста при фокусировке */
-    }
+.baseInputBody {
+    border-radius: 15px;
+    border: none;
+    background-color: #81BECE;
+    outline: none;
+    padding-left: 10px;
+    transition: box-shadow 0.3s ease;
+}
+
+.baseInputBody:focus {
+    box-shadow: 0 0 5px #012e4a88;
+}
+
+.baseInputText {
+    font-family: "Alegreya Sans SC";
+    color: #012e4a;
+    border: none;
+    width: 100%;
+    outline: none;
+}
+
+.baseInputText::placeholder {
+    color: #012e4a88;
+}
+
+.baseInputText:focus {
+    color: #012e4a;
+}
 </style>

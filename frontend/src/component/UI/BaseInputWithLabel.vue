@@ -1,8 +1,10 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import BaseInput from './BaseInput.vue'; // Убедитесь, что путь к вашему компоненту верный
+import { defineComponent } from 'vue';
+import BaseInput from './BaseInput.vue';
 import { setUniqId } from './util';
+
 export default defineComponent({
+    name: 'BaseInputWithLabel',
     components: {
         BaseInput
     },
@@ -19,47 +21,50 @@ export default defineComponent({
             type: String,
             default: 'text'
         },
-        inputWidth: {
+        customStyleForInput: {
             type: String,
-            default: 'auto'
+            default: ''
         },
-        inputHeight: {
+        customStyleForLabel: {
             type: String,
-            default: 'auto'
+            default: ''
         },
         label: {
             type: String,
             required: true,
         },
     },
-    setup() {
-        const inputId = setUniqId(); // Генерируем уникальный id для label и input
-        return { inputId };
+    emits: ['update:modelValue'],
+    setup(props, { emit }) {
+        const inputId = setUniqId();
+
+        const updateValue = (value: string) => {
+            emit('update:modelValue', value); // Эмитируем обновление
+        };
+
+        return { inputId, updateValue };
     }
 });
 </script>
+
 <template>
     <div class="inputWithLabel">
-        <label :for="inputId" class="label">{{ label }}</label>
-        <BaseInput
-            v-model="modelValue"
-            :inputPlaceholder="inputPlaceholder"
-            :inputType="inputType"
-            :width="inputWidth"
-            :height="inputHeight"
-            :id="inputId"
-        />
+        <label :for="inputId" class="label" :style="customStyleForLabel">{{ label }}</label>
+        <BaseInput :modelValue="modelValue" @update:modelValue="updateValue" :inputPlaceholder="inputPlaceholder"
+            :inputType="inputType" :customStyle="customStyleForInput" :id="inputId" />
+        <!-- Обработка события -->
     </div>
 </template>
+
+
 <style scoped>
 .inputWithLabel {
     display: flex;
     flex-direction: column;
-    margin-bottom: 1rem; /* Отступ между полями ввода */
 }
+
 .label {
-    font-family: "Alegreya Sans SC", sans-serif; /* Шрифт для метки */
-    color: #012E4A; /* Цвет текста метки */
-    margin-bottom: 0.5rem; /* Отступ между меткой и полем ввода */
+    font-family: "Alegreya Sans SC";
+    color: #012E4A;
 }
 </style>
