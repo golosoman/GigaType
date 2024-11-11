@@ -4,10 +4,12 @@ import BaseButton from '@/component/UI/BaseButton.vue';
 import BaseInputWithLabel from '@/component/UI/BaseInputWithLabel.vue';
 import AuthForm from '@/component/Auth/AuthForm.vue';
 import BaseLogo from '@/component/UI/BaseLogo.vue';
-import BaseDropdown from '@/component/UI/BaseDropDown.vue';
+import BaseDropdown from '@/component/UI/BaseDropdown.vue';
 import TrainingField from '@/component/Trainer/TrainingField.vue';
 import BaseCheckbox from '@/component/UI/BaseCheckbox.vue';
 import BaseCheckboxGroup from '@/component/UI/BaseCheckboxGroup.vue';
+import Toast from '@/component/UI/Toast.vue';
+import TypingTrainer from '@/component/Trainer/TypingTrainer.vue';
 import { ref } from 'vue';
 let a = ref("1"); // Просто для теста базовых input
 const login = ref('') // Двусторонняя привязка с полем логин в форме auth
@@ -20,9 +22,57 @@ const selectedOptions = ref<string[]>([]);
 const handleSelectedValues = (values: string[]) => {
   selectedOptions.value = values;
 };
+const toastVisible = ref(false);
+const toastMessage = ref('');
+const toastType = ref('info');
+
+const showToast = (message: string, type: string) => {
+  toastMessage.value = message;
+  toastType.value = type;
+  toastVisible.value = true;
+};
 const handleCompletion = (completedText: string) => {
   console.log('Завершено! Введенный текст:', completedText);
 };
+
+//------------------------------------------------------------Тренажер
+// Определяем интерфейс для данных о завершении
+interface CompletionData {
+  level: string;
+  exercise: string;
+  speed: number;
+  errorsCount: number;
+  elapsedTime: number;
+  score: number;
+}
+
+const successData = ref<CompletionData | null>(null);
+const errorData = ref<CompletionData | null>(null);
+
+const handleSuccessCompletion = (data: any[]) => {
+  successData.value = {
+    level: data[0],
+    exercise: data[1],
+    speed: data[2],
+    errorsCount: data[3],
+    elapsedTime: data[4],
+    score: data[5],
+  };
+  errorData.value = null; // Сбросить данные об ошибках, если они были
+};
+
+const handleErrorCompletion = (data: any[]) => {
+  errorData.value = {
+    level: data[0],
+    exercise: data[1],
+    speed: data[2],
+    errorsCount: data[3],
+    elapsedTime: data[4],
+    score: data[5],
+  };
+  successData.value = null; // Сбросить данные о успешном завершении, если они были
+};
+
 </script>
 
 <template>
@@ -83,11 +133,44 @@ const handleCompletion = (completedText: string) => {
       </div>
     </div>
     <div>
+      <h2>Уведомления для пользователя</h2>
+      <button @click="showToast('Это сообщение об ошибке!', 'error')">Показать ошибку</button>
+      <button @click="showToast('Это сообщение об успешном действии!', 'success')">Показать успех</button>
+      <button @click="showToast('Это информационное сообщение.', 'info')">Показать информацию</button>
+      <button @click="showToast('Это предупреждение!', 'warning')">Показать предупреждение</button>
+
+      <Toast v-if="toastVisible" v-model="toastVisible" :message="toastMessage" :type="toastType"
+        @close="toastVisible = false" />
+    </div>
+    <div>
       <h2>Поле для тренировки</h2>
       <!-- Кнопки клавы блочатся -->
       <!-- <TrainingField :textToType="textToType" @completed="handleCompletion"
         customStyle="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px; "></TrainingField> -->
     </div>
-
+    <div>
+      <h2>Клавиатурный тренажер</h2>
+      <TypingTrainer level="Легкий" exercise="Печать текста" :maxErrors="5" textToType="Пример текста для тренировки."
+        customStyleForTrainingField="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px; "
+        @success-completion="handleSuccessCompletion" @error-completion="handleErrorCompletion" />
+      <div v-if="successData">
+        <h3>Успешное завершение:</h3>
+        <p>Уровень: {{ successData.level }}</p>
+        <p>Упражнение: {{ successData.exercise }}</p>
+        <p>Скорость: {{ successData.speed }} симв/мин</p>
+        <p>Ошибки: {{ successData.errorsCount }}</p>
+        <p>Время: {{ successData.elapsedTime }} сек</p>
+        <p>Счет: {{ successData.score }}</p>
+      </div>
+      <div v-if="errorData">
+        <h3>Завершение с ошибками:</h3>
+        <p>Уровень: {{ errorData.level }}</p>
+        <p>Упражнение: {{ errorData.exercise }}</p>
+        <p>Скорость: {{ errorData.speed }} симв/мин</p>
+        <p>Ошибки: {{ errorData.errorsCount }}</p>
+        <p>Время: {{ errorData.elapsedTime }} сек</p>
+        <p>Счет: {{ errorData.score }}</p>
+      </div>
+    </div>
   </main>
 </template>
