@@ -1,4 +1,5 @@
 import datetime
+import os
 from typing import List
 from uuid import uuid4
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column, relationship
@@ -37,6 +38,7 @@ class User(Base):
         cascade="all, delete",
         passive_deletes=True,
     )
+    photo_path: Mapped[str] = mapped_column(String(128))
 
     def __init__(self,
                  login: str,
@@ -46,6 +48,10 @@ class User(Base):
         self.uuid = str(uuid4())
         self.password_hash = password_hash
         self.status_id = 1
+        # TODO: выбрать оптимальный способ хранения пути до фото (абсолютный, но с перезаписью, если нужно разворачивать на другой системе, относительный или просто хранить название файла)
+        # separator = os.path.sep
+        # self.photo_path = f"{os.getcwd()}{separator}app{separator}static{separator}profiles_photo{separator}{self.uuid}.png"
+        self.photo_path = f"{self.uuid}.png"
 
 
 difficulty_zone = Table(
