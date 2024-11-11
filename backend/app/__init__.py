@@ -13,4 +13,6 @@ db = SQLAlchemy(app)
 
 from backend.app.models import *
 
+# with app.app_context():
+#     print(db.session.execute(select(Status)).all())
 # CORS(app, resources={r'/*': {'origins': '*'}})

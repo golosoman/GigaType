@@ -6,3 +6,6 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
+
+
+JWT_SECRET_KEY = "kuewasd;'hibbasdtwazxff"
