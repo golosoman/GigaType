@@ -5,10 +5,10 @@ from flask import Blueprint, request, make_response
 from sqlalchemy import select, and_
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from backend.app import db
-from backend.app.models import User
-from backend.app.utils import *
-from backend.config import JWT_SECRET_KEY
+from app import db
+from app.models import User
+from app.utils import *
+from config import JWT_SECRET_KEY
 
 user_api = Blueprint('user_api', __name__, url_prefix="/user")
 

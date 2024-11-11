@@ -1,13 +1,10 @@
 import datetime
-import os
 from typing import List
 from uuid import uuid4
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, Table, Column
-from flask_sqlalchemy import SQLAlchemy
-from backend.app import app
 
-from backend.app import db
+from app import db
 
 
 class Base(db.Model):
