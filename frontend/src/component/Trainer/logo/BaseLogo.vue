@@ -15,7 +15,7 @@ export default defineComponent({
     props: {
         logoSrc: {
             type: String,
-            required: true // Делаем этот пропс обязательным
+            required: true
         },
         customStyleForImg: {
             type: String,
@@ -39,10 +39,6 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.logoImg {
-    mix-blend-mode: color;
 }
 
 .logoText {

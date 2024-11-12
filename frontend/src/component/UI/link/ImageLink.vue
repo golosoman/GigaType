@@ -1,6 +1,6 @@
 <template>
     <a :href="url" class="image-link" :style="customStyle" target="_blank" rel="noopener noreferrer">
-        <img :src="imageSrc" :alt="altText" class="image-link__image" />
+        <img :src="imageSrc" :alt="altText" class="image" />
     </a>
 </template>
 
@@ -36,14 +36,11 @@ export default defineComponent({
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: inherit;
-    /* Убираем цвет ссылки, чтобы использовать цвет текста */
 }
 
-.image-link__image {
-    max-width: 50px;
-    /* Устанавливаем максимальную ширину для изображения */
-    margin-right: 8px;
-    /* Отступ между изображением и текстом */
+.image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 </style>

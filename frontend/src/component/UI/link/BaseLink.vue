@@ -31,13 +31,9 @@ export default defineComponent({
     cursor: pointer;
     transition: background-color 0.3s, opacity 0.3s, transform 0.1s;
     text-decoration: none;
-    /* Убираем подчеркивание для ссылки */
     display: inline-block;
-    /* Позволяет задавать ширину и высоту */
     text-align: center;
-    /* Выравнивание текста по центру */
     line-height: 50px;
-    /* Высота строки для вертикального центрирования текста */
 }
 
 .baseButtonBody:hover {
@@ -55,6 +51,5 @@ export default defineComponent({
     color: #012e4a;
     font-family: "Alegreya Sans SC";
     display: block;
-    /* Убедитесь, что текст занимает всю ширину ссылки */
 }
 </style>
