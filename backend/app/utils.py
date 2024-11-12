@@ -23,7 +23,7 @@ get_args = lambda class_: [arg for arg in list(class_.__init__.__code__.co_varna
                            arg not in ["self", "new_state"]]
 
 
-def check_all_args(class_: Type["Base"] | None, data, *args):
+def check_all_args(class_: Type["Base"], data, *args):
     isOkay = True
     if not args:
         args = get_args(class_)
@@ -32,7 +32,7 @@ def check_all_args(class_: Type["Base"] | None, data, *args):
     return isOkay
 
 
-def check_one_arg(class_: Type["Base"] | None, data, *args):
+def check_one_arg(class_: Type["Base"], data, *args):
     isOkay = False
     if not args:
         args = get_args(class_)
