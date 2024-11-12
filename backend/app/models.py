@@ -45,17 +45,18 @@ class User(Base):
         self.uuid = str(uuid4())
         self.password_hash = password_hash
         self.status_id = 1
-        # TODO: выбрать оптимальный способ хранения пути до фото (абсолютный, но с перезаписью, если нужно разворачивать на другой системе, относительный или просто хранить название файла)
-        # separator = os.path.sep
-        # self.photo_path = f"{os.getcwd()}{separator}app{separator}static{separator}profiles_photo{separator}{self.uuid}.png"
+        # TODO: выбрать оптимальный способ хранения пути до фото (абсолютный, но с перезаписью, если нужно
+        #  разворачивать на другой системе, относительный или просто хранить название файла) separator = os.path.sep
+        #  self.photo_path = f"{os.getcwd()}{separator}app{separator}static{separator}profiles_photo{separator}{
+        #  self.uuid}.png"
         self.photo_path = f"{self.uuid}.png"
 
 
 difficulty_zone = Table(
     "difficulty_zone",
     Base.metadata,
-    Column("difficulty_id", ForeignKey("difficulty.id")),
-    Column("keyboardzone_id", ForeignKey("keyboardzone.id"))
+    Column("difficulty_id", ForeignKey("difficulty.id", ondelete="CASCADE")),
+    Column("keyboardzone_id", ForeignKey("keyboardzone.id", ondelete="CASCADE"))
 )
 
 
@@ -78,18 +79,23 @@ class Task(Base):
     content: Mapped[str] = mapped_column(String(256))
     difficulty_id: Mapped[int] = mapped_column(ForeignKey("difficulty.id", ondelete="CASCADE"))
     difficulty: Mapped["Difficulty"] = relationship(
-        back_populates="tasks"
+        back_populates="tasks",
+        uselist=False
     )
 
     def __init__(self,
                  name: str,
                  content: str,
-                 difficulty_id: int
+                 difficulty_id: int | None,
+                 difficulty
                  ):
         self.uid = str(uuid4())
         self.name = name
         self.content = content
-        self.difficulty_id = difficulty_id
+        if difficulty_id:
+            self.difficulty_id = difficulty_id
+        if difficulty:
+            self.difficulty = difficulty
 
 
 class Difficulty(Base):
@@ -116,24 +122,23 @@ class Difficulty(Base):
                  max_length: int,
                  key_press_time: float,
                  max_mistakes: int,
-                 zone: KeyBoardZone | List["KeyBoardZone"] = None,
-                 task: Task | List["Task"] = None):
+                 zones: KeyBoardZone | List["KeyBoardZone"],
+                 tasks: Task | List["Task"] = None):
         self.uid = str(uuid4())
         self.name = name
         self.min_length = min_length
         self.max_length = max_length
         self.key_press_time = key_press_time
         self.max_mistakes = max_mistakes
-        if zone:
-            if type(zone) is list:
-                self.zones = zone
+        if type(zones) is list:
+            self.zones = zones
+        else:
+            self.zones = [zones]
+        if tasks:
+            if type(tasks) is list:
+                self.tasks = tasks
             else:
-                self.zones = [zone]
-        if task:
-            if type(task) is list:
-                self.tasks = task
-            else:
-                self.tasks = [task]
+                self.tasks = [tasks]
 
 
 class Statistic(Base):
