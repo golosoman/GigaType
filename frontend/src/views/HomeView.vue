@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import BaseInput from '@/component/UI/BaseInput.vue';
-import BaseButton from '@/component/UI/BaseButton.vue';
-import BaseInputWithLabel from '@/component/UI/BaseInputWithLabel.vue';
-import AuthForm from '@/component/Auth/AuthForm.vue';
-import BaseLogo from '@/component/UI/BaseLogo.vue';
-import BaseDropdown from '@/component/UI/BaseDropdown.vue';
-import TrainingField from '@/component/Trainer/TrainingField.vue';
-import BaseCheckbox from '@/component/UI/BaseCheckbox.vue';
-import BaseCheckboxGroup from '@/component/UI/BaseCheckboxGroup.vue';
-import Toast from '@/component/UI/Toast.vue';
-import TypingTrainer from '@/component/Trainer/TypingTrainer.vue';
+
+import { TrainingField, TypingTrainer, BaseLogo, NavigationBarForTrainee } from '@/component/trainer';
+import ImageUrl from '@/assets/Logo.png'
+import { AuthForm, RegisterForm } from '@/component/auth';
 import { ref } from 'vue';
+import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink } from '@/component/UI'
+
+const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
 const login = ref('') // Двусторонняя привязка с полем логин в форме auth
 const password = ref('') // Двусторонняя привязка с полем пароль в форме auth
+const repeatPassword = ref('') // Двусторонняя привязка с полем пароль в форме auth
 const textToType = ref("фыва олдж фыва олдж фыва олдж фыва олдж фыва олдж фыва олдж"); // Текст для поля тренажера
 const options = ['Упражнение 1', 'Упражнение 2', 'Упражнение 3']; // Опции для выпадающего списка
 const selectedOption = ref(null); // Двусторонняя привязка с опциями
@@ -25,6 +22,7 @@ const handleSelectedValues = (values: string[]) => {
 const toastVisible = ref(false);
 const toastMessage = ref('');
 const toastType = ref('info');
+
 
 const showToast = (message: string, type: string) => {
   toastMessage.value = message;
@@ -77,11 +75,17 @@ const handleErrorCompletion = (data: any[]) => {
 
 <template>
   <main>
+    <h1>Примеры компонентов</h1>
     <div>
-      <h1>Примеры компонентов</h1>
-      <h2>Наш логотип</h2>
-      <BaseLogo></BaseLogo>
+      <h2>Навигационная панель</h2>
+      <NavigationBarForTrainee></NavigationBarForTrainee>
     </div>
+    <div>
+      <h2>Наш логотип</h2>
+      <BaseLogo :logoSrc="imgUrl" customStyleForImg="width: 90px; height: auto;">
+      </BaseLogo>
+    </div>
+
     <div>
       <h2>Базовая кнопка</h2>
       <BaseButton customStyle="width: 200px; height: 50px; background-color: #012E4A; color: #E8EDE7;"
@@ -93,6 +97,16 @@ const handleErrorCompletion = (data: any[]) => {
 
       <BaseButton v-on:click="() => console.log('Базовая кнопка работает! (третья)')">
         click me</BaseButton>
+    </div>
+    <div>
+      <h2>Кнопка-ссылка</h2>
+      <BaseLink href="https://example.com" customStyle="width: 200px; height: 50px;">
+        Перейти на Example.com
+      </BaseLink>
+    </div>
+    <div>
+      <h2>Ссылка-картинка</h2>
+      <ImageLink url="https://example.com" customStyle="width: 50px; height: 50px;" :imageSrc="imgUrl"></ImageLink>
     </div>
     <div>
       <h2>Базовое поле ввода</h2>
@@ -111,7 +125,8 @@ const handleErrorCompletion = (data: any[]) => {
     </div>
     <div>
       <h2>Группа чекбоксов</h2>
-      <BaseCheckboxGroup :options="checkOptions" :columns="3" @update:selectedValues="handleSelectedValues" />
+      <BaseCheckboxGroup :options="checkOptions" :columns="3" customStyle="width: 570px"
+        @update:selectedValues="handleSelectedValues" />
       <div>
         <h3>Выбранные опции:</h3>
         <ul>
@@ -130,6 +145,16 @@ const handleErrorCompletion = (data: any[]) => {
       <div>
         <p>Логин: {{ login }}</p>
         <p>Пароль: {{ password }}</p>
+      </div>
+    </div>
+    <div>
+      <h2>Форма регистрации</h2>
+      <RegisterForm v-model:login="login" v-model:password="password" v-model:repeatPassword="repeatPassword">
+      </RegisterForm>
+      <div>
+        <p>Логин: {{ login }}</p>
+        <p>Пароль: {{ password }}</p>
+        <p>Повтор пароля: {{ repeatPassword }}</p>
       </div>
     </div>
     <div>
