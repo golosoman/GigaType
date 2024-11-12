@@ -1,14 +1,11 @@
 from typing import List
 
-import jwt
 from flask import Blueprint, request, make_response
 from sqlalchemy import select, and_, delete
-from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 from app.models import Difficulty, KeyBoardZone
-from app.utils import admin_required, message, check_all_args, check_one_arg
-from config import JWT_SECRET_KEY
+from app.utils import admin_required, message, send_json_data, check_all_args, check_one_arg, make_json_response
 
 difficulty_api = Blueprint('difficulty_api', __name__, url_prefix="/difficulty")
 
@@ -21,10 +18,19 @@ def create():
     Payload: json{name: str, min_length: int, max_length: int, key_press_time: float, max_mistakes: int, zones: list[str]}
     :return: {message: str}, code, Content-Type
     """
+    if len(db.session.execute(select(Difficulty)).all()) == 12:
+        return message("Достигнуто максимальное количество уровней сложности (12).", 403)
     data = request.json
     if 'tasks' not in data:
         data['tasks'] = []
+    if 'name' not in data:
+        data['name'] = ""
     if check_all_args(Difficulty, data):
+        if len(db.session.execute(select(Difficulty)).all()) == 3:
+            data['name'] = "1"
+        else:
+            name = db.session.execute(select(Difficulty.name).order_by(Difficulty.id.desc())).first()
+            data['name'] = str(int(name[0])+1)
         if db.session.execute(select(Difficulty).where(Difficulty.name == data['name'])).first():
             return message("Название уже используется.", 406)
         if not data['zones']:
@@ -120,4 +126,21 @@ def delete_():
     else:
         return message("Недостаточно данных", 406)
 
+
+@difficulty_api.route("/get", methods=["GET"])
+@admin_required
+def get():
+    uid = None
+    if 'uid' in request.args:
+        uid = request.args['uid']
+    if uid:
+        difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid == uid)).first()
+        if not difficulty:
+            return message("Неверный uid.", 404)
+        difficulty: Difficulty = difficulty[0]
+        return send_json_data(make_json_response(difficulty))
+    else:
+        difficulties = [difficulty[0] for difficulty in db.session.execute(select(Difficulty)).all()]
+        difficulties.sort(key=lambda x: int(x.__getattribute__("name")))
+        return send_json_data(make_json_response(difficulties, additional="uid"))
 
