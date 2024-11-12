@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import BaseInput from '@/component/UI/BaseInput.vue';
-import BaseButton from '@/component/UI/BaseButton.vue';
-import BaseInputWithLabel from '@/component/UI/BaseInputWithLabel.vue';
+import BaseInput from '@/component/UI';
+import BaseButton from '@/component/UI';
+import BaseInputWithLabel from '@/component/UI';
 import AuthForm from '@/component/Auth/AuthForm.vue';
-import BaseLogo from '@/component/UI/BaseLogo.vue';
-import BaseDropdown from '@/component/UI/BaseDropdown.vue';
+import BaseLogo from '@/component/UI';
+import BaseDropdown from '@/component/UI';
 import TrainingField from '@/component/Trainer/TrainingField.vue';
-import BaseCheckbox from '@/component/UI/BaseCheckbox.vue';
-import BaseCheckboxGroup from '@/component/UI/BaseCheckboxGroup.vue';
-import Toast from '@/component/UI/Toast.vue';
+import BaseCheckbox from '@/component/UI';
+import BaseCheckboxGroup from '@/component/UI';
+import Toast from '@/component/UI';
 import TypingTrainer from '@/component/Trainer/TypingTrainer.vue';
+import BaseLink from '@/component/UI';
 import { ref } from 'vue';
 let a = ref("1"); // Просто для теста базовых input
 const login = ref('') // Двусторонняя привязка с полем логин в форме auth
@@ -80,7 +81,7 @@ const handleErrorCompletion = (data: any[]) => {
     <div>
       <h1>Примеры компонентов</h1>
       <h2>Наш логотип</h2>
-      <BaseLogo></BaseLogo>
+      <BaseLogo customStyleForImg="width: 90px; height: auto;"></BaseLogo>
     </div>
     <div>
       <h2>Базовая кнопка</h2>
@@ -93,6 +94,11 @@ const handleErrorCompletion = (data: any[]) => {
 
       <BaseButton v-on:click="() => console.log('Базовая кнопка работает! (третья)')">
         click me</BaseButton>
+    </div>
+    <div>
+      <BaseLink href="https://example.com" customStyle="width: 200px; height: 50px;">
+        Перейти на Example.com
+      </BaseLink>
     </div>
     <div>
       <h2>Базовое поле ввода</h2>
@@ -111,7 +117,8 @@ const handleErrorCompletion = (data: any[]) => {
     </div>
     <div>
       <h2>Группа чекбоксов</h2>
-      <BaseCheckboxGroup :options="checkOptions" :columns="3" @update:selectedValues="handleSelectedValues" />
+      <BaseCheckboxGroup :options="checkOptions" :columns="3" customStyle="width: 570px"
+        @update:selectedValues="handleSelectedValues" />
       <div>
         <h3>Выбранные опции:</h3>
         <ul>
