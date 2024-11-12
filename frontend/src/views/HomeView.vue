@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { BaseButton, BaseInput, BaseInputWithLabel, BaseLogo, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink } from '@/component/UI'
 
 import TrainingField from '@/component/Trainer/TrainingField.vue';
+import ImageUrl from '@/assets/Logo.png'
 import AuthForm from '@/component/Auth/AuthForm.vue';
 import TypingTrainer from '@/component/Trainer/TypingTrainer.vue';
 import { ref } from 'vue';
+import { BaseButton, BaseInput, BaseInputWithLabel, BaseLogo, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink } from '@/component/UI'
 
+const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
 const login = ref('') // Двусторонняя привязка с полем логин в форме auth
 const password = ref('') // Двусторонняя привязка с полем пароль в форме auth
@@ -20,6 +22,7 @@ const handleSelectedValues = (values: string[]) => {
 const toastVisible = ref(false);
 const toastMessage = ref('');
 const toastType = ref('info');
+
 
 const showToast = (message: string, type: string) => {
   toastMessage.value = message;
@@ -75,7 +78,8 @@ const handleErrorCompletion = (data: any[]) => {
     <div>
       <h1>Примеры компонентов</h1>
       <h2>Наш логотип</h2>
-      <BaseLogo customStyleForImg="width: 90px; height: auto;"></BaseLogo>
+      <BaseLogo :logoSrc="imgUrl" customStyleForImg="width: 90px; height: auto;">
+      </BaseLogo>
     </div>
     <div>
       <h2>Базовая кнопка</h2>
@@ -90,9 +94,14 @@ const handleErrorCompletion = (data: any[]) => {
         click me</BaseButton>
     </div>
     <div>
+      <h2>Кнопка-ссылка</h2>
       <BaseLink href="https://example.com" customStyle="width: 200px; height: 50px;">
         Перейти на Example.com
       </BaseLink>
+    </div>
+    <div>
+      <h2>Ссылка-картинка</h2>
+      <ImageLink url="https://example.com" :imageSrc="imgUrl"></ImageLink>
     </div>
     <div>
       <h2>Базовое поле ввода</h2>

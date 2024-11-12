@@ -20,12 +20,6 @@ export default defineComponent({
             default: ''
         }
     },
-    methods: {
-        handleClick(event: MouseEvent) {
-            // Здесь можно добавить дополнительную логику, если нужно
-            // Например, предотвращение перехода по ссылке при выполнении определенных условий
-        }
-    }
 });
 </script>
 

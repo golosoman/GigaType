@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <div class="logoContainer">
-            <img src="@/assets/Logo.png" alt="Логотип" class="logoImg" :style="customStyleForImg" />
+            <img :src="logoSrc" alt="Логотип" class="logoImg" :style="customStyleForImg" />
             <span class="logoText" :style="customStyleForText">GIGATYPE</span>
         </div>
     </div>
@@ -13,6 +13,10 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     name: 'BaseLogo',
     props: {
+        logoSrc: {
+            type: String,
+            required: true // Делаем этот пропс обязательным
+        },
         customStyleForImg: {
             type: String,
             default: ''
@@ -29,15 +33,12 @@ export default defineComponent({
 .content {
     display: flex;
     align-items: flex-start;
-    /* Выравнивание по верхнему краю для родительского контейнера */
 }
 
 .logoContainer {
     display: flex;
     flex-direction: column;
-    /* Устанавливаем направление колонкой */
     align-items: center;
-    /* Центрируем элементы по горизонтали внутри logoContainer */
 }
 
 .logoImg {
@@ -48,6 +49,5 @@ export default defineComponent({
     font-family: "Alata";
     color: #012E4A;
     margin-top: 8px;
-    /* Отступ между изображением и текстом */
 }
 </style>
