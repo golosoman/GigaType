@@ -1,5 +1,3 @@
-import json
-
 import jwt
 from flask import Blueprint, request, make_response
 from sqlalchemy import select, and_
@@ -23,14 +21,14 @@ def register():
     data = request.json
     if "login" in data and "password" in data:
         try:
-            if len(db.session.execute(select(User).where(User.login == data["login"])).scalars().all()) != 0:
-                return message("Пользователь с таким именем уже существует.", 500)
+            if db.session.execute(select(User).where(User.login == data["login"])).first():
+                return message("Пользователь с таким именем уже существует.", 406)
             password_hash = generate_password_hash(data['password'])
             new_user = User(data['login'], password_hash)
             db.session.add(new_user)
             db.session.commit()
             resp = make_response()
-            cookie = jwt.encode({"id": new_user.id, "uuid": new_user.uuid}, JWT_SECRET_KEY, algorithm="HS256")
+            cookie = jwt.encode({"id": new_user.id, "uuid": new_user.uuid, "login": new_user.login}, JWT_SECRET_KEY, algorithm="HS256")
             resp.set_cookie('auth', cookie, secure=True, httponly=False)
             resp.status = 200
             return resp
@@ -40,7 +38,7 @@ def register():
             print(str(e))
             return message("Произошла ошибка.", 500)
     else:
-        return message("Недостаточно данных", 403)
+        return message("Недостаточно данных", 406)
 
 
 @user_api.route("/login", methods=["POST"])
@@ -58,7 +56,7 @@ def login():
         if exist_user:
             exist_user: User = exist_user[0]
             resp = make_response()
-            cookie = jwt.encode({"id": exist_user.id, "uuid": exist_user.uuid}, JWT_SECRET_KEY, algorithm="HS256")
+            cookie = jwt.encode({"id": exist_user.id, "uuid": exist_user.uuid, "login": exist_user.login}, JWT_SECRET_KEY, algorithm="HS256")
             resp.set_cookie('auth', cookie, secure=True, httponly=False)
             resp.status = 200
             return resp
@@ -72,9 +70,9 @@ def login():
         if not check_password_hash(exist_user.password_hash, data['password']):
             return message("Неверный пароль.", 403)
         resp = make_response()
-        cookie = jwt.encode({"id": exist_user.id, "uuid": exist_user.uuid}, JWT_SECRET_KEY, algorithm="HS256")
+        cookie = jwt.encode({"id": exist_user.id, "uuid": exist_user.uuid, "login": exist_user.login}, JWT_SECRET_KEY, algorithm="HS256")
         resp.set_cookie('auth', cookie, secure=True, httponly=False)
         resp.status = 200
         return resp
     else:
-        return message("Недостаточно данных", 403)
+        return message("Недостаточно данных", 406)
