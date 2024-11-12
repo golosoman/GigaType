@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import BaseInput from './BaseInput.vue';
-import { setUniqId } from './util';
+import { setUniqId } from '../util';
 
 export default defineComponent({
     name: 'BaseInputWithLabel',

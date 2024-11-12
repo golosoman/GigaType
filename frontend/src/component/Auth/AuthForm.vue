@@ -1,7 +1,7 @@
 <script lang="ts">
-import BaseInputWithLabel from '../UI/BaseInputWithLabel.vue';
-import BaseButton from '../UI/BaseButton.vue';
-import BaseLogo from '../UI/BaseLogo.vue';
+import BaseInputWithLabel from "../UI"
+import BaseButton from '../UI';
+import BaseLogo from '../UI';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -34,9 +34,6 @@ export default defineComponent({
 
 <template>
     <div>
-        <div>
-            <BaseLogo customStyleForText="font-size: 64px;"></BaseLogo>
-        </div>
         <div class="formContent">
             <div>
                 <BaseButton
