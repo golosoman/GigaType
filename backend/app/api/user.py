@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 from app.models import User
-from app.utils import *
+from app.utils import message, check_all_args
 from config import JWT_SECRET_KEY
 
 user_api = Blueprint('user_api', __name__, url_prefix="/user")
@@ -19,7 +19,7 @@ def register():
     :return: cookie | {message: str}, code, Content-Type
     """
     data = request.json
-    if "login" in data and "password" in data:
+    if check_all_args(User, data, "login", "password"):
         try:
             if db.session.execute(select(User).where(User.login == data["login"])).first():
                 return message("Пользователь с таким именем уже существует.", 406)
@@ -51,7 +51,7 @@ def login():
     data = request.json
     if "auth" in request.cookies:
         token = request.cookies['auth']
-        id_, uuid = (jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])).values()
+        id_, uuid, login = (jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])).values()
         exist_user = db.session.execute(select(User).where(and_(User.id == id_, User.uuid == uuid))).first()
         if exist_user:
             exist_user: User = exist_user[0]
@@ -62,7 +62,7 @@ def login():
             return resp
         else:
             return message("Неверные cookie", 500)
-    elif "login" in data and "password" in data:
+    elif check_all_args(User, data, "login", "password"):
         exist_user = db.session.execute(select(User).where(User.login == data['login'])).first()
         if not exist_user:
             return message("Неверный логин", 404)
