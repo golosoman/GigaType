@@ -1,1 +1,3 @@
-export { default as Toast } from "./Toast.vue";
+import Toast from "./Toast.vue";
+
+export { Toast };

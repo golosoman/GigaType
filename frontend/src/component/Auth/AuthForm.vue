@@ -1,7 +1,5 @@
 <script lang="ts">
-import BaseInputWithLabel from "../UI"
-import BaseButton from '../UI';
-import BaseLogo from '../UI';
+import { BaseInputWithLabel, BaseButton, BaseLogo } from "../UI";
 import { defineComponent } from 'vue';
 
 export default defineComponent({

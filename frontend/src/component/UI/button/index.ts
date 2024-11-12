@@ -1,2 +1,4 @@
-export { default as BaseButton } from "./BaseButton.vue";
-export { default as BaseLink } from "./BaseLink.vue";
+import BaseButton from "./BaseButton.vue";
+import BaseLink from "./BaseLink.vue";
+
+export { BaseButton, BaseLink };

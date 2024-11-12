@@ -1,1 +1,3 @@
-export { default as BaseLogo } from "./BaseLogo.vue";
+import BaseLogo from "./BaseLogo.vue";
+
+export { BaseLogo };

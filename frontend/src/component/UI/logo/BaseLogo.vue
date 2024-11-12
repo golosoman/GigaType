@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <div class="logoContainer">
-            <img src="@/assets/logo.png" alt="Логотип" class="logoImg" :style="customStyleForImg" />
+            <img src="@/assets/Logo.png" alt="Логотип" class="logoImg" :style="customStyleForImg" />
             <span class="logoText" :style="customStyleForText">GIGATYPE</span>
         </div>
     </div>

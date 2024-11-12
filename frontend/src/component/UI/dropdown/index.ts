@@ -1,1 +1,3 @@
-export { default as BaseDropdown } from "./BaseDropdown.vue";
+import BaseDropdown from "./BaseDropdown.vue";
+
+export { BaseDropdown };

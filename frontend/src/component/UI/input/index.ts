@@ -1,2 +1,4 @@
-export { default as BaseInput } from "./BaseInput.vue";
-export { default as BaseInputWithLabel } from "./BaseInputWithLabel.vue";
+import BaseInput from "./BaseInput.vue";
+import BaseInputWithLabel from "./BaseInputWithLabel.vue";
+
+export { BaseInput, BaseInputWithLabel };

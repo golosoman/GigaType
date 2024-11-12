@@ -1,2 +1,4 @@
-export { default as BaseCheckbox } from "./BaseCheckbox.vue";
-export { default as BaseCheckboxGroup } from "./BaseCheckboxGroup.vue";
+import BaseCheckbox from "./BaseCheckbox.vue";
+import BaseCheckboxGroup from "./BaseCheckboxGroup.vue";
+
+export { BaseCheckbox, BaseCheckboxGroup };

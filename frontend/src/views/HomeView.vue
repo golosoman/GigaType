@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import BaseInput from '@/component/UI';
-import BaseButton from '@/component/UI';
-import BaseInputWithLabel from '@/component/UI';
-import AuthForm from '@/component/Auth/AuthForm.vue';
-import BaseLogo from '@/component/UI';
-import BaseDropdown from '@/component/UI';
+import { BaseButton, BaseInput, BaseInputWithLabel, BaseLogo, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink } from '@/component/UI'
+
 import TrainingField from '@/component/Trainer/TrainingField.vue';
-import BaseCheckbox from '@/component/UI';
-import BaseCheckboxGroup from '@/component/UI';
-import Toast from '@/component/UI';
+import AuthForm from '@/component/Auth/AuthForm.vue';
 import TypingTrainer from '@/component/Trainer/TypingTrainer.vue';
-import BaseLink from '@/component/UI';
 import { ref } from 'vue';
+
 let a = ref("1"); // Просто для теста базовых input
 const login = ref('') // Двусторонняя привязка с полем логин в форме auth
 const password = ref('') // Двусторонняя привязка с полем пароль в форме auth
