@@ -2,13 +2,15 @@
 import { BaseLogo } from "../trainer";
 import { BaseInputWithLabel, BaseButton } from "@/component/UI";
 import { defineComponent } from 'vue';
+import BaseLink from "../UI/link/BaseLink.vue";
 
 export default defineComponent({
     name: 'RegisterForm',
     components: {
-        BaseButton,
+        BaseLink,
         BaseLogo,
-        BaseInputWithLabel
+        BaseInputWithLabel,
+        BaseButton
     },
     props: {
         login: {
@@ -22,7 +24,12 @@ export default defineComponent({
         repeatPassword: {
             type: [String, Number],
             required: true,
-        }
+        },
+        customStyle: {
+            type: String,
+            required: false,
+            default: '',
+        },
     },
     setup(props, { emit }) {
         const changePassword = (password: String) => {
@@ -44,16 +51,7 @@ export default defineComponent({
 
 <template>
     <div>
-        <div class="formContent">
-            <div>
-                <BaseButton customStyle="width: 251px; height: 61px; text-align: left; font-size: 32px;">
-                    Вход
-                </BaseButton>
-                <BaseButton
-                    customStyle="width: 251px; height: 61px; background-color: #012E4A; color: #E8EDE7; text-align: left; font-size: 32px;">
-                    Регистрация
-                </BaseButton>
-            </div>
+        <div class="formContent" :style="customStyle">
             <div>
                 <form @submit.prevent>
                     <div class="formGroup">
@@ -63,12 +61,12 @@ export default defineComponent({
                             customStyleForLabel="font-size: 32px;">
                         </BaseInputWithLabel>
                         <BaseInputWithLabel label="Пароль" inputPlaceholder="Введите пароль:" :modelValue="password"
-                            @update:modelValue="changePassword" style="margin-top: 38px;"
+                            inputType="password" @update:modelValue="changePassword" style="margin-top: 38px;"
                             customStyleForInput="width: 450px; height: 57px; font-size: 32px;"
                             customStyleForLabel="font-size: 32px;">
                         </BaseInputWithLabel>
                         <BaseInputWithLabel label="Подтверждение пароля" inputPlaceholder="Подтвердите пароль:"
-                            :modelValue="repeatPassword" @update:modelValue="changeRepeatPassword"
+                            inputType="password" :modelValue="repeatPassword" @update:modelValue="changeRepeatPassword"
                             style="margin-top: 38px;" customStyleForInput="width: 450px; height: 57px; font-size: 32px;"
                             customStyleForLabel="font-size: 32px;">
                         </BaseInputWithLabel>
@@ -84,9 +82,13 @@ export default defineComponent({
 </template>
 
 <style scoped>
+.headerButton {
+    display: flex;
+}
+
 .formContent {
     width: 502px;
-    height: 632px;
+    height: 571px;
     background-color: #D9E1E5;
 }
 

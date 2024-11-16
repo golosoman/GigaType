@@ -1,23 +1,45 @@
-<script setup lang="ts">
-import { AuthForm } from '@/component/auth';
-import { BaseLogo } from '@/component/trainer';
-import ImageUrl from '@/assets/Logo.png';
-import { ref } from 'vue';
-
-const loginData = ref('');
-const passwordData = ref('');
-</script>
-
 <template>
     <div class="container">
         <div class="form-wrapper">
             <BaseLogo :logoSrc="ImageUrl" customStyleForImg="width: 150px; height: 150px;"
                 customStyleForText="color: #012E4A; font-family: 'Alata'; font-size: 64px;">
             </BaseLogo>
-            <AuthForm v-model:login="loginData" v-model:password="passwordData" class="auth-form" />
+            <div style="margin-top: 30px">
+                <AuthButtons v-model:currentForm="currentForm"
+                    loginLinkStyles="width: 251px; height: 61px; text-align: left; font-size: 32px; padding-left: 10px; border-radius: 15px 0px 0px 0px;"
+                    registerLinkStyles="width: 251px; height: 61px; text-align: left; font-size: 32px; padding-left: 10px; border-radius: 0px 15px 0px 0px;"
+                    @update:currentForm="changeForm" />
+                <div v-if="currentForm === 'login'">
+                    <AuthForm v-model:login="login" v-model:password="password"
+                        customStyle="border-radius: 0px 0px 15px 15px;" />
+                </div>
+                <div v-else>
+                    <RegisterForm v-model:login="login" v-model:password="password"
+                        v-model:repeatPassword="repeatPassword" customStyle="border-radius: 0px 0px 15px 15px;" />
+                </div>
+            </div>
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+import { BaseLogo } from '@/component/trainer';
+import { AuthButtons, AuthForm, RegisterForm } from '@/component/auth';
+import ImageUrl from '@/assets/Logo.png';
+import { ref } from 'vue'
+
+const currentForm = ref('login')
+const login = ref('')
+const password = ref('')
+const repeatPassword = ref('')
+
+const changeForm = (form: string) => {
+    currentForm.value = form;
+    login.value = ''
+    password.value = ''
+    repeatPassword.value = ''
+}     
+</script>
 
 <style scoped>
 .container {
@@ -31,9 +53,5 @@ const passwordData = ref('');
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.auth-form {
-    margin-top: 30px;
 }
 </style>

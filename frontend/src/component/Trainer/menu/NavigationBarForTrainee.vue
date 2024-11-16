@@ -6,14 +6,17 @@
             </BaseLogo>
         </div>
         <div class="nav-links">
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="#link1">Тренажер</BaseLink>
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/trainer">Тренажер
+            </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="#link2">Упражнения</BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="#link3">Тестовое задание
             </BaseLink>
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="#link4">О системе</BaseLink>
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="#link5">О разработчиках
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/system">О
+                системе</BaseLink>
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/developer">О
+                разработчиках
             </BaseLink>
-            <ImageLink url="https://example.com" :imageSrc="userUrl" altText="ЛК"
+            <ImageLink url="/app/cabinet" :imageSrc="userUrl" altText="ЛК"
                 customStyle="width: 58px; height: 58px; border-radius: 15px; background-color: #81BECE;" />
         </div>
     </nav>
@@ -62,6 +65,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     font-size: 32px;
+    margin-right: 10px;
 }
 
 .nav-links>* {

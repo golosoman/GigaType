@@ -1,7 +1,8 @@
 <template>
     <div class="text-container" :style="customStyle">
-        <div class="input-text">{{ visibleInputText }}</div>
+        <div class="input-text">{{ inputText }}</div>
         <div class="text-to-type">{{ visibleTextToType }}</div>
+        <div class="overlay-text">{{ textPreview }}</div>
     </div>
 </template>
 
@@ -23,17 +24,28 @@ export default defineComponent({
             type: Boolean,
             default: true
         },
-        modelValue: { // Изменено на modelValue для v-model
+        inputText: {
             type: String,
             default: ''
         },
+        textPreview: {
+            type: String,
+            default: ''
+        }
     },
     setup(props, { emit }) {
-        const inputText = ref<string>(props.modelValue);
+        const inputText = ref<string>('');
+        const nextChar = ref('');
+        const textPreview = ref(props.textPreview);
 
-        // Смотрите за изменениями modelValue и обновляйте inputText
-        watch(() => props.modelValue, (newValue) => {
+        watch(() => props.inputText, (newValue) => {
             inputText.value = newValue;
+        });
+
+        emit('update:inputText', inputText.value);
+
+        watch(() => props.textPreview, (newValue) => {
+            textPreview.value = newValue;
         });
 
         const specialKeys = new Set([
@@ -44,16 +56,22 @@ export default defineComponent({
             'F8', 'F9', 'F10', 'F11', 'F12'
         ]);
 
+
         const visibleTextToType = computed(() => props.textToType.slice(inputText.value.length));
-        const visibleInputText = computed(() => inputText.value);
+        emit('current-charrecter', visibleTextToType.value[0])
 
         const handleKeydown = (event: KeyboardEvent) => {
             if (!props.inputControl) return;
+            nextChar.value = visibleTextToType.value[0];
 
-            const nextChar = visibleTextToType.value[0];
-            if (event.key === nextChar) {
+            if (event.key === nextChar.value) {
+                if (visibleTextToType.value.length > 1) {
+                    emit('current-charrecter', visibleTextToType.value[1])
+                }
+                else {
+                    emit('current-charrecter', '')
+                }
                 inputText.value += event.key;
-                emit('update:modelValue', inputText.value); // Эмитим обновление
                 emit('right-character', inputText.value);
             } else if (specialKeys.has(event.key)) {
                 event.preventDefault();
@@ -76,15 +94,10 @@ export default defineComponent({
             window.removeEventListener('keydown', handleKeydown);
         });
 
-        const reset = () => {
-            inputText.value = '';
-            emit('update:modelValue', ''); // Сбрасываем значение в родительском компоненте
-        };
-
         return {
             visibleTextToType,
-            visibleInputText,
-            reset,
+            nextChar,
+            textPreview,
         };
     },
 });
@@ -98,14 +111,13 @@ export default defineComponent({
     align-items: center;
     background-color: #81BECE;
     overflow: hidden;
+    position: relative;
 }
 
 .text-to-type {
     color: gray;
     white-space: pre;
     overflow: hidden;
-    /* text-overflow: ellipsis; */
-    /* Убрано многоточие */
     flex: 1;
 }
 
@@ -116,8 +128,22 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     overflow: hidden;
-    /* text-overflow: ellipsis; */
-    /* Убрано многоточие */
     flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 30%;
+    left: 0;
+    width: 50%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    color: black;
+    pointer-events: none;
+    font-size: inherit;
+    z-index: 2;
 }
 </style>

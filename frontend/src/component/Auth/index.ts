@@ -1,3 +1,4 @@
 import AuthForm from "./AuthForm.vue";
 import RegisterForm from "./RegisterForm.vue";
-export { AuthForm, RegisterForm };
+import AuthButtons from "./AuthButtons.vue";
+export { AuthForm, RegisterForm, AuthButtons };
