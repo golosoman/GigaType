@@ -1,5 +1,5 @@
 import jwt
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, jsonify
 from sqlalchemy import select, and_
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -61,7 +61,10 @@ def login():
             resp.status = 200
             return resp
         else:
-            return message("Неверные cookie", 500)
+            resp = make_response(jsonify({"message": "Неверные cookie"}))
+            resp.status = 403
+            resp.set_cookie("auth", '', expires=0, secure=True, httponly=False)
+            return resp
     elif check_all_args(User, data, "login", "password"):
         exist_user = db.session.execute(select(User).where(User.login == data['login'])).first()
         if not exist_user:

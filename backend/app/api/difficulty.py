@@ -5,7 +5,8 @@ from sqlalchemy import select, and_, delete
 
 from app import db
 from app.models import Difficulty, KeyBoardZone
-from app.utils import admin_required, message, send_json_data, check_all_args, check_one_arg, make_json_response
+from app.utils import (admin_required, message, send_json_data, check_all_args, check_one_arg, make_json_response,
+                       util_round, login_required)
 
 difficulty_api = Blueprint('difficulty_api', __name__, url_prefix="/difficulty")
 
@@ -21,11 +22,7 @@ def create():
     if len(db.session.execute(select(Difficulty)).all()) == 12:
         return message("Достигнуто максимальное количество уровней сложности (12).", 403)
     data = request.json
-    if 'tasks' not in data:
-        data['tasks'] = []
-    if 'name' not in data:
-        data['name'] = ""
-    if check_all_args(Difficulty, data):
+    if check_all_args(Difficulty, data, exclude=["tasks", "name", "max_mistakes"]):
         if len(db.session.execute(select(Difficulty)).all()) == 3:
             data['name'] = "1"
         else:
@@ -48,7 +45,7 @@ def create():
                     data['min_length'],
                     data['max_length'],
                     data['key_press_time'],
-                    data['max_mistakes'],
+                    util_round(int(data['max_length'])*0.1),
                     zones
                 )
             )
@@ -57,6 +54,7 @@ def create():
         except BaseException as e:
             print(str(e))
             db.session.rollback()
+            db.session.commit()
             return message("Произошла ошибка", 500)
     else:
         return message("Недостаточно данных", 406)
@@ -88,15 +86,15 @@ def update_():
                         zones.append(zone[0])
                     difficulty.zones = zones
                 else:
-                    difficulty.__setattr__(arg, data[arg])
-                db.session.commit()
+                    if difficulty.__getattribute__(arg)!=data[arg]:
+                        difficulty.__setattr__(arg, data[arg])
+            db.session.commit()
+            return message("Okay", 200)
         except BaseException as e:
             print(str(e))
             db.session.rollback()
             db.session.commit()
             return message("Произошла ошибка", 500)
-
-        return message("Okay", 200)
     else:
         return message("Недостаточно данных", 406)
 
@@ -128,7 +126,7 @@ def delete_():
 
 
 @difficulty_api.route("/get", methods=["GET"])
-@admin_required
+@login_required
 def get():
     uid = None
     if 'uid' in request.args:
@@ -142,5 +140,5 @@ def get():
     else:
         difficulties = [difficulty[0] for difficulty in db.session.execute(select(Difficulty)).all()]
         difficulties.sort(key=lambda x: int(x.__getattribute__("name")))
-        return send_json_data(make_json_response(difficulties, additional="uid"))
+        return send_json_data(make_json_response(difficulties, additional=["uid"], exclude=["difficulty"]))
 
