@@ -86,8 +86,8 @@ class Task(Base):
     def __init__(self,
                  name: str,
                  content: str,
-                 difficulty_id: int | None,
-                 difficulty
+                 difficulty_id: int = None,
+                 difficulty=None
                  ):
         self.uid = str(uuid4())
         self.name = name
@@ -152,7 +152,6 @@ class Statistic(Base):
     # average_key_press_time: Mapped[float]
     clicks_number: Mapped[int]
     score: Mapped[int]
-
 
     def __init__(self,
                  user_id: int,
