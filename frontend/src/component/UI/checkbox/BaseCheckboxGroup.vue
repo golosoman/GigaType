@@ -22,7 +22,7 @@ export default defineComponent({
         },
         columns: {
             type: Number,
-            default: 2, // Количество колонок по умолчанию
+            default: 2,
         },
         customStyle: {
             type: String,
@@ -67,6 +67,5 @@ export default defineComponent({
 .checkbox-group>div {
     display: flex;
     align-items: center;
-    /* Выравнивание по центру */
 }
 </style>

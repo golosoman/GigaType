@@ -2,16 +2,12 @@
 import { RouterLink, RouterView } from 'vue-router'
 </script>
 
-<template>
-  <header>
-    <div class="wrapper">
-
-    </div>
-  </header>
-
+<template class="">
   <RouterView />
 </template>
 
-<style scoped>
-
+<style>
+.backgroundStyle {
+  background-color: #E8EDE7;
+}
 </style>

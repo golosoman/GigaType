@@ -8,9 +8,10 @@
             <div>Счет: {{ score }}</div>
         </div>
         <TrainingField :textToType="textToType" :customStyle="customStyleForTrainingField"
-            :disabled="errorsCount >= maxErrors" ref="trainingField" v-model="textFromInput"
-            v-model:inputControl="trackClicks" @completed="handleCompletion" @invalid-character="handleInvalidCharacter"
-            @right-character="handleUpdateTextInput" />
+            :disabled="errorsCount >= maxErrors" ref="trainingField" v-model:inputText="textFromInput"
+            v-model:textPreview="textPreview" v-model:inputControl="trackClicks" @completed="handleCompletion"
+            @invalid-character="handleInvalidCharacter" @right-character="handleUpdateTextInput"
+            @current-charrecter="handleThrowCurrentCharacter" />
     </div>
 </template>
 
@@ -50,15 +51,22 @@ export default defineComponent({
         },
     },
     setup(props, { emit }) {
+        // Данные статистики
         const speed = ref(0);
         const errorsCount = ref(0);
         const elapsedTime = ref(0);
         const score = ref(0);
-        const trackClicks = ref(false);
-        const textFromInput = ref('Нажмите <SPACE>'); // Начальное значение
         const lastKeyPressTime = ref(0);
+
+        // Отслеживать нажатия
+        const trackClicks = ref(false);
+        const textFromInput = ref('');
+        const textPreview = ref('Нажмите «SPACE»');
+        const firstCharacter = ref('');
+
+        // Флаг для отслеживания состояния таймера (возможно таймер или отслеживание кликов можно удалить)
+        const timerRunning = ref(false);
         let timer: ReturnType<typeof setInterval>;
-        const timerRunning = ref(false); // Флаг для отслеживания состояния таймера
 
         const calculateScore = () => {
             const timeBonus = Math.max(0, 120 - elapsedTime.value);
@@ -75,6 +83,16 @@ export default defineComponent({
             textFromInput.value = inputText;
             checkLastKeyPressTime();
         };
+
+        const handleThrowCurrentCharacter = (character: string) => {
+            if (!timerRunning.value) {
+                emit('current-charrecter', ' ')
+                firstCharacter.value = character
+            }
+            else {
+                emit('current-charrecter', character)
+            }
+        }
 
         const checkLastKeyPressTime = () => {
             const currentTime = Date.now();
@@ -130,6 +148,9 @@ export default defineComponent({
 
         const startTimer = () => {
             if (!timerRunning.value) {
+                emit('current-charrecter', firstCharacter.value);
+                firstCharacter.value = '';
+                textPreview.value = "";
                 textFromInput.value = "";
                 trackClicks.value = true;
                 lastKeyPressTime.value = Date.now();
@@ -165,6 +186,8 @@ export default defineComponent({
             trackClicks,
             textFromInput,
             timerRunning,
+            textPreview,
+            handleThrowCurrentCharacter,
             handleCompletion,
             handleInvalidCharacter,
             handleUpdateTextInput,

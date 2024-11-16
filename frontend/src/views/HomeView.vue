@@ -1,10 +1,12 @@
 <script setup lang="ts">
 
-import { TrainingField, TypingTrainer, BaseLogo, NavigationBarForTrainee } from '@/component/trainer';
+import { TrainingField, Keyboard, KeyboardButton, TypingTrainer, BaseLogo, NavigationBarForTrainee } from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
+import UserUrl from '@/assets/User.png'
 import { AuthForm, RegisterForm } from '@/component/auth';
 import { ref } from 'vue';
-import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink } from '@/component/UI'
+import { StackedBarChart } from '@/component/statistic';
+import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable } from '@/component/UI'
 
 const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
@@ -23,6 +25,7 @@ const toastVisible = ref(false);
 const toastMessage = ref('');
 const toastType = ref('info');
 
+const currentCharacter = ref('');
 
 const showToast = (message: string, type: string) => {
   toastMessage.value = message;
@@ -57,6 +60,7 @@ const handleSuccessCompletion = (data: any[]) => {
     score: data[5],
   };
   errorData.value = null; // Сбросить данные об ошибках, если они были
+
 };
 
 const handleErrorCompletion = (data: any[]) => {
@@ -71,6 +75,32 @@ const handleErrorCompletion = (data: any[]) => {
   successData.value = null; // Сбросить данные о успешном завершении, если они были
 };
 
+interface Key {
+  values: string[];
+  backgroundColor?: string;
+}
+
+const keys = ref<Key[]>([
+  { values: [' '] }, // Кнопка пробела
+  { values: ['1', '!'] },
+  { values: ['2', '@'] },
+  { values: ['3', '#'] },
+  { values: ['К'] },
+  // Добавьте остальные кнопки
+]);
+
+const tableHeaders = ['Имя', 'Возраст', 'Город'];
+const tableData = [
+  { Имя: 'Иван', Возраст: 25, Город: 'Москва' },
+  { Имя: 'Анна', Возраст: 30, Город: 'Санкт-Петербург' },
+  { Имя: 'Петр', Возраст: 22, Город: 'Екатеринбург' },
+];
+
+const chartData = ref([
+  { date: '2023-01-01', new: 10, old: 5 },
+  { date: '2023-01-02', new: 15, old: 10 },
+  { date: '2023-01-03', new: 20, old: 15 },
+]) 
 </script>
 
 <template>
@@ -85,7 +115,10 @@ const handleErrorCompletion = (data: any[]) => {
       <BaseLogo :logoSrc="imgUrl" customStyleForImg="width: 90px; height: auto;">
       </BaseLogo>
     </div>
-
+    <div>
+      <h2>Картинка</h2>
+      <BaseImage :src="UserUrl" alt="asdsad"></BaseImage>
+    </div>
     <div>
       <h2>Базовая кнопка</h2>
       <BaseButton customStyle="width: 200px; height: 50px; background-color: #012E4A; color: #E8EDE7;"
@@ -195,6 +228,32 @@ const handleErrorCompletion = (data: any[]) => {
         <p>Ошибки: {{ errorData.errorsCount }}</p>
         <p>Время: {{ errorData.elapsedTime }} сек</p>
         <p>Счет: {{ errorData.score }}</p>
+      </div>
+    </div>
+    <div>
+      <h2>Кнопки</h2>
+      <div class="keyboard-container">
+        <KeyboardButton v-for="(key, index) in keys" :key="index" :values="key.values"
+          :backgroundColor="key.backgroundColor"
+          custom-style="background-color: #E8EDE7; width: 90px; height: 90px; font-size: 30px; border-radius: 10px;" />
+      </div>
+    </div>
+    <div>
+      <h2>Клавиатура</h2>
+      <div>
+        <Keyboard class="keyboard" :currentCharacter="currentCharacter" />
+      </div>
+    </div>
+    <div>
+      <h2>Таблица</h2>
+      <BaseTable :headers="tableHeaders" :data="tableData" custom-style="width: 700px;" />
+    </div>
+    <div>
+      <h2>Гистограммы</h2>
+      <div>
+        <h1>Накопленная гистограмма</h1>
+
+        <!-- <StackedBarChart :data="chartData" /> -->
       </div>
     </div>
   </main>

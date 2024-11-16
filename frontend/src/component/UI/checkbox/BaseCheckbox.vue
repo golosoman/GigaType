@@ -55,15 +55,11 @@ export default defineComponent({
     margin-right: 10px;
     position: relative;
     transition: background-color 0.3s, border-color 0.3s;
-    /* Добавляем плавный переход */
 }
 
-/* Эффект затемнения при наведении */
 .checkbox-container:hover .checkmark {
     background-color: rgba(128, 190, 206, 0.5);
-    /* Полупрозрачный цвет */
     border-color: #3c6d74;
-    /* Изменяем цвет рамки */
 }
 
 .checkbox-container input:checked+.checkmark {
