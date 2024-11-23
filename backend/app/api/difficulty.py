@@ -69,7 +69,7 @@ def update_():
     :return: {message: str}, code, Content-Type
     """
     data: dict = request.json
-    if check_one_arg(Difficulty, data) and 'uid' in data:
+    if check_one_arg(Difficulty, data, should_be=["uid"]):
         difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid == data['uid'])).first()
         if not difficulty:
             return message("Неверный id сложности.", 404)
@@ -136,7 +136,7 @@ def get():
         if not difficulty:
             return message("Неверный uid.", 404)
         difficulty: Difficulty = difficulty[0]
-        return send_json_data(make_json_response(difficulty))
+        return send_json_data(make_json_response(difficulty, additional=['uid'], exclude=["difficulty"]))
     else:
         difficulties = [difficulty[0] for difficulty in db.session.execute(select(Difficulty)).all()]
         difficulties.sort(key=lambda x: int(x.__getattribute__("name")))

@@ -62,7 +62,7 @@ def update_():
     :return: {message: str}, code, Content-Type
     """
     data: dict = request.json
-    if check_one_arg(Task, data, additional=['uid']):
+    if check_one_arg(Task, data, should_be=['uid']):
         task = db.session.execute(select(Task).where(Task.uid==data['uid'])).first()
         if not task:
             return message("Неверный uid задания.", 404)

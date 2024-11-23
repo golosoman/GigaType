@@ -1,9 +1,6 @@
-import base64
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from sqlalchemy import select
 
 from config import DevelopmentConfig
 
