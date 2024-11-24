@@ -1,11 +1,9 @@
 <script setup lang="ts">
 
-import { TrainingField, Keyboard, KeyboardButton, TypingTrainer, BaseLogo, NavigationBarForTrainee } from '@/component/trainer';
+import { TrainingField, Keyboard, KeyboardButton, TypingTrainer, BaseLogo, NavigationBarForTrainee, AuthButtons, AuthForm, RegisterForm } from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
-import { AuthForm, RegisterForm } from '@/component/auth';
 import { ref } from 'vue';
-import { StackedBarChart } from '@/component/statistic';
 import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable } from '@/component/UI'
 
 const imgUrl = ref(ImageUrl);

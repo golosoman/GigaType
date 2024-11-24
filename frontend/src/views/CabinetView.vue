@@ -26,19 +26,32 @@
             <div>
                 <h2>Статистика</h2>
                 <div>
-                    <BaseButton
+                    <BaseButton @click="setActiveTab('speed')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A;">
-                        Скорость</BaseButton>
-                    <BaseButton
+                        Скорость
+                    </BaseButton>
+                    <BaseButton @click="setActiveTab('levels')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A; margin-left: 20px;">
-                        Уровни</BaseButton>
-                    <BaseButton
+                        Уровни
+                    </BaseButton>
+                    <BaseButton @click="setActiveTab('trainees')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A; margin-left: 20px;">
-                        Обучаемые</BaseButton>
+                        Обучаемые
+                    </BaseButton>
                 </div>
                 <div>
-                    <h2>Таблица рейтинга</h2>
-                    <RatingTable :user-data="userData" custom-style="width: 500px"></RatingTable>
+                    <div v-if="activeTab === 'speed'" style="width: 800px;">
+                        <h2>Количество символов</h2>
+                        <Line :data="chartData" :options="chartOptions" />
+                    </div>
+                    <div v-else-if="activeTab === 'levels'">
+                        <h2>Статистика по уровням</h2>
+                        <LevelTable :tableData="userStatistics" customStyle="width: 600px" />
+                    </div>
+                    <div v-else-if="activeTab === 'trainees'">
+                        <h2>Рейтинг среди обучаемых</h2>
+                        <RatingTable :user-data="userData" custom-style="width: 500px"></RatingTable>
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,21 +59,79 @@
 </template>
 
 <script setup lang="ts">
-import { NavigationBarForTrainee } from '@/component/trainer';
+import { NavigationBarForTrainee, RatingTable, LevelTable } from '@/component/trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel } from '@/component/UI';
-import { RatingTable } from '@/component/statistic';
 import UserImage from '@/assets/User.png'
 import { ref } from 'vue'
+
+import { Line } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
+
+ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
+
+const chartData = ref({
+    labels: [
+        '2023-10-01 10:00',
+        '2023-10-01 11:00',
+        '2023-10-01 12:00',
+        '2023-10-01 13:00',
+        '2023-10-01 14:00',
+        '2023-10-02 10:00',
+        '2023-10-02 11:00',
+        '2023-10-02 12:00',
+        '2023-10-02 13:00',
+        '2023-10-02 14:00',
+        '2023-10-03 10:00',
+        '2023-10-03 11:00',
+    ],
+    datasets: [
+        {
+            label: 'Скорость ввода (симв/мин)',
+            data: [100, 150, 120, 130, 160, 140, 170, 180, 190, 200, 210, 220],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            fill: true,
+        },
+    ],
+});
+
+const chartOptions = ref({
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top' as const,
+        },
+        title: {
+            display: true,
+            text: 'Статистика скорости ввода',
+        },
+    },
+});
 
 const userName = ref('trainee')
 
 const userData = ref([
-    { Место: 1, Пользователь: 'Иван', Рейтинг: 1500 },
-    { Место: 2, Пользователь: 'Анна', Рейтинг: 1450 },
-    { Место: 3, Пользователь: 'Петр', Рейтинг: 1400 },
-    { Место: 4, Пользователь: 'Светлана', Рейтинг: 1350 },
-    { Место: 5, Пользователь: 'Дмитрий', Рейтинг: 1300 },
+    { Место: 1, Пользователь: 'Ivan', Рейтинг: 1500 },
+    { Место: 2, Пользователь: 'Anna', Рейтинг: 1450 },
+    { Место: 3, Пользователь: 'Petr', Рейтинг: 1400 },
+    { Место: 4, Пользователь: 'Svetlana', Рейтинг: 1350 },
+    { Место: 5, Пользователь: 'Dmitry', Рейтинг: 1300 },
 ]);
+
+const userStatistics = ref([
+    { Упражнение: 1, Статус: 'Выполнено', Скорость: '110 симв/мин', Ошибки: '3/5', Время: '120 с' },
+    { Упражнение: 2, Статус: 'Не выполнено', Скорость: '130 симв/мин', Ошибки: '5/6', Время: '130 с' },
+    { Упражнение: 3, Статус: 'Выполнено', Скорость: '120 симв/мин', Ошибки: '5/5', Время: '125 с' },
+    // Добавьте дополнительные данные по мере необходимости
+]);
+
+// Reactive property to track which tab is active
+const activeTab = ref('speed');
+
+// Function to set the active tab
+const setActiveTab = (tab: string) => {
+    activeTab.value = tab;
+};
 </script>
 
 <style scoped>

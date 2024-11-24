@@ -23,8 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { BaseLogo } from '@/component/trainer';
-import { AuthButtons, AuthForm, RegisterForm } from '@/component/auth';
+import { BaseLogo, AuthButtons, AuthForm, RegisterForm } from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png';
 import { ref } from 'vue'
 
