@@ -19,6 +19,7 @@ import UserUrl from '@/assets/User.png'
 import CloseUrl from '@/assets/Close.png'
 import { ref } from 'vue';
 import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable, ButtonWithImage } from '@/component/UI'
+import EditLevelWindow from '@/component/trainer/modalWindow/EditLevelWindow.vue';
 
 const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
@@ -123,6 +124,28 @@ const showModal = () => {
 const closeModal = () => {
   isModalVisible.value = false;
 };
+
+
+
+const isModalVisible2 = ref(false);
+
+// Пример массива зон клавиатуры
+const keyboardZones = [
+  'Зона 1 (ФЫВАОЛДЖ)',
+  'Зона 3 (КЕНГ)',
+  'Зона 4 (МИТЬ)',
+  'Зона 7 (ЁЙЯЗХЪЭ.,)',
+];
+
+// Пример минимального и максимального количества символов
+const minCount = ref(30);
+const maxCount = ref(80);
+const pressTime = ref(1.5)
+
+const openModal = () => {
+  isModalVisible2.value = true;
+};
+
 </script>
 
 <template>
@@ -280,7 +303,7 @@ const closeModal = () => {
       </div>
     </div>
     <div>
-      <h2>Модальное окно создания упражнений</h2>
+      <h2>Модальное окно создания уровней сложности</h2>
       <div>
         <button @click="showModal">Открыть модальное окно</button>
         <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
@@ -289,6 +312,12 @@ const closeModal = () => {
           <button @click="closeModal">Закрыть</button>
         </CreateLevelWindow>
       </div>
+    </div>
+    <div>
+      <h2>Модальное окно изменения уровней сложности</h2>
+      <button @click="openModal">Создать уровень сложности</button>
+      <EditLevelWindow :isVisible="isModalVisible2" :keyboardZones="keyboardZones" :minCount="minCount"
+        :timePressKey="pressTime" :maxCount="maxCount" @update:isVisible="isModalVisible2 = $event" />
     </div>
     <div>
       <h2>Клавиатура</h2>

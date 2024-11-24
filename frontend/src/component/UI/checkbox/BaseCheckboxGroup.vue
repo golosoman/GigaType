@@ -20,6 +20,11 @@ export default defineComponent({
             type: Array as () => string[],
             required: true,
         },
+        valuesSelected: {
+            type: Array as () => string[],
+            required: false,
+            default: []
+        },
         columns: {
             type: Number,
             default: 2,
@@ -36,7 +41,7 @@ export default defineComponent({
         },
     },
     setup(props, { emit }) {
-        const selectedValues = ref<string[]>([]);
+        const selectedValues = ref<string[]>(props.valuesSelected);
 
         const updateCheckboxValue = (option: string, checked: boolean) => {
             if (checked) {

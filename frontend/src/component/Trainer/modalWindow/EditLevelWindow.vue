@@ -4,23 +4,24 @@
             <div>
                 Создание уровня сложности
             </div>
-            <KeyboardWithCheckbox></KeyboardWithCheckbox>
+            <KeyboardWithCheckbox :keyboardZones="zoneKeyboard" />
             <BaseInputWithLabel label="Минимальное количество символов"
-                inputPlaceholder="Введите минимальное количество символов:" :modelValue="min_count_char"
+                inputPlaceholder="Введите минимальное количество символов:" :modelValue="minCountChar"
                 @update:modelValue="changeMinCountChar"
                 customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 32px;" />
             <BaseInputWithLabel label="Максимальное количество символов"
-                inputPlaceholder="Введите максимальное количество символов:" :modelValue="max_count_char"
+                inputPlaceholder="Введите максимальное количество символов:" :modelValue="maxCountChar"
                 @update:modelValue="changeMaxCountChar"
                 customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 32px;" />
             <BaseInputWithLabel label="Время нажатия на клавишу" inputPlaceholder="Введите время нажатия на клавишу:"
-                :modelValue="time_press_key" @update:modelValue="changeTimePressKey"
+                :modelValue="timePressKey" @update:modelValue="changeTimePressKey"
                 customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 32px;" />
             <BaseButton
-                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
+                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;"
+                @click="saveChanges">
                 Сохранить
             </BaseButton>
             <ButtonWithImage class="close-button" @click="closeModal" :imageSrc="CloseUrl"
@@ -34,7 +35,8 @@
 import { defineComponent, ref } from 'vue';
 import { KeyboardWithCheckbox } from '../editor';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
-import CloseUrl from '@/assets/Close.png'
+import CloseUrl from '@/assets/Close.png';
+
 export default defineComponent({
     name: 'CreateLevelWindow',
     components: {
@@ -48,36 +50,65 @@ export default defineComponent({
             type: Boolean,
             required: true,
         },
+        keyboardZones: {
+            type: Array as () => string[],
+            required: true,
+        },
+        minCount: {
+            type: Number,
+            required: true,
+        },
+        maxCount: {
+            type: Number,
+            required: true,
+        },
+        timePressKey: {
+            type: Number,
+            required: true,
+        }
     },
     setup(props, { emit }) {
-        const min_count_char = ref('')
-        const changeMinCountChar = () => {
+        const minCountChar = ref(props.minCount);
+        const maxCountChar = ref(props.maxCount);
+        const timePressKey = ref(props.timePressKey);
+        const zoneKeyboard = ref(props.keyboardZones);
+        const changeMinCountChar = (value: number) => {
+            minCountChar.value = value;
+        };
 
-        }
+        const changeMaxCountChar = (value: number) => {
+            maxCountChar.value = value;
+        };
 
-        const max_count_char = ref('')
-        const changeMaxCountChar = () => {
-
-        }
-
-        const time_press_key = ref('')
-        const changeTimePressKey = () => {
-
-        }
+        const changeTimePressKey = (value: number) => {
+            timePressKey.value = value;
+        };
 
         const closeModal = () => {
             emit('update:isVisible', false);
         };
 
+        const saveChanges = () => {
+            // Здесь вы можете обработать сохранение изменений
+            console.log('Сохраненные значения:', {
+                minCount: minCountChar.value,
+                maxCount: maxCountChar.value,
+                timePressKey: timePressKey.value,
+            });
+            closeModal();
+        };
+
         return {
-            min_count_char,
-            max_count_char,
-            time_press_key,
+            minCountChar,
+            maxCountChar,
+            timePressKey,
             CloseUrl,
-            changeTimePressKey,
-            changeMaxCountChar,
+            zoneKeyboard,
             changeMinCountChar,
+            changeMaxCountChar,
+            changeTimePressKey,
             closeModal,
+            saveChanges,
         };
     },
 });
