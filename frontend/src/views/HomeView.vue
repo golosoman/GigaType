@@ -1,6 +1,17 @@
 <script setup lang="ts">
 
-import { TrainingField, Keyboard, KeyboardButton, TypingTrainer, BaseLogo, NavigationBarForTrainee, AuthButtons, AuthForm, RegisterForm } from '@/component/trainer';
+import {
+  TrainingField,
+  Keyboard,
+  KeyboardButton,
+  TypingTrainer,
+  BaseLogo,
+  NavigationBarForTrainee,
+  AuthButtons,
+  AuthForm,
+  RegisterForm,
+  NavigationBarForAdmin
+} from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
 import { ref } from 'vue';
@@ -105,8 +116,12 @@ const chartData = ref([
   <main>
     <h1>Примеры компонентов</h1>
     <div>
-      <h2>Навигационная панель</h2>
+      <h2>Навигационная панель пользователя</h2>
       <NavigationBarForTrainee></NavigationBarForTrainee>
+    </div>
+    <div>
+      <h2>Навигационная панель администратора</h2>
+      <NavigationBarForAdmin></NavigationBarForAdmin>
     </div>
     <div>
       <h2>Наш логотип</h2>
