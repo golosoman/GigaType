@@ -1,5 +1,5 @@
 <script lang="ts">
-import { BaseLogo } from "../trainer";
+import { BaseLogo } from "../logo";
 import { BaseInputWithLabel, BaseButton, BaseLink } from "@/component/UI";
 import { defineComponent } from 'vue';
 

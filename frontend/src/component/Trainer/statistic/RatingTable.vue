@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue';
-import { BaseTable } from '../UI';
+import { BaseTable } from '@/component/UI';
 
 // Определяем пропсы
 const props = defineProps<{

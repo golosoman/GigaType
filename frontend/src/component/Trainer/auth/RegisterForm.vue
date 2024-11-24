@@ -1,8 +1,7 @@
 <script lang="ts">
-import { BaseLogo } from "../trainer";
-import { BaseInputWithLabel, BaseButton } from "@/component/UI";
+import { BaseLogo } from "../logo";
+import { BaseInputWithLabel, BaseButton, BaseLink } from "@/component/UI";
 import { defineComponent } from 'vue';
-import BaseLink from "../UI/link/BaseLink.vue";
 
 export default defineComponent({
     name: 'RegisterForm',

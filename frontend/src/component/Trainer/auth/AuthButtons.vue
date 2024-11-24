@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { BaseButton } from '../UI';
+import { BaseButton } from '@/component/UI';
 // import BaseLink from '../UI/link/BaseLink.vue';
 
 export default defineComponent({

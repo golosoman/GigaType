@@ -6,6 +6,7 @@ import {
   HomeView,
   TrainerView,
   CabinetView,
+  ChooseExerciseView,
 } from "@/views";
 
 const router = createRouter({
@@ -40,6 +41,11 @@ const router = createRouter({
       path: "/app/cabinet",
       name: "cabinet",
       component: CabinetView,
+    },
+    {
+      path: "/app/choose_exercise",
+      name: "choose_exercise",
+      component: ChooseExerciseView,
     },
   ],
 });
