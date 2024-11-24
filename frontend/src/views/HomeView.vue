@@ -10,7 +10,8 @@ import {
   AuthButtons,
   AuthForm,
   RegisterForm,
-  NavigationBarForAdmin
+  NavigationBarForAdmin,
+  KeyboardWithCheckbox
 } from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
@@ -218,6 +219,17 @@ const chartData = ref([
       <!-- Кнопки клавы блочатся -->
       <!-- <TrainingField :textToType="textToType" @completed="handleCompletion"
         customStyle="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px; "></TrainingField> -->
+    </div>
+
+    <div>
+      <h2>Клавиатура с чек-боксами</h2>
+      <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues"></KeyboardWithCheckbox>
+      <div>
+        <h3>Выбранные опции:</h3>
+        <ul>
+          <li v-for="option in selectedOptions" :key="option">{{ option }}</li>
+        </ul>
+      </div>
     </div>
     <div>
       <h2>Клавиатурный тренажер</h2>
