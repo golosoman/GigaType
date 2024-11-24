@@ -11,12 +11,14 @@ import {
   AuthForm,
   RegisterForm,
   NavigationBarForAdmin,
-  KeyboardWithCheckbox
+  KeyboardWithCheckbox,
+  CreateLevelWindow
 } from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
+import CloseUrl from '@/assets/Close.png'
 import { ref } from 'vue';
-import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable } from '@/component/UI'
+import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable, ButtonWithImage } from '@/component/UI'
 
 const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
@@ -110,7 +112,17 @@ const chartData = ref([
   { date: '2023-01-01', new: 10, old: 5 },
   { date: '2023-01-02', new: 15, old: 10 },
   { date: '2023-01-03', new: 20, old: 15 },
-]) 
+])
+
+const isModalVisible = ref(false);
+
+const showModal = () => {
+  isModalVisible.value = true;
+};
+
+const closeModal = () => {
+  isModalVisible.value = false;
+};
 </script>
 
 <template>
@@ -159,6 +171,10 @@ const chartData = ref([
       <h2>Базовое поле ввода</h2>
       <BaseInput customStyle="width: 800px; height: 50px;" v-model="a"></BaseInput>
       <p>a: {{ a }}</p>
+    </div>
+    <div>
+      <h2>Кнопка с картинкой</h2>
+      <ButtonWithImage :image-src="CloseUrl"></ButtonWithImage>
     </div>
     <div>
       <h2>Базовое поле ввода с биркой</h2>
@@ -261,6 +277,17 @@ const chartData = ref([
         <KeyboardButton v-for="(key, index) in keys" :key="index" :values="key.values"
           :backgroundColor="key.backgroundColor"
           custom-style="background-color: #E8EDE7; width: 90px; height: 90px; font-size: 30px; border-radius: 10px;" />
+      </div>
+    </div>
+    <div>
+      <h2>Модальное окно создания упражнений</h2>
+      <div>
+        <button @click="showModal">Открыть модальное окно</button>
+        <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
+          <h2>Это модальное окно</h2>
+          <p>Содержимое модального окна.</p>
+          <button @click="closeModal">Закрыть</button>
+        </CreateLevelWindow>
       </div>
     </div>
     <div>

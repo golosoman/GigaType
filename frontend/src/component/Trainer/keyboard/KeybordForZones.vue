@@ -1,5 +1,5 @@
 <template>
-    <div class="keyboard">
+    <div class="keyboard" :style="customStyle">
         <div v-for="(row, rowIndex) in keys" :key="rowIndex" class="keyboard-row">
             <KeyboardButton v-for="(key, keyIndex) in row" :key="keyIndex" :values="Array.isArray(key) ? key : [key]"
                 :onClick="handleButtonClick" :style="{ backgroundColor: getKeyColor(key) }"
@@ -23,7 +23,12 @@ export default defineComponent({
             type: Array as () => string[],
             required: false,
             default: () => []
-        }
+        },
+        customStyle: {
+            type: String,
+            required: false,
+            default: '',
+        },
     },
     setup(props) {
         const keys = ref([

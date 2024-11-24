@@ -2,7 +2,7 @@
     <div>
         <BaseCheckboxGroup :options="checkOptions" :columns="3" customStyle="width: 570px"
             @update:selectedValues="handleSelectedValues" />
-        <KeybordForZones :selectedZones="selectedOptions" />
+        <KeybordForZones :selectedZones="selectedOptions" custom-style="margin-top: 20px" />
     </div>
 </template>
 
