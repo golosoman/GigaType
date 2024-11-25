@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { KeyboardWithCheckbox } from '../editor';
+import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
 
