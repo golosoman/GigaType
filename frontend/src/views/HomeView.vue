@@ -1,10 +1,41 @@
 <script setup lang="ts">
 
-import { TrainingField, Keyboard, KeyboardButton, TypingTrainer, BaseLogo, NavigationBarForTrainee, AuthButtons, AuthForm, RegisterForm } from '@/component/trainer';
+import {
+  TrainingField,
+  Keyboard,
+  KeyboardButton,
+  TypingTrainer,
+  BaseLogo,
+  NavigationBarForTrainee,
+  AuthButtons,
+  AuthForm,
+  RegisterForm,
+  NavigationBarForAdmin,
+  KeyboardWithCheckbox,
+  CreateLevelWindow,
+  EditLevelWindow,
+  CreateExerciseWindow,
+  EditExerciseWindow
+} from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
+import CloseUrl from '@/assets/Close.png'
 import { ref } from 'vue';
-import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable } from '@/component/UI'
+import {
+  BaseButton,
+  BaseInput,
+  BaseInputWithLabel,
+  BaseDropdown,
+  BaseCheckbox,
+  BaseCheckboxGroup,
+  Toast,
+  BaseLink,
+  ImageLink,
+  BaseImage,
+  BaseTable,
+  ButtonWithImage,
+  CheckBoxGroupWithBlock
+} from '@/component/UI'
 
 const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
@@ -98,15 +129,71 @@ const chartData = ref([
   { date: '2023-01-01', new: 10, old: 5 },
   { date: '2023-01-02', new: 15, old: 10 },
   { date: '2023-01-03', new: 20, old: 15 },
-]) 
+])
+
+const isModalVisible = ref(false);
+
+const showModal = () => {
+  isModalVisible.value = true;
+};
+
+const closeModal = () => {
+  isModalVisible.value = false;
+};
+
+
+
+const isModalVisible2 = ref(false);
+
+// Пример массива зон клавиатуры
+const keyboardZones = [
+  'Зона 1 (ФЫВАОЛДЖ)',
+  'Зона 3 (КЕНГ)',
+  'Зона 4 (МИТЬ)',
+  'Зона 7 (ЁЙЯЗХЪЭ.,)',
+];
+
+const checkboxOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
+const selectedCheckboxess = ref(['Option 1', 'Option 3']); // Пример выбранных значений
+
+const updateSelectedCheckboxes = (newValues: string[]) => {
+  selectedCheckboxess.value = newValues;
+};
+
+// Пример минимального и максимального количества символов
+const minCount = ref(30);
+const maxCount = ref(80);
+const pressTime = ref(1.5)
+
+const openModal = () => {
+  isModalVisible2.value = true;
+};
+
+const isModalVisible3 = ref(false);
+
+const openModal3 = () => {
+  isModalVisible3.value = true;
+};
+
+const textExercise = ref("Это текст упражнения, который потом пользователь будет вводить...")
+
+const isModalVisible4 = ref(false);
+
+const openModal4 = () => {
+  isModalVisible4.value = true;
+};
 </script>
 
 <template>
   <main>
     <h1>Примеры компонентов</h1>
     <div>
-      <h2>Навигационная панель</h2>
+      <h2>Навигационная панель пользователя</h2>
       <NavigationBarForTrainee></NavigationBarForTrainee>
+    </div>
+    <div>
+      <h2>Навигационная панель администратора</h2>
+      <NavigationBarForAdmin></NavigationBarForAdmin>
     </div>
     <div>
       <h2>Наш логотип</h2>
@@ -145,6 +232,10 @@ const chartData = ref([
       <p>a: {{ a }}</p>
     </div>
     <div>
+      <h2>Кнопка с картинкой</h2>
+      <ButtonWithImage :image-src="CloseUrl"></ButtonWithImage>
+    </div>
+    <div>
       <h2>Базовое поле ввода с биркой</h2>
       <BaseInputWithLabel customStyleForInput="width: 800px; height: 50px;" v-model="a" label="Что?!">
       </BaseInputWithLabel>
@@ -164,6 +255,12 @@ const chartData = ref([
           <li v-for="option in selectedOptions" :key="option">{{ option }}</li>
         </ul>
       </div>
+    </div>
+    <div>
+      <h2>Группа чекбоксов с блокировкой</h2>
+      <CheckBoxGroupWithBlock :options="checkboxOptions" :valuesSelected="selectedCheckboxess"
+        @update:selectedValues="updateSelectedCheckboxes" :columns="3" customStyle="margin: 20px;"
+        customStyleForBaseCheckbox="margin-bottom: 10px;"></CheckBoxGroupWithBlock>
     </div>
     <div>
       <h2>Выпадающий список</h2>
@@ -204,6 +301,17 @@ const chartData = ref([
       <!-- <TrainingField :textToType="textToType" @completed="handleCompletion"
         customStyle="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px; "></TrainingField> -->
     </div>
+
+    <div>
+      <h2>Клавиатура с чек-боксами</h2>
+      <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues"></KeyboardWithCheckbox>
+      <div>
+        <h3>Выбранные опции:</h3>
+        <ul>
+          <li v-for="option in selectedOptions" :key="option">{{ option }}</li>
+        </ul>
+      </div>
+    </div>
     <div>
       <h2>Клавиатурный тренажер</h2>
       <TypingTrainer level="Легкий" exercise="Печать текста" :maxErrors="5" textToType="Пример текста для тренировки."
@@ -235,6 +343,36 @@ const chartData = ref([
           :backgroundColor="key.backgroundColor"
           custom-style="background-color: #E8EDE7; width: 90px; height: 90px; font-size: 30px; border-radius: 10px;" />
       </div>
+    </div>
+    <div>
+      <h2>Модальное окно создания уровней сложности</h2>
+      <div>
+        <button @click="showModal">Создать уровень сложности</button>
+        <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
+          <h2>Это модальное окно</h2>
+          <p>Содержимое модального окна.</p>
+          <button @click="closeModal">Закрыть</button>
+        </CreateLevelWindow>
+      </div>
+    </div>
+    <div>
+      <h2>Модальное окно изменения уровней сложности</h2>
+      <button @click="openModal">Изменить уровень сложности</button>
+      <EditLevelWindow :isVisible="isModalVisible2" :keyboardZones="keyboardZones" :minCount="minCount"
+        :timePressKey="pressTime" :maxCount="maxCount" @update:isVisible="isModalVisible2 = $event" />
+    </div>
+    <div>
+      <h2>Модальное окно создания упражнения</h2>
+      <button @click="openModal3">Создать упражнение</button>
+      <CreateExerciseWindow :isVisible="isModalVisible3" :keyboardZones="keyboardZones" :minCount="minCount"
+        :numberErrors="5" :timePressKey="pressTime" :maxCount="maxCount" @update:isVisible="isModalVisible3 = $event" />
+    </div>
+    <div>
+      <h2>Модальное окно изменения упражнения</h2>
+      <button @click="openModal4">Изменить упражнение</button>
+      <EditExerciseWindow :text-exercise="textExercise" :isVisible="isModalVisible4" :keyboardZones="keyboardZones"
+        :minCount="minCount" :numberErrors="5" :timePressKey="pressTime" :maxCount="maxCount"
+        @update:isVisible="isModalVisible4 = $event" />
     </div>
     <div>
       <h2>Клавиатура</h2>

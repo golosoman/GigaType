@@ -2,7 +2,8 @@
     <div :style="[gridStyle, customStyle]" class="checkbox-group">
         <BaseCheckbox v-for="(option, index) in options" :key="index" :modelValue="selectedValues.includes(option)"
             :label="option" @update:modelValue="(value) => updateCheckboxValue(option, value)"
-            :customStyle="customStyleForBaseCheckbox" />
+            :customStyle="customStyleForBaseCheckbox" :disabled_property="!activValues.includes(option)"
+            :class="{ 'disabled-checkbox': !activValues.includes(option) }" />
     </div>
 </template>
 
@@ -23,7 +24,7 @@ export default defineComponent({
         valuesSelected: {
             type: Array as () => string[],
             required: false,
-            default: []
+            default: () => []
         },
         columns: {
             type: Number,
@@ -41,6 +42,7 @@ export default defineComponent({
         },
     },
     setup(props, { emit }) {
+        const activValues = ref<string[]>(props.valuesSelected);
         const selectedValues = ref<string[]>(props.valuesSelected);
 
         const updateCheckboxValue = (option: string, checked: boolean) => {
@@ -60,6 +62,7 @@ export default defineComponent({
         }));
 
         return {
+            activValues,
             selectedValues,
             updateCheckboxValue,
             gridStyle,
@@ -69,8 +72,16 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.checkbox-group>div {
+.checkbox-group {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+}
+
+.disabled-checkbox {
+    /* Цвет фона для неактивных чекбоксов */
+    opacity: 0.5;
+    /* Прозрачность для визуального эффекта */
+    pointer-events: none;
+    /* Отключение взаимодействия */
 }
 </style>
