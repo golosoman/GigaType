@@ -4,23 +4,39 @@
             <div>
                 Создание уровня сложности
             </div>
-            <KeyboardWithCheckbox></KeyboardWithCheckbox>
-            <BaseInputWithLabel label="Минимальное количество символов"
-                inputPlaceholder="Введите минимальное количество символов:" :modelValue="min_count_char"
-                @update:modelValue="changeMinCountChar"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
-            <BaseInputWithLabel label="Максимальное количество символов"
-                inputPlaceholder="Введите максимальное количество символов:" :modelValue="max_count_char"
-                @update:modelValue="changeMaxCountChar"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
-            <BaseInputWithLabel label="Время нажатия на клавишу" inputPlaceholder="Введите время нажатия на клавишу:"
-                :modelValue="time_press_key" @update:modelValue="changeTimePressKey"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
+            <KeyboardWithBlockCheckBox :keyboardZones="zoneKeyboard" />
+            <div style="display: flex;">
+                <div>
+                    <BaseInput inputPlaceholder="Поле минимального количества символов:" :modelValue="minCountChar"
+                        :disabled="true"
+                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
+                        customStyleForLabel="font-size: 32px;" />
+                    <BaseInput inputPlaceholder="Поле максимального количества символов" :modelValue="maxCountChar"
+                        :disabled="true"
+                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
+                        customStyleForLabel="font-size: 32px;" />
+                    <BaseInput inputPlaceholder="Поле допустимого окличества ошибок" :modelValue="numberErrors"
+                        :disabled="true"
+                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
+                        customStyleForLabel="font-size: 32px;" />
+                    <BaseInput inputPlaceholder="Поле времени нажатия на клавишу" :modelValue="timePressKey"
+                        :disabled="true"
+                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
+                        customStyleForLabel="font-size: 32px;" />
+                </div>
+
+                <div style="margin-left: 20px;">
+                    <BaseInput inputPlaceholder="Введите количество символов для генерации:"
+                        :modelValue="lengthExercise" @update:modelValue="changeLengthExercise"
+                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
+                        customStyleForLabel="font-size: 32px;" />
+                    <BaseButton>Генерация упражнения</BaseButton>
+                </div>
+            </div>
+            <BaseInputTextArea v-model="textExercise" @update:modelValue="changeTextExercise" />
             <BaseButton
-                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
+                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;"
+                @click="saveChanges">
                 Сохранить
             </BaseButton>
             <ButtonWithImage class="close-button" @click="closeModal" :imageSrc="CloseUrl"
@@ -32,52 +48,90 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { KeyboardWithCheckbox } from '../keyboard';
-import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
-import CloseUrl from '@/assets/Close.png'
+import { KeyboardWithBlockCheckBox } from '../keyboard';
+import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
+import CloseUrl from '@/assets/Close.png';
+
 export default defineComponent({
-    name: 'CreateLevelWindow',
+    name: 'CreateExerciseWindow',
     components: {
-        KeyboardWithCheckbox,
+        KeyboardWithBlockCheckBox,
         BaseInputWithLabel,
+        BaseInput,
         BaseButton,
-        ButtonWithImage
+        ButtonWithImage,
+        BaseInputTextArea
     },
     props: {
         isVisible: {
             type: Boolean,
             required: true,
         },
+        keyboardZones: {
+            type: Array as () => string[],
+            required: true,
+        },
+        minCount: {
+            type: Number,
+            required: true,
+        },
+        maxCount: {
+            type: Number,
+            required: true,
+        },
+        numberErrors: {
+            type: Number,
+            required: true,
+        },
+        timePressKey: {
+            type: Number,
+            required: true,
+        },
     },
     setup(props, { emit }) {
-        const min_count_char = ref('')
-        const changeMinCountChar = () => {
+        const minCountChar = ref(`Минимальное количество символов - ${props.minCount}`);
+        const maxCountChar = ref(`Максимальное количество символов - ${props.maxCount}`);
+        const timePressKey = ref(`Время нажатия на клавишу - ${props.timePressKey}`);
+        const numberErrors = ref(`Допустимое количество ошибок - ${props.numberErrors}`);
+        const zoneKeyboard = ref(props.keyboardZones);
+        const lengthExercise = ref<number | string>('')
+        const textExercise = ref('')
 
+        const changeTextExercise = (value: string) => {
+            textExercise.value = value
         }
 
-        const max_count_char = ref('')
-        const changeMaxCountChar = () => {
-
-        }
-
-        const time_press_key = ref('')
-        const changeTimePressKey = () => {
-
+        const changeLengthExercise = (value: number) => {
+            lengthExercise.value = value
         }
 
         const closeModal = () => {
             emit('update:isVisible', false);
         };
 
+        const saveChanges = () => {
+            // Здесь вы можете обработать сохранение изменений
+            console.log('Сохраненные значения:', {
+                minCount: minCountChar.value,
+                maxCount: maxCountChar.value,
+                timePressKey: timePressKey.value,
+            });
+            closeModal();
+        };
+
         return {
-            min_count_char,
-            max_count_char,
-            time_press_key,
+            minCountChar,
+            maxCountChar,
+            timePressKey,
             CloseUrl,
-            changeTimePressKey,
-            changeMaxCountChar,
-            changeMinCountChar,
+            zoneKeyboard,
+            numberErrors,
+            lengthExercise,
+            textExercise,
+            changeTextExercise,
+            changeLengthExercise,
             closeModal,
+            saveChanges,
         };
     },
 });

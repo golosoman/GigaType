@@ -12,14 +12,30 @@ import {
   RegisterForm,
   NavigationBarForAdmin,
   KeyboardWithCheckbox,
-  CreateLevelWindow
+  CreateLevelWindow,
+  EditLevelWindow,
+  CreateExerciseWindow,
+  EditExerciseWindow
 } from '@/component/trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
 import CloseUrl from '@/assets/Close.png'
 import { ref } from 'vue';
-import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable, ButtonWithImage, CheckBoxGroupWithBlock } from '@/component/UI'
-import EditLevelWindow from '@/component/trainer/modalWindow/EditLevelWindow.vue';
+import {
+  BaseButton,
+  BaseInput,
+  BaseInputWithLabel,
+  BaseDropdown,
+  BaseCheckbox,
+  BaseCheckboxGroup,
+  Toast,
+  BaseLink,
+  ImageLink,
+  BaseImage,
+  BaseTable,
+  ButtonWithImage,
+  CheckBoxGroupWithBlock
+} from '@/component/UI'
 
 const imgUrl = ref(ImageUrl);
 let a = ref("1"); // Просто для теста базовых input
@@ -153,6 +169,19 @@ const openModal = () => {
   isModalVisible2.value = true;
 };
 
+const isModalVisible3 = ref(false);
+
+const openModal3 = () => {
+  isModalVisible3.value = true;
+};
+
+const textExercise = ref("Это текст упражнения, который потом пользователь будет вводить...")
+
+const isModalVisible4 = ref(false);
+
+const openModal4 = () => {
+  isModalVisible4.value = true;
+};
 </script>
 
 <template>
@@ -318,7 +347,7 @@ const openModal = () => {
     <div>
       <h2>Модальное окно создания уровней сложности</h2>
       <div>
-        <button @click="showModal">Открыть модальное окно</button>
+        <button @click="showModal">Создать уровень сложности</button>
         <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
           <h2>Это модальное окно</h2>
           <p>Содержимое модального окна.</p>
@@ -328,9 +357,22 @@ const openModal = () => {
     </div>
     <div>
       <h2>Модальное окно изменения уровней сложности</h2>
-      <button @click="openModal">Создать уровень сложности</button>
+      <button @click="openModal">Изменить уровень сложности</button>
       <EditLevelWindow :isVisible="isModalVisible2" :keyboardZones="keyboardZones" :minCount="minCount"
         :timePressKey="pressTime" :maxCount="maxCount" @update:isVisible="isModalVisible2 = $event" />
+    </div>
+    <div>
+      <h2>Модальное окно создания упражнения</h2>
+      <button @click="openModal3">Создать упражнение</button>
+      <CreateExerciseWindow :isVisible="isModalVisible3" :keyboardZones="keyboardZones" :minCount="minCount"
+        :numberErrors="5" :timePressKey="pressTime" :maxCount="maxCount" @update:isVisible="isModalVisible3 = $event" />
+    </div>
+    <div>
+      <h2>Модальное окно изменения упражнения</h2>
+      <button @click="openModal4">Изменить упражнение</button>
+      <EditExerciseWindow :text-exercise="textExercise" :isVisible="isModalVisible4" :keyboardZones="keyboardZones"
+        :minCount="minCount" :numberErrors="5" :timePressKey="pressTime" :maxCount="maxCount"
+        @update:isVisible="isModalVisible4 = $event" />
     </div>
     <div>
       <h2>Клавиатура</h2>

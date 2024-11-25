@@ -38,7 +38,7 @@ import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI'
 import CloseUrl from '@/assets/Close.png';
 
 export default defineComponent({
-    name: 'CreateLevelWindow',
+    name: 'EditLevelWindow',
     components: {
         KeyboardWithCheckbox,
         BaseInputWithLabel,
