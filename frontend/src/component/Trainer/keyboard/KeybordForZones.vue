@@ -12,6 +12,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import KeyboardButton from './KeyboardButton.vue';
+import { KeyboardZones } from '../util';
 
 export default defineComponent({
     name: 'KeyboardForZone',
@@ -40,30 +41,30 @@ export default defineComponent({
         ]);
 
         const zoneMapping: Record<string, string[]> = {
-            'Зона 1 (ФЫВАОЛДЖ)': ['ф', 'ы', 'в', 'а', 'о', 'л', 'д', 'ж'],
-            'Зона 2 (ПР)': ['п', 'р'],
-            'Зона 3 (КЕНГ)': ['к', 'е', 'н', 'г'],
-            'Зона 4 (МИТЬ)': ['м', 'и', 'т', 'ь'],
-            'Зона 5 (УСШБ)': ['у', 'с', 'ш', 'б'],
-            'Зона 6 (ЦЧЩЮ)': ['ц', 'ч', 'щ', 'ю'],
-            'Зона 7 (ЁЙЯЗХЪЭ.,)': ['ё', 'й', 'я', 'з', 'х', 'ъ', 'э', '.', ','],
-            'Зона 8 (1234567890)': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-            'Зона 9 (символы)': ['!', '"', '№', ';', '%', ':', '?', '*', '(', ')', '_', '-', '+', '='],
-            'Зона Пробела': [' '],
+            [KeyboardZones.ZONE_1]: ['ф', 'ы', 'в', 'а', 'о', 'л', 'д', 'ж'],
+            [KeyboardZones.ZONE_2]: ['п', 'р'],
+            [KeyboardZones.ZONE_3]: ['к', 'е', 'н', 'г'],
+            [KeyboardZones.ZONE_4]: ['м', 'и', 'т', 'ь'],
+            [KeyboardZones.ZONE_5]: ['у', 'с', 'ш', 'б'],
+            [KeyboardZones.ZONE_6]: ['ц', 'ч', 'щ', 'ю'],
+            [KeyboardZones.ZONE_7]: ['ё', 'й', 'я', 'з', 'х', 'ъ', 'э', '.', ','],
+            [KeyboardZones.ZONE_8]: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            [KeyboardZones.ZONE_9]: ['!', '"', '№', ';', '%', ':', '?', '*', '(', ')', '_', '-', '+', '='],
+            [KeyboardZones.ZONE_10]: [' '],
         };
 
         // Маппинг зон на цвета
         const zoneColors: Record<string, string> = {
-            'Зона 1 (ФЫВАОЛДЖ)': '#FFCCCB',
-            'Зона 2 (ПР)': '#FFD700',
-            'Зона 3 (КЕНГ)': '#ADFF2F',
-            'Зона 4 (МИТЬ)': '#00FA9A',
-            'Зона 5 (УСШБ)': '#00BFFF',
-            'Зона 6 (ЦЧЩЮ)': '#FF69B4',
-            'Зона 7 (ЁЙЯЗХЪЭ.,)': '#BA55D3',
-            'Зона 8 (1234567890)': '#6495ED',
-            'Зона 9 (символы)': '#E24548',
-            'Зона Пробела': '#90EE90'
+            [KeyboardZones.ZONE_1]: '#FFCCCB',
+            [KeyboardZones.ZONE_2]: '#FFD700',
+            [KeyboardZones.ZONE_3]: '#ADFF2F',
+            [KeyboardZones.ZONE_4]: '#00FA9A',
+            [KeyboardZones.ZONE_5]: '#00BFFF',
+            [KeyboardZones.ZONE_6]: '#FF69B4',
+            [KeyboardZones.ZONE_7]: '#BA55D3',
+            [KeyboardZones.ZONE_8]: '#6495ED',
+            [KeyboardZones.ZONE_9]: '#E24548',
+            [KeyboardZones.ZONE_10]: '#90EE90'
         };
 
         const handleButtonClick = (value: string) => {

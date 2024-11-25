@@ -10,6 +10,7 @@
 import { defineComponent, ref } from 'vue';
 import { BaseCheckboxGroup } from '@/component/UI';
 import { KeybordForZones } from '../keyboard';
+import { KeyboardZones } from '../util';
 
 export default defineComponent({
     name: 'App',
@@ -27,15 +28,15 @@ export default defineComponent({
     setup(props, { emit }) {
         const selectedOptions = ref<string[]>(props.keyboardZones);
         const checkOptions = [
-            'Зона 1 (ФЫВАОЛДЖ)',
-            'Зона 2 (ПР)',
-            'Зона 3 (КЕНГ)',
-            'Зона 4 (МИТЬ)',
-            'Зона 5 (УСШБ)',
-            'Зона 6 (ЦЧЩЮ)',
-            'Зона 7 (ЁЙЯЗХЪЭ.,)',
-            'Зона 8 (1234567890)',
-            'Зона 9 (символы)'
+            KeyboardZones.ZONE_1,
+            KeyboardZones.ZONE_2,
+            KeyboardZones.ZONE_3,
+            KeyboardZones.ZONE_4,
+            KeyboardZones.ZONE_5,
+            KeyboardZones.ZONE_6,
+            KeyboardZones.ZONE_7,
+            KeyboardZones.ZONE_8,
+            KeyboardZones.ZONE_9
         ];
 
         const handleSelectedValues = (values: string[]) => {

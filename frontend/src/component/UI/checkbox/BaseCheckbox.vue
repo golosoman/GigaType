@@ -1,6 +1,6 @@
 <template>
     <label :style="customStyle" class="checkbox-container">
-        <input type="checkbox" :checked="modelValue" @change="toggleCheckbox" />
+        <input type="checkbox" :checked="modelValue" @change="toggleCheckbox" :disabled="disabled_property" />
         <span class="checkmark"></span>
         {{ label }}
     </label>
@@ -20,6 +20,11 @@ export default defineComponent({
             type: String,
             required: false,
             default: ''
+        },
+        disabled_property: {
+            type: Boolean,
+            required: false,
+            default: false
         },
         label: {
             type: String,

@@ -18,7 +18,7 @@ import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
 import CloseUrl from '@/assets/Close.png'
 import { ref } from 'vue';
-import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable, ButtonWithImage } from '@/component/UI'
+import { BaseButton, BaseInput, BaseInputWithLabel, BaseDropdown, BaseCheckbox, BaseCheckboxGroup, Toast, BaseLink, ImageLink, BaseImage, BaseTable, ButtonWithImage, CheckBoxGroupWithBlock } from '@/component/UI'
 import EditLevelWindow from '@/component/trainer/modalWindow/EditLevelWindow.vue';
 
 const imgUrl = ref(ImageUrl);
@@ -137,6 +137,13 @@ const keyboardZones = [
   'Зона 7 (ЁЙЯЗХЪЭ.,)',
 ];
 
+const checkboxOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
+const selectedCheckboxess = ref(['Option 1', 'Option 3']); // Пример выбранных значений
+
+const updateSelectedCheckboxes = (newValues: string[]) => {
+  selectedCheckboxess.value = newValues;
+};
+
 // Пример минимального и максимального количества символов
 const minCount = ref(30);
 const maxCount = ref(80);
@@ -219,6 +226,12 @@ const openModal = () => {
           <li v-for="option in selectedOptions" :key="option">{{ option }}</li>
         </ul>
       </div>
+    </div>
+    <div>
+      <h2>Группа чекбоксов с блокировкой</h2>
+      <CheckBoxGroupWithBlock :options="checkboxOptions" :valuesSelected="selectedCheckboxess"
+        @update:selectedValues="updateSelectedCheckboxes" :columns="3" customStyle="margin: 20px;"
+        customStyleForBaseCheckbox="margin-bottom: 10px;"></CheckBoxGroupWithBlock>
     </div>
     <div>
       <h2>Выпадающий список</h2>
