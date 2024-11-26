@@ -4,13 +4,13 @@
         <div>
             <div>
                 <h2>
-                    Выбрать список упражнений.
+                    Выбрать список упражнений
                 </h2>
                 <BaseDropdown v-model="selectedOption" :options="options" placeholder="Выберите уровень сложности" />
             </div>
             <div>
                 <h2>Таблица Упражнений</h2>
-                <TableExercise :headers="headers" :data="exerciseData" />
+                <TableExercise :headers="headers" :data="exerciseData" custom-style="width: 600px;" />
             </div>
 
         </div>

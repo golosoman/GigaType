@@ -5,6 +5,13 @@
                 {{ header }}
             </div>
         </div>
+        <div>
+            <div class="header-cell centered-cell" colspan="2">
+                <ButtonWithImage :imageSrc="PlusUrl" text="Добавить"
+                    customStyleForImage="width: 20px; height: 20px; margin-top: 2px; margin-bottom: 2px;"
+                    customStyle="background-color: #86CE81;" @click="handleAddButtonClick"></ButtonWithImage>
+            </div>
+        </div>
         <div class="table-body">
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
@@ -16,7 +23,7 @@
                         </BaseLink>
                     </template>
                     <template v-else>
-                        {{ row['number'] }}
+                        {{ row['value'] }} <!-- Предполагаем, что у вас есть поле 'value' -->
                     </template>
                 </div>
             </div>
@@ -25,17 +32,34 @@
 </template>
 
 <script setup lang="ts">
-import { BaseLink } from '@/component/UI';
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
+import { ButtonWithImage, BaseLink } from '@/component/UI';
+import PlusUrl from '@/assets/Plus.png';
 
 const props = defineProps<{
     headers: string[];
-    data: Array<Record<string, any>>;
+    data: Array<{ name: string; value: number; level: number; number: number }>; // Добавлены поля 'level' и 'number'
     customStyle?: string;
 }>();
+
+const emit = defineEmits<{
+    (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
+}>();
+
+const handleAddButtonClick = () => {
+    emit('addButtonClicked'); // Генерируем событие при нажатии на кнопку
+    console.log('Кнопка "Добавить" нажата'); // Лог для проверки
+};
 </script>
 
 <style scoped>
+.centered-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
 .base-table {
     display: flex;
     flex-direction: column;
@@ -52,7 +76,7 @@ const props = defineProps<{
     flex: 1;
     padding: 10px;
     font-weight: bold;
-    text-align: left;
+    text-align: center;
     border: 1px solid #012E4A;
 }
 

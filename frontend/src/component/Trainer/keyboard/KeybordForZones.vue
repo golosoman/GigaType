@@ -3,8 +3,8 @@
         <div v-for="(row, rowIndex) in keys" :key="rowIndex" class="keyboard-row">
             <KeyboardButton v-for="(key, keyIndex) in row" :key="keyIndex" :values="Array.isArray(key) ? key : [key]"
                 :onClick="handleButtonClick" :style="{ backgroundColor: getKeyColor(key) }"
-                :customStyle="getButtonStyle(key)" styleForOneItem="font-size: 50px;"
-                styleForTwoItem="font-size: 27px; margin-left: 10px; margin-bottom: 5px;" />
+                :customStyle="getButtonStyle(key)" styleForOneItem="font-size: 40px;"
+                styleForTwoItem="font-size: 22px; margin-left: 10px; margin-bottom: 5px;" />
         </div>
     </div>
 </template>
@@ -73,9 +73,9 @@ export default defineComponent({
         };
 
         const getButtonStyle = (key: string | string[]): string => {
-            const baseStyle = 'background-color: #E8EDE7; width: 60px; height: 60px; font-size: 30px; border-radius: 10px;';
+            const baseStyle = 'background-color: #E8EDE7; width: 50px; height: 50px; font-size: 25px; border-radius: 10px;';
             if (key.includes(' ')) {
-                return `${baseStyle} width: 400px; height: 60px; font-size: 30px;`; // Увеличенная ширина для пробела
+                return `${baseStyle} width: 350px; height: 50px; font-size: 25px;`; // Увеличенная ширина для пробела
             }
             return `${baseStyle}`; // Стандартный стиль
         };

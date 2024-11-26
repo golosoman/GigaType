@@ -7,6 +7,10 @@ import {
   TrainerView,
   CabinetView,
   ChooseExerciseView,
+  CabinetAdminView,
+  LevelEditorView,
+  UserEditorView,
+  ExerciseEditorView,
 } from "@/views";
 
 const router = createRouter({
@@ -41,6 +45,26 @@ const router = createRouter({
       path: "/app/cabinet",
       name: "cabinet",
       component: CabinetView,
+    },
+    {
+      path: "/app/edit/level",
+      name: "edit_level",
+      component: LevelEditorView,
+    },
+    {
+      path: "/app/edit/user",
+      name: "edit_user",
+      component: UserEditorView,
+    },
+    {
+      path: "/app/edit/exercise",
+      name: "edit_exercise",
+      component: ExerciseEditorView,
+    },
+    {
+      path: "/app/cabinet/admin",
+      name: "admin_cabinet",
+      component: CabinetAdminView,
     },
     {
       path: "/app/choose_exercise",

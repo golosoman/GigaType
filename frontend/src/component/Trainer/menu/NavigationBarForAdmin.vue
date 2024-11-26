@@ -6,20 +6,21 @@
             </BaseLogo>
         </div>
         <div class="nav-links">
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/trainer">Редактор уровня
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/edit/level">Редактор
+                уровня
             </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" class="for-link"
-                href="/app/choose_exercise">
+                href="/app/edit/exercise">
                 Редактор упражнения</BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px;; border-radius: 15px;" class="for-link"
-                href="/app/trainer">Редактор
+                href="/app/edit/user">Редактор
                 пользователей</BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/system">О
                 системе</BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/developer">О
                 разработчиках
             </BaseLink>
-            <ImageLink url="/app/cabinet" :imageSrc="userUrl" altText="ЛК"
+            <ImageLink url="/app/cabinet/admin" :imageSrc="userUrl" altText="ЛК"
                 customStyle="width: 58px; height: 58px; border-radius: 15px; background-color: #81BECE;" />
         </div>
     </nav>

@@ -1,6 +1,6 @@
 <template>
     <div class="content">
-        <NavigationBarForTrainee></NavigationBarForTrainee>
+        <NavigationBarForAdmin></NavigationBarForAdmin>
         <div style="margin-left: 60px;">
             <div class="container">
                 <div>
@@ -24,15 +24,14 @@
                 </BaseButton>
             </div>
             <div>
+                <StackedBarChart></StackedBarChart>
+            </div>
+            <div>
                 <h2>Статистика</h2>
                 <div>
-                    <BaseButton @click="setActiveTab('speed')"
-                        customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A;">
-                        Скорость
-                    </BaseButton>
-                    <BaseButton @click="setActiveTab('levels')"
+                    <BaseButton @click="setActiveTab('exercise')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A; margin-left: 20px;">
-                        Уровни
+                        Упражнения
                     </BaseButton>
                     <BaseButton @click="setActiveTab('trainees')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A; margin-left: 20px;">
@@ -40,15 +39,13 @@
                     </BaseButton>
                 </div>
                 <div>
-                    <div v-if="activeTab === 'speed'" style="width: 800px;">
-                        <h2>Количество символов</h2>
-                        <Line :data="chartData" :options="chartOptions" />
-                    </div>
-                    <div v-else-if="activeTab === 'levels'">
-                        <h2>Статистика по уровням</h2>
+                    <div v-if="activeTab === 'exercise'">
+                        <h2>Статистика по упражнениям</h2>
                         <BaseDropdown v-model="selectedOption" :options="options"
                             placeholder="Выберите уровень сложности" />
-                        <LevelTable :tableData="userStatistics" customStyle="width: 600px; margin-top: 10px;" />
+                        <div style="width: 600px; height: 300px;">
+                            <Bar :data="chartData" :options="chartOptions" />
+                        </div>
                     </div>
                     <div v-else-if="activeTab === 'trainees'">
                         <h2>Рейтинг среди обучаемых</h2>
@@ -61,59 +58,58 @@
 </template>
 
 <script setup lang="ts">
-import { NavigationBarForTrainee, RatingTable, LevelTable } from '@/component/trainer';
+import { NavigationBarForAdmin, RatingTable } from '@/component/trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
 import UserImage from '@/assets/User.png'
 import { ref } from 'vue'
+import { Bar } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 
-import { Line } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
-
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const options = ['Уровень 1', 'Уровень 2', 'Уровень 3']; // Опции для выпадающего списка
 const selectedOption = ref(null); // Двусторонняя привязка с опциями
 
 const chartData = ref({
-    labels: [
-        '2023-10-01 10:00',
-        '2023-10-01 11:00',
-        '2023-10-01 12:00',
-        '2023-10-01 13:00',
-        '2023-10-01 14:00',
-        '2023-10-02 10:00',
-        '2023-10-02 11:00',
-        '2023-10-02 12:00',
-        '2023-10-02 13:00',
-        '2023-10-02 14:00',
-        '2023-10-03 10:00',
-        '2023-10-03 11:00',
-    ],
+    labels: ['Упражнение 1', 'Упражнение 2', 'Упражнение 3'],
     datasets: [
         {
-            label: 'Скорость ввода (симв/мин)',
-            data: [100, 150, 120, 130, 160, 140, 170, 180, 190, 200, 210, 220],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: true,
+            label: 'Верные решения',
+            data: [15, 20, 0], // Количество верных решений для каждого упражнения
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        },
+        {
+            label: 'Ошибочные решения',
+            data: [5, 10, 0], // Количество ошибочных решений для каждого упражнения
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
         },
     ],
-});
-
+})
 const chartOptions = ref({
     responsive: true,
+    scales: {
+        x: {
+            stacked: true, // Включаем накопление по оси X
+        },
+        y: {
+            stacked: true, // Включаем накопление по оси Y
+            beginAtZero: true,
+        },
+    },
     plugins: {
         legend: {
             position: 'top' as const,
         },
         title: {
             display: true,
-            text: 'Статистика скорости ввода',
+            text: 'Накопительная диаграмма верных и ошибочных решений',
         },
     },
-});
+})
 
-const userName = ref('trainee')
+
+
+const userName = ref('admin')
 
 const userData = ref([
     { Место: 1, Пользователь: 'Ivan', Рейтинг: 1500 },
