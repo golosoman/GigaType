@@ -41,6 +41,8 @@
                 <div>
                     <div v-if="activeTab === 'exercise'">
                         <h2>Статистика по упражнениям</h2>
+                        <BaseDropdown v-model="selectedOption" :options="options"
+                            placeholder="Выберите уровень сложности" />
                         <div style="width: 600px; height: 300px;">
                             <Bar :data="chartData" :options="chartOptions" />
                         </div>
@@ -56,8 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import { NavigationBarForAdmin, RatingTable, LevelTable } from '@/component/trainer';
-import { BaseImage, BaseButton, BaseInputWithLabel } from '@/component/UI';
+import { NavigationBarForAdmin, RatingTable } from '@/component/trainer';
+import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
 import UserImage from '@/assets/User.png'
 import { ref } from 'vue'
 import { Bar } from 'vue-chartjs';
@@ -65,17 +67,20 @@ import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, Li
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
+const options = ['Уровень 1', 'Уровень 2', 'Уровень 3']; // Опции для выпадающего списка
+const selectedOption = ref(null); // Двусторонняя привязка с опциями
+
 const chartData = ref({
     labels: ['Упражнение 1', 'Упражнение 2', 'Упражнение 3'],
     datasets: [
         {
             label: 'Верные решения',
-            data: [15, 20, 10], // Количество верных решений для каждого упражнения
+            data: [15, 20, 0], // Количество верных решений для каждого упражнения
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
         },
         {
             label: 'Ошибочные решения',
-            data: [5, 10, 15], // Количество ошибочных решений для каждого упражнения
+            data: [5, 10, 0], // Количество ошибочных решений для каждого упражнения
             backgroundColor: 'rgba(255, 99, 132, 0.6)',
         },
     ],
@@ -122,7 +127,7 @@ const userStatistics = ref([
 ]);
 
 // Reactive property to track which tab is active
-const activeTab = ref('speed');
+const activeTab = ref('');
 
 // Function to set the active tab
 const setActiveTab = (tab: string) => {

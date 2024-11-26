@@ -46,7 +46,9 @@
                     </div>
                     <div v-else-if="activeTab === 'levels'">
                         <h2>Статистика по уровням</h2>
-                        <LevelTable :tableData="userStatistics" customStyle="width: 600px" />
+                        <BaseDropdown v-model="selectedOption" :options="options"
+                            placeholder="Выберите уровень сложности" />
+                        <LevelTable :tableData="userStatistics" customStyle="width: 600px; margin-top: 10px;" />
                     </div>
                     <div v-else-if="activeTab === 'trainees'">
                         <h2>Рейтинг среди обучаемых</h2>
@@ -60,7 +62,7 @@
 
 <script setup lang="ts">
 import { NavigationBarForTrainee, RatingTable, LevelTable } from '@/component/trainer';
-import { BaseImage, BaseButton, BaseInputWithLabel } from '@/component/UI';
+import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
 import UserImage from '@/assets/User.png'
 import { ref } from 'vue'
 
@@ -68,6 +70,9 @@ import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
+
+const options = ['Уровень 1', 'Уровень 2', 'Уровень 3']; // Опции для выпадающего списка
+const selectedOption = ref(null); // Двусторонняя привязка с опциями
 
 const chartData = ref({
     labels: [
@@ -126,7 +131,7 @@ const userStatistics = ref([
 ]);
 
 // Reactive property to track which tab is active
-const activeTab = ref('speed');
+const activeTab = ref('');
 
 // Function to set the active tab
 const setActiveTab = (tab: string) => {

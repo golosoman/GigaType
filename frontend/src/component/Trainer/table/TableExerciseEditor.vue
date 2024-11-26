@@ -7,7 +7,7 @@
         </div>
         <div>
             <div class="header-cell centered-cell" colspan="2">
-                <ButtonWithImage :imageSrc="PlusUrl"
+                <ButtonWithImage :imageSrc="PlusUrl" text="Добавить"
                     customStyleForImage="width: 20px; height: 20px; margin-top: 2px; margin-bottom: 2px;"
                     customStyle="background-color: #86CE81;"></ButtonWithImage>
             </div>
@@ -16,9 +16,11 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <a :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`" target="_blank">
+                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`"
+                            target="_blank"
+                            style="background-color: transparent; text-decoration: underline; line-height: 20px;">
                             Упражнение {{ row["level"] }}.{{ row['number'] }}
-                        </a>
+                        </BaseLink>
                     </template>
                     <template v-else>
                         {{ row['value'] }} <!-- Предполагаем, что у вас есть поле 'value' -->
@@ -31,7 +33,7 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue';
-import { ButtonWithImage } from '@/component/UI';
+import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
 
 const props = defineProps<{
@@ -65,7 +67,7 @@ const props = defineProps<{
     flex: 1;
     padding: 10px;
     font-weight: bold;
-    text-align: left;
+    text-align: center;
     border: 1px solid #012E4A;
 }
 

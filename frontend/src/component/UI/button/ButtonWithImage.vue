@@ -62,12 +62,7 @@ export default defineComponent({
     background-color: violet;
 }
 
-.button-image {
-    width: 30px;
-    height: 30px;
-}
-
 .button-text {
-    font-size: 16px;
+    margin-left: 2px;
 }
 </style>

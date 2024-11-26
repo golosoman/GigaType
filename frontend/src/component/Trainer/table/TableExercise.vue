@@ -9,9 +9,11 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <a :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`" target="_blank">
+                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`"
+                            target="_blank"
+                            style="background-color: transparent; text-decoration: underline; line-height: 20px;">
                             Упражнение {{ row["level"] }}.{{ row['number'] }}
-                        </a>
+                        </BaseLink>
                     </template>
                     <template v-else>
                         {{ row['number'] }}
@@ -23,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import { BaseLink } from '@/component/UI';
 import { defineProps } from 'vue';
 
 const props = defineProps<{
