@@ -9,7 +9,7 @@
             <div class="header-cell centered-cell" colspan="2">
                 <ButtonWithImage :imageSrc="PlusUrl" text="Добавить"
                     customStyleForImage="width: 20px; height: 20px; margin-top: 2px; margin-bottom: 2px;"
-                    customStyle="background-color: #86CE81;"></ButtonWithImage>
+                    customStyle="background-color: #86CE81;" @click="handleAddButtonClick"></ButtonWithImage>
             </div>
         </div>
         <div class="table-body">
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
 
@@ -41,6 +41,15 @@ const props = defineProps<{
     data: Array<{ name: string; value: number; level: number; number: number }>; // Добавлены поля 'level' и 'number'
     customStyle?: string;
 }>();
+
+const emit = defineEmits<{
+    (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
+}>();
+
+const handleAddButtonClick = () => {
+    emit('addButtonClicked'); // Генерируем событие при нажатии на кнопку
+    console.log('Кнопка "Добавить" нажата'); // Лог для проверки
+};
 </script>
 
 <style scoped>

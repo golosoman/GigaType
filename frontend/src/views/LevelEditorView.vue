@@ -1,12 +1,21 @@
 <template>
     <NavigationBarForAdmin></NavigationBarForAdmin>
     <h2>Редактор уровня</h2>
-    <TableLevelEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px" />
+    <TableLevelEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
+        @addButtonClicked="openModal" />
+    <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event"></CreateLevelWindow>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { NavigationBarForAdmin } from '@/component/trainer';
-import { TableLevelEditor } from '@/component/trainer';
+import { TableLevelEditor, CreateLevelWindow } from '@/component/trainer';
+
+const isModalVisible = ref(false);
+
+const openModal = () => {
+    isModalVisible.value = true;
+};
 
 const tableHeaders = ['Уровень', 'Название']; // Заголовки таблицы
 
