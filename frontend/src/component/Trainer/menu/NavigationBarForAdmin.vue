@@ -6,7 +6,8 @@
             </BaseLogo>
         </div>
         <div class="nav-links">
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/trainer">Редактор уровня
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/edit/level">Редактор
+                уровня
             </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" class="for-link"
                 href="/app/choose_exercise">

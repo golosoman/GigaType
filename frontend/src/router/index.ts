@@ -8,6 +8,7 @@ import {
   CabinetView,
   ChooseExerciseView,
   CabinetAdminView,
+  LevelEditorView,
 } from "@/views";
 
 const router = createRouter({
@@ -42,6 +43,11 @@ const router = createRouter({
       path: "/app/cabinet",
       name: "cabinet",
       component: CabinetView,
+    },
+    {
+      path: "/app/edit/level",
+      name: "edit_level",
+      component: LevelEditorView,
     },
     {
       path: "/app/cabinet/admin",
