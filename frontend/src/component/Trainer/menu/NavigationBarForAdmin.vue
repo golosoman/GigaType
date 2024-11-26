@@ -10,10 +10,10 @@
                 уровня
             </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" class="for-link"
-                href="/app/choose_exercise">
+                href="/app/edit/exercise">
                 Редактор упражнения</BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px;; border-radius: 15px;" class="for-link"
-                href="/app/trainer">Редактор
+                href="/app/edit/user">Редактор
                 пользователей</BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/system">О
                 системе</BaseLink>

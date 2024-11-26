@@ -7,6 +7,8 @@ import CabinetView from "./CabinetView.vue";
 import ChooseExerciseView from "./ChooseExerciseView.vue";
 import CabinetAdminView from "./CabinetAdminView.vue";
 import LevelEditorView from "./LevelEditorView.vue";
+import UserEditorView from "./UserEditorView.vue";
+import ExerciseEditorView from "./ExerciseEditorView.vue";
 
 export {
   AboutDevelopersView,
@@ -18,4 +20,6 @@ export {
   ChooseExerciseView,
   CabinetAdminView,
   LevelEditorView,
+  UserEditorView,
+  ExerciseEditorView,
 };

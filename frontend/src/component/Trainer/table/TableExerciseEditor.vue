@@ -17,7 +17,7 @@
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
                         <a :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`" target="_blank">
-                            Уровень {{ row["level"] }}
+                            Упражнение {{ row["level"] }}.{{ row['number'] }}
                         </a>
                     </template>
                     <template v-else>
