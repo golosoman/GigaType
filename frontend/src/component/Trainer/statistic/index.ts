@@ -1,3 +1,5 @@
 import RatingTable from "./RatingTable.vue";
 import LevelTable from "./LevelTable.vue";
-export { RatingTable, LevelTable };
+import StackedBarChart from "./StackedBarChart.vue";
+
+export { RatingTable, LevelTable, StackedBarChart };

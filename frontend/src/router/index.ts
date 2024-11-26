@@ -7,6 +7,7 @@ import {
   TrainerView,
   CabinetView,
   ChooseExerciseView,
+  CabinetAdminView,
 } from "@/views";
 
 const router = createRouter({
@@ -41,6 +42,11 @@ const router = createRouter({
       path: "/app/cabinet",
       name: "cabinet",
       component: CabinetView,
+    },
+    {
+      path: "/app/cabinet/admin",
+      name: "admin_cabinet",
+      component: CabinetAdminView,
     },
     {
       path: "/app/choose_exercise",

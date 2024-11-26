@@ -5,6 +5,7 @@ import HomeView from "./HomeView.vue";
 import TrainerView from "./TrainerView.vue";
 import CabinetView from "./CabinetView.vue";
 import ChooseExerciseView from "./ChooseExerciseView.vue";
+import CabinetAdminView from "./CabinetAdminView.vue";
 
 export {
   AboutDevelopersView,
@@ -14,4 +15,5 @@ export {
   TrainerView,
   CabinetView,
   ChooseExerciseView,
+  CabinetAdminView,
 };
