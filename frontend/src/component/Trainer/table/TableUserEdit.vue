@@ -9,7 +9,7 @@
             <div class="header-cell centered-cell" colspan="2">
                 <ButtonWithImage :imageSrc="PlusUrl" text="Добавить"
                     customStyleForImage="width: 20px; height: 20px; margin-top: 2px; margin-bottom: 2px;"
-                    customStyle="background-color: #86CE81;"></ButtonWithImage>
+                    customStyle="background-color: #86CE81;" @click="handleAddButtonClick"></ButtonWithImage>
             </div>
         </div>
         <div class="table-body">
@@ -42,7 +42,14 @@ const props = defineProps<{
     data: Array<{ id: number; name: string }>; // Обновлены поля для пользователей
     customStyle?: string;
 }>();
+const emit = defineEmits<{
+    (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
+}>();
 
+const handleAddButtonClick = () => {
+    emit('addButtonClicked'); // Генерируем событие при нажатии на кнопку
+    console.log('Кнопка "Добавить" нажата'); // Лог для проверки
+};
 const removeUser = (index: number) => {
     // Здесь вы можете добавить логику для удаления пользователя из данных
     // Например, вы можете использовать emit для уведомления родительского компонента

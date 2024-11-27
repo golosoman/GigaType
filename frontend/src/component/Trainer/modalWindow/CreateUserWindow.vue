@@ -4,7 +4,6 @@
             <div>
                 Создание нового пользователя
             </div>
-            <KeyboardWithCheckbox></KeyboardWithCheckbox>
             <BaseInputWithLabel label="Логин" inputPlaceholder="Введите логин:" :modelValue="login"
                 @update:modelValue="setLogin"
                 customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
