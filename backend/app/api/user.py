@@ -79,3 +79,29 @@ def login():
         return resp
     else:
         return message("Недостаточно данных", 406)
+
+
+def change_user_status(status_id: int, message_: str):
+    data = request.json
+    if "uuid" in data:
+        user = db.session.execute(select(User).where(User.uuid == data['uuid'])).first()
+        if not user:
+            return message("Неверный uuid пользователя", 404)
+        user: User = user[0]
+        if user.status_id == status_id:
+            return message(message_, 406)
+        user.status_id = status_id
+        db.session.commit()
+        return message("Okay")
+    else:
+        return message("Недостаточно данных", 406)
+
+
+@user_api.route("/block", methods=["POST"])
+def block():
+    return change_user_status(2, "Пользователь уже заблокирован")
+
+
+@user_api.route("/unblock", methods=["POST"])
+def unblock():
+    return change_user_status(1, "Пользователь уже разблокирован")
