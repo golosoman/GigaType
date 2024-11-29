@@ -72,9 +72,9 @@ def make_json_response(obj_list: Base | List["Base"], *args: str, **kwargs) -> L
                         response[i][arg] = getattr(obj, arg)
                 elif kwargs and "get" in kwargs and arg in kwargs['get']:
                     if type(kwargs['get'][arg]) is list:
-                        response[i][arg] = []
+                        response[i][arg] = {}
                         for arg_ in kwargs['get'][arg]:
-                            response[i][arg].append(getattr(getattr(obj, arg), arg_))
+                            response[i][arg][arg_] = (getattr(getattr(obj, arg), arg_))
                     else:
                         response[i][arg] = getattr(getattr(obj, arg), kwargs['get'][arg])
     return response

@@ -36,7 +36,7 @@ def create():
         for uid in data['zones']:
             zone = db.session.execute(select(KeyBoardZone).where(KeyBoardZone.uid == uid)).first()
             if not zone:
-                return message("Неверный id зоны клавиатуры", 404)
+                return message("Неверный uid зоны клавиатуры", 404)
             zones.append(zone[0])
         try:
             db.session.add(
@@ -140,5 +140,5 @@ def get():
     else:
         difficulties = [difficulty[0] for difficulty in db.session.execute(select(Difficulty)).all()]
         difficulties.sort(key=lambda x: int(x.__getattribute__("name")))
-        return send_json_data(make_json_response(difficulties, additional=["uid"], exclude=["difficulty"]))
+        return send_json_data(make_json_response(difficulties, additional=["uid"], exclude=["difficulty", "difficulty_id"]))
 
