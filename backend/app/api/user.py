@@ -18,6 +18,14 @@ def register():
     Payload: json{login: str, password: str}
     :return: cookie | {message: str}, code, Content-Type
     """
+
+    def send_cookie(id_: int, uuid: str, login: str):
+        resp = make_response()
+        cookie = jwt.encode({"id": id_, "uuid": uuid, "login": login}, JWT_SECRET_KEY, algorithm="HS256")
+        resp.set_cookie('auth', cookie, secure=True, httponly=False)
+        resp.status = 200
+        return resp
+
     data = request.json
     if check_all_args(User, data, "login", "password"):
         try:
@@ -27,11 +35,18 @@ def register():
             new_user = User(data['login'], password_hash)
             db.session.add(new_user)
             db.session.commit()
-            resp = make_response()
-            cookie = jwt.encode({"id": new_user.id, "uuid": new_user.uuid, "login": new_user.login}, JWT_SECRET_KEY, algorithm="HS256")
-            resp.set_cookie('auth', cookie, secure=True, httponly=False)
-            resp.status = 200
-            return resp
+            if "auth" not in request.cookies:
+                return send_cookie(new_user.id, new_user.uuid, new_user.login)
+            token = request.cookies['auth']
+            id_, uuid, login = (jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])).values()
+            exist_user = db.session.execute(select(User).where(and_(User.id == id_, User.uuid == uuid))).first()
+            if not exist_user:
+                return send_cookie(new_user.id, new_user.uuid, new_user.login)
+            exist_user: User = exist_user[0]
+            if exist_user.login == "admin":
+                return message("Пользователь создан")
+            else:
+                return send_cookie(new_user.id, new_user.uuid, new_user.login)
         except BaseException as e:
             db.session.rollback()
             db.session.commit()
