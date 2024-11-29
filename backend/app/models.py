@@ -82,19 +82,16 @@ class Task(Base):
         back_populates="tasks",
         uselist=False
     )
-    max_mistakes: Mapped[int]
 
     def __init__(self,
                  name: str,
                  content: str,
-                 max_mistakes: int,
                  difficulty_id: int = None,
                  difficulty=None,
                  ):
         self.uid = str(uuid4())
         self.name = name
         self.content = content
-        self.max_mistakes = max_mistakes
         if difficulty_id:
             self.difficulty_id = difficulty_id
         if difficulty:
@@ -108,6 +105,7 @@ class Difficulty(Base):
     min_length: Mapped[int]
     max_length: Mapped[int]
     key_press_time: Mapped[float]
+    max_mistakes: Mapped[int]
     zones: Mapped[List["KeyBoardZone"]] = relationship(
         secondary=difficulty_zone,
         back_populates="difficulty"
@@ -123,6 +121,7 @@ class Difficulty(Base):
                  min_length: int,
                  max_length: int,
                  key_press_time: float,
+                 max_mistakes: int,
                  zones: KeyBoardZone | List["KeyBoardZone"],
                  tasks: Task | List["Task"] = None):
         self.uid = str(uuid4())
@@ -130,6 +129,7 @@ class Difficulty(Base):
         self.min_length = min_length
         self.max_length = max_length
         self.key_press_time = key_press_time
+        self.max_mistakes = max_mistakes
         if type(zones) is list:
             self.zones = zones
         else:

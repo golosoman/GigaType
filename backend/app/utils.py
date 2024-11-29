@@ -1,3 +1,4 @@
+import datetime
 import functools
 import json
 from typing import List, Type
@@ -21,6 +22,8 @@ def send_json_data(data: dict | List[dict] , code: int = 200):
 
 get_args = lambda class_: [arg for arg in list(class_.__init__.__code__.co_varnames) if
                            arg not in ["self", "new_state"]]
+
+get_all_args = lambda class_: [arg for arg in list(class_.__annotations__)]
 
 
 def check_all_args(class_: Type["Base"], data, *args, **kwargs):
@@ -64,13 +67,15 @@ def make_json_response(obj_list: Base | List["Base"], *args: str, **kwargs) -> L
         for i, obj in enumerate(obj_list):
             response.append({})
             for arg in args:
-                if arg not in exclude:
+                if arg not in exclude and arg in get_all_args(obj):
                     if isinstance(getattr(obj, arg), List) and len(getattr(obj, arg)) != 0 and isinstance(getattr(obj, arg)[0],
                                                                                                           Base):
                         response[i][arg] = make_json_response(list(getattr(obj, arg)), **kwargs)
+                    elif type(getattr(obj, arg)) is datetime.datetime:
+                        response[i][arg] = str(getattr(obj, arg))
                     else:
-                        response[i][arg] = getattr(obj, arg)
-                elif kwargs and "get" in kwargs and arg in kwargs['get']:
+                        response[i][arg] = str(getattr(obj, arg))
+                elif kwargs and "get" in kwargs and arg in kwargs['get'] and arg in get_all_args(obj):
                     if type(kwargs['get'][arg]) is list:
                         response[i][arg] = {}
                         for arg_ in kwargs['get'][arg]:

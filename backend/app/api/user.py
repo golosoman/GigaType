@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 from app.models import User
-from app.utils import message, check_all_args, admin_required
+from app.utils import message, check_all_args, admin_required, login_required, send_json_data, make_json_response
 from config import JWT_SECRET_KEY
 
 user_api = Blueprint('user_api', __name__, url_prefix="/user")
@@ -132,3 +132,35 @@ def block():
 @admin_required
 def unblock():
     return change_user_status(1, "Пользователь уже разблокирован")
+
+
+@user_api.route("/get", methods=["GET"])
+@login_required
+def get():
+    @admin_required
+    def get_all_users():
+        users = [user[0] for user in db.session.execute(select(User).where(User.login != "admin")).all()]
+        return send_json_data(make_json_response(
+            users,
+            additional=["uuid"],
+            exclude=["statistic", "password_hash"],
+        ))
+
+    uuid = None
+    if 'auth' in request.cookies:
+        token = request.cookies['auth']
+        id_, uuid, login = (jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])).values()
+    if "uuid" in request.args:
+        if not uuid:
+            uuid = request.args['uuid']
+        user = db.session.execute(select(User).where(User.uuid==uuid)).first()
+        if not user:
+            return message("Неверный uuid.", 404)
+        user: User = user[0]
+        return send_json_data(make_json_response(
+            user,
+            additional=["uuid"],
+            exclude=["statistic", "password_hash"],
+            ))
+    else:
+        return get_all_users()
