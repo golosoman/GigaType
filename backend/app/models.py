@@ -151,6 +151,8 @@ class Statistic(Base):
     mistakes: Mapped[int]
     # average_key_press_time: Mapped[float]
     clicks_number: Mapped[int]
+    clicks_per_minute: Mapped[int]
+    success: Mapped[bool]
     score: Mapped[int]
 
     def __init__(self,
@@ -159,7 +161,9 @@ class Statistic(Base):
                  used_time: float,
                  mistakes: int,
                  clicks_number: int,
+                 success: bool,
                  score: int,
+                 clicks_per_minute: int = None,
                  timestamp: datetime.datetime = None
                  ):
         self.user_id = user_id
@@ -167,6 +171,12 @@ class Statistic(Base):
         self.used_time = used_time
         self.mistakes = mistakes
         self.clicks_number = clicks_number
+        self.success = success
         self.score = score
+        if clicks_per_minute:
+            self.clicks_per_minute = clicks_per_minute
+        else:
+            from app.utils import correct_rounding
+            self.clicks_per_minute = correct_rounding(clicks_number*60/used_time)
         if timestamp:
             self.timestamp = timestamp
