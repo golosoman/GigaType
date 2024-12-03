@@ -106,6 +106,14 @@ def login():
         return message("Недостаточно данных", 406)
 
 
+@user_api.route("/logout", methods=["GET", "POST"])
+def logout():
+    resp = make_response(jsonify({"message": "Okay"}))
+    resp.status = 200
+    resp.set_cookie("auth", '', expires=0, secure=True, httponly=False)
+    return resp
+
+
 def change_user_status(status_id: int, message_: str):
     data = request.json
     if "uuid" in data:
@@ -147,11 +155,12 @@ def get():
         ))
 
     uuid = None
+    login = None
     if 'auth' in request.cookies:
         token = request.cookies['auth']
         id_, uuid, login = (jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])).values()
     if "uuid" in request.args:
-        if not uuid:
+        if not uuid or login == "admin":
             uuid = request.args['uuid']
         user = db.session.execute(select(User).where(User.uuid==uuid)).first()
         if not user:
