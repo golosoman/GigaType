@@ -148,3 +148,33 @@ def get():
                       ).order_by(Statistic.timestamp)).all()]
         return send_json_data(
             make_json_response(statistics, "clicks_per_minute", "timestamp", "task", exclude=["task"], get={"task": "uid"}))
+
+
+@statistic_api.route("/top", methods=["GET"])
+@login_required
+def top():
+    class TopInfo:
+        login = ""
+        scores = 0
+
+        def __init__(self):
+            pass
+    query = (select(User.login, func.sum(Statistic.score).label("scores"))
+        .where(
+            and_(
+                Statistic.user_id != 1,
+                Statistic.success == 1
+            )
+        ).group_by(Statistic.user_id)
+        .join(User).select_from(Statistic))
+    print(query)
+    statistics = db.session.execute(query).all()
+    print(statistics)
+    top_list = []
+    for statistic in statistics:
+        temp = TopInfo()
+        temp.login = statistic[0]
+        temp.scores = int(statistic[1])
+        top_list.append(temp)
+    print(top_list)
+    return send_json_data(make_json_response(top_list))
