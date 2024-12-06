@@ -1,3 +1,4 @@
+import datetime
 import functools
 import json
 from typing import List, Type
@@ -19,14 +20,19 @@ def send_json_data(data: dict | List[dict] , code: int = 200):
     return json.dumps(data), code, {'Content-Type': 'application/json'}
 
 
-get_args = lambda class_: [arg for arg in list(class_.__init__.__code__.co_varnames) if
-                           arg not in ["self", "new_state"]]
+get_args = lambda class_: ([arg for arg in list(class_.__init__.__code__.co_varnames) if
+                           arg not in ["self", "new_state"]] or
+                           [arg for arg in dir(class_) if not(arg.startswith("__") and arg.endswith("__"))])
+
+get_all_args = lambda class_: [arg for arg in dir(class_) if not(arg.startswith("__") and arg.endswith("__"))]
 
 
 def check_all_args(class_: Type["Base"], data, *args, **kwargs):
     isOkay = True
     if not args:
         args = get_args(class_)
+    if kwargs and "additional" in kwargs:
+        args += kwargs["additional"]
     if kwargs and "exclude" in kwargs:
         for arg in kwargs["exclude"]:
             args.remove(arg)
@@ -39,41 +45,48 @@ def check_one_arg(class_: Type["Base"], data, *args, **kwargs):
     isOkay = False
     if not args:
         args = get_args(class_)
+    if kwargs and "additional" in kwargs:
+        args += kwargs["additional"]
     for arg in args:
         isOkay = isOkay or arg in data
-    if kwargs and "additional" in kwargs:
-        for arg in kwargs['additional']:
+    if kwargs and "should_be" in kwargs:
+        for arg in kwargs['should_be']:
             isOkay = isOkay and arg in data
     return isOkay
 
 
 def make_json_response(obj_list: Base | List["Base"], *args: str, **kwargs) -> List[dict]:
     response = []
-    if not type(obj_list) is list:
-        obj_list = [obj_list]
-    if not args:
-        args = get_args(obj_list[0])
-    if kwargs and "additional" in kwargs:
-        args += kwargs["additional"]
-    exclude = []
-    if kwargs and "exclude" in kwargs:
-        exclude = kwargs['exclude']
-    for i, obj in enumerate(obj_list):
-        response.append({})
-        for arg in args:
-            if arg not in exclude:
-                if isinstance(getattr(obj, arg), List) and len(getattr(obj, arg)) != 0 and isinstance(getattr(obj, arg)[0],
-                                                                                                      Base):
-                    response[i][arg] = make_json_response(list(getattr(obj, arg)), **kwargs)
-                else:
-                    response[i][arg] = getattr(obj, arg)
-            elif kwargs and "get" in kwargs and arg in kwargs['get']:
-                if type(kwargs['get'][arg]) is list:
-                    response[i][arg] = []
-                    for arg_ in kwargs['get'][arg]:
-                        response[i][arg].append(getattr(getattr(obj, arg), arg_))
-                else:
-                    response[i][arg] = getattr(getattr(obj, arg), kwargs['get'][arg])
+    if obj_list:
+        if not type(obj_list) is list:
+            obj_list = [obj_list]
+        if not args:
+            args = get_args(obj_list[0])
+        if kwargs and "additional" in kwargs:
+            args += kwargs["additional"]
+        exclude = []
+        if kwargs and "exclude" in kwargs:
+            exclude = kwargs['exclude']
+        for i, obj in enumerate(obj_list):
+            response.append({})
+            for arg in args:
+                if arg not in exclude and arg in get_all_args(obj):
+                    if isinstance(getattr(obj, arg), List) and len(getattr(obj, arg)) != 0 and isinstance(getattr(obj, arg)[0],
+                                                                                                          Base):
+                        response[i][arg] = make_json_response(list(getattr(obj, arg)), **kwargs)
+                    elif isinstance(getattr(obj, arg), Base):
+                        response[i][arg] = make_json_response(getattr(obj, arg), **kwargs)
+                    elif type(getattr(obj, arg)) is datetime.datetime:
+                        response[i][arg] = str(getattr(obj, arg))
+                    else:
+                        response[i][arg] = getattr(obj, arg)
+                elif kwargs and "get" in kwargs and arg in kwargs['get'] and arg in get_all_args(obj):
+                    if type(kwargs['get'][arg]) is list:
+                        response[i][arg] = {}
+                        for arg_ in kwargs['get'][arg]:
+                            response[i][arg][arg_] = (getattr(getattr(obj, arg), arg_))
+                    else:
+                        response[i][kwargs['get'][arg]] = getattr(getattr(obj, arg), kwargs['get'][arg])
     return response
 
 
@@ -118,3 +131,10 @@ def login_required(func):
 def util_round(digit: float):
     integer = int(digit)
     return integer + (digit - integer >= 0.5)
+
+
+def correct_rounding(number):
+    if number > 0:
+        return int(number + 0.5)
+    else:
+        return int(number + -0.5)
