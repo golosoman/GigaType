@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Keyboard, TypingTrainer, NavigationBarForTrainee } from '@/component/trainer';
+import { Keyboard, TypingTrainer, NavigationBarForTrainee, FinishExerciseWindow } from '@/component/trainer';
 import { BaseCheckbox } from '@/component/UI';
 import { ref } from 'vue';
 
@@ -11,14 +11,20 @@ interface CompletionData {
     elapsedTime: number;
     score: number;
 }
-
-const successData = ref<CompletionData | null>(null);
-const errorData = ref<CompletionData | null>(null);
+const isModalVisible = ref(false);
+const resultData = ref<CompletionData>({
+    level: "",
+    exercise: "",
+    speed: 0,
+    errorsCount: 0,
+    elapsedTime: 0,
+    score: 0
+});
 const showKeyboard = ref(false);
 const currentCharacter = ref('');
 
 const handleSuccessCompletion = (data: any[]) => {
-    successData.value = {
+    resultData.value = {
         level: data[0],
         exercise: data[1],
         speed: data[2],
@@ -26,11 +32,11 @@ const handleSuccessCompletion = (data: any[]) => {
         elapsedTime: data[4],
         score: data[5],
     };
-    errorData.value = null;
+    isModalVisible.value = true
 };
 
 const handleErrorCompletion = (data: any[]) => {
-    errorData.value = {
+    resultData.value = {
         level: data[0],
         exercise: data[1],
         speed: data[2],
@@ -38,7 +44,7 @@ const handleErrorCompletion = (data: any[]) => {
         elapsedTime: data[4],
         score: data[5],
     };
-    successData.value = null;
+    isModalVisible.value = true
 };
 
 const handleCurrentCharacter = (character: string) => {
@@ -67,6 +73,10 @@ const toggleKeyboardVisibility = (value: boolean) => {
                 </div>
             </div>
             <Keyboard v-if="showKeyboard" class="keyboard" :currentCharacter="currentCharacter" />
+            <FinishExerciseWindow :isVisible="isModalVisible" :levelName="resultData!.level"
+                :exerciseName="resultData!.exercise" :wpm="resultData!.speed" :errorsMade="resultData!.errorsCount"
+                :allowedErrors="5" :timeSpent="resultData!.elapsedTime" :score="resultData!.score">
+            </FinishExerciseWindow>
         </div>
     </div>
 </template>
