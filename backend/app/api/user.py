@@ -63,7 +63,11 @@ def login():
     Payload: json{login: str, password: str} | cookie
     :return: cookie | {message: str}, code, Content-Type
     """
-    data = request.json
+    data = {}
+    try:
+        data = request.json
+    except BaseException as e:
+        pass
     if "auth" in request.cookies:
         token = request.cookies['auth']
         id_, uuid, login = (jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])).values()
