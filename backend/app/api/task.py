@@ -62,7 +62,7 @@ def update_():
     :return: {message: str}, code, Content-Type
     """
     data: dict = request.json
-    if check_one_arg(Task, data, additional=['uid']):
+    if check_one_arg(Task, data, should_be=['uid']):
         task = db.session.execute(select(Task).where(Task.uid==data['uid'])).first()
         if not task:
             return message("Неверный uid задания.", 404)
@@ -126,16 +126,16 @@ def get():
         if not task:
             return message("Неверный uid задания", 404)
         task: Task = task[0]
-        return send_json_data(make_json_response(task, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": "uid"}))
-    elif "difficulty_id" in request.args:
-        difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid==request.args['difficulty_id'])).first()
+        return send_json_data(make_json_response(task, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": ["uid", "name"]}))
+    elif "difficulty_uid" in request.args:
+        difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid==request.args['difficulty_uid'])).first()
         if not difficulty:
             return message("Неверный uid сложности", 404)
         difficulty: Difficulty = difficulty[0]
         tasks = [task[0] for task in db.session.execute(select(Task).where(Task.difficulty_id==difficulty.id)).all()]
         tasks.sort(key=lambda x: int(x.__getattribute__("name")))
-        return send_json_data(make_json_response(tasks, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": "uid"}))
+        return send_json_data(make_json_response(tasks, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": ["uid", "name"]}))
     else:
         tasks = [task[0] for task in db.session.execute(select(Task)).all()]
         tasks.sort(key=lambda x: (int(getattr(getattr(x, "difficulty"), "name")), int(getattr(x, "name"))))
-        return send_json_data(make_json_response(tasks, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": "uid"}))
+        return send_json_data(make_json_response(tasks, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": ["uid", "name"]}))
