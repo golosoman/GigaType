@@ -2,8 +2,8 @@
     <div>
         <h1>Login</h1>
         <form @submit.prevent="handleLogin">
-            <input v-model="loginData.login" type="text" placeholder="Login" required />
-            <input v-model="loginData.password" type="password" placeholder="Password" required />
+            <input v-model="loginData.login" type="text" placeholder="Login" />
+            <input v-model="loginData.password" type="password" placeholder="Password"  />
             <button type="submit">Login</button>
         </form>
     </div>

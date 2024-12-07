@@ -44,7 +44,7 @@ export const useUser = defineStore("user", () => {
   const loginUser = async (userData: { login: string; password: string }) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/user/login",
+        "/api/user/login",
         userData,
         { withCredentials: true }
       );
