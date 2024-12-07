@@ -11,6 +11,21 @@ from config import JWT_SECRET_KEY
 user_api = Blueprint('user_api', __name__, url_prefix="/user")
 
 
+def send_cookie(id_: int, uuid: str, login: str):
+    resp = make_response()
+    cookie = jwt.encode({"id": id_, "uuid": uuid, "login": login}, JWT_SECRET_KEY, algorithm="HS256")
+    resp.set_cookie('auth', cookie, max_age=14 * 24 * 3600, secure=False, httponly=False)
+    resp.status = 200
+    return resp
+
+
+def delete_cookie(message_):
+    resp = make_response(jsonify({"message": message_}))
+    resp.status = 403
+    resp.set_cookie("auth", '', expires=0, secure=False, httponly=False)
+    return resp
+
+
 @user_api.route("/register", methods=["POST"])
 def register():
     """
@@ -18,13 +33,6 @@ def register():
     Payload: json{login: str, password: str}
     :return: cookie | {message: str}, code, Content-Type
     """
-
-    def send_cookie(id_: int, uuid: str, login: str):
-        resp = make_response()
-        cookie = jwt.encode({"id": id_, "uuid": uuid, "login": login}, JWT_SECRET_KEY, algorithm="HS256")
-        resp.set_cookie('auth', cookie, secure=True, httponly=False)
-        resp.status = 200
-        return resp
 
     data = request.json
     if check_all_args(User, data, "login", "password"):
@@ -75,37 +83,20 @@ def login():
         if exist_user:
             exist_user: User = exist_user[0]
             if exist_user.status_id == 2:
-                resp = make_response(jsonify({"message": "Вы заблокированы"}))
-                resp.status = 403
-                resp.set_cookie("auth", '', expires=0, secure=True, httponly=False)
-                return resp
-            resp = make_response()
-            cookie = jwt.encode({"id": exist_user.id, "uuid": exist_user.uuid, "login": exist_user.login}, JWT_SECRET_KEY, algorithm="HS256")
-            resp.set_cookie('auth', cookie, secure=True, httponly=False)
-            resp.status = 200
-            return resp
+                return delete_cookie("Вы заблокированы")
+            return send_cookie(exist_user.id, exist_user.uuid, exist_user.login)
         else:
-            resp = make_response(jsonify({"message": "Неверные cookie"}))
-            resp.status = 403
-            resp.set_cookie("auth", '', expires=0, secure=True, httponly=False)
-            return resp
+            return delete_cookie("Неверные cookie")
     elif check_all_args(User, data, "login", "password"):
         exist_user = db.session.execute(select(User).where(User.login == data['login'])).first()
         if not exist_user:
             return message("Неверный логин", 404)
         exist_user: User = exist_user[0]
         if exist_user.status_id == 2:
-            resp = make_response(jsonify({"message": "Вы заблокированы"}))
-            resp.status = 403
-            resp.set_cookie("auth", '', expires=0, secure=True, httponly=False)
-            return resp
+            return delete_cookie("Вы заблокированы")
         if not check_password_hash(exist_user.password_hash, data['password']):
             return message("Неверный пароль.", 403)
-        resp = make_response()
-        cookie = jwt.encode({"id": exist_user.id, "uuid": exist_user.uuid, "login": exist_user.login}, JWT_SECRET_KEY, algorithm="HS256")
-        resp.set_cookie('auth', cookie, secure=True, httponly=False)
-        resp.status = 200
-        return resp
+        return send_cookie(exist_user.id, exist_user.uuid, exist_user.login)
     else:
         return message("Недостаточно данных", 406)
 
@@ -114,7 +105,7 @@ def login():
 def logout():
     resp = make_response(jsonify({"message": "Okay"}))
     resp.status = 200
-    resp.set_cookie("auth", '', expires=0, secure=True, httponly=False)
+    resp.set_cookie("auth", '', expires=0, secure=False, httponly=False)
     return resp
 
 
@@ -166,7 +157,7 @@ def get():
     if "uuid" in request.args:
         if not uuid or login == "admin":
             uuid = request.args['uuid']
-        user = db.session.execute(select(User).where(User.uuid==uuid)).first()
+        user = db.session.execute(select(User).where(User.uuid == uuid)).first()
         if not user:
             return message("Неверный uuid.", 404)
         user: User = user[0]
@@ -174,6 +165,6 @@ def get():
             user,
             additional=["uuid"],
             exclude=["statistic", "password_hash"],
-            ))
+        ))
     else:
         return get_all_users()
