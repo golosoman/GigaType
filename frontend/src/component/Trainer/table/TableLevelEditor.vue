@@ -16,14 +16,14 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`"
+                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.level}`"
                             target="_blank"
                             style="background-color: transparent; text-decoration: underline; line-height: 20px;">
                             Уровень {{ row["level"] }}
                         </BaseLink>
                     </template>
                     <template v-else>
-                        {{ row['value'] }} <!-- Предполагаем, что у вас есть поле 'value' -->
+                        {{ row["level"] }} <!-- Предполагаем, что у вас есть поле 'value' -->
                     </template>
                 </div>
             </div>
@@ -38,7 +38,7 @@ import PlusUrl from '@/assets/Plus.png';
 
 const props = defineProps<{
     headers: string[];
-    data: Array<{ name: string; value: number; level: number; number: number }>; // Добавлены поля 'level' и 'number'
+    data: Array<{ level: number; }>; // Добавлены поля 'level' и 'number'
     customStyle?: string;
 }>();
 

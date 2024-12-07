@@ -1,63 +1,67 @@
-// stores/userStore.ts
 import { defineStore } from "pinia";
 import axios from "axios";
-import { ref } from "vue";
-import Cookies from "js-cookie"; // Импортируем библиотеку js-cookie
+import { ref, watch } from "vue";
+import Cookies from "js-cookie";
 
 export const useUser = defineStore("user", () => {
-  const token = ref<string | null>(null);
-  const login = ref<string | null>(null);
+  const isAuth = ref<boolean>(localStorage.getItem("isAuth") === "true");
+  const login = ref<string | null>(localStorage.getItem("login"));
+  const role = ref<string | null>(localStorage.getItem("role"));
 
-  const setAuth = (tokenValue: string, loginValue: string) => {
-    token.value = tokenValue;
+  const setAuth = (loginValue: string) => {
+    isAuth.value = true;
     login.value = loginValue;
-    // Устанавливаем куку с помощью js-cookie
-    Cookies.set("auth", tokenValue, { path: "/", secure: true });
+
+    // Устанавливаем роль в зависимости от логина
+    if (loginValue === "admin") {
+      role.value = "ADMIN";
+    } else {
+      role.value = "TRAINEE";
+    }
+
+    // Сохраняем состояние в localStorage
+    localStorage.setItem("isAuth", "true");
+    localStorage.setItem("login", loginValue);
+    localStorage.setItem("role", role.value);
   };
 
   const clearAuth = () => {
-    token.value = null;
     login.value = null;
-    // Удаляем куку с помощью js-cookie
-    Cookies.remove("auth", { path: "/" });
+    role.value = null;
+    isAuth.value = false;
+    Cookies.remove("auth", { path: "/auth" });
+
+    // Очищаем состояние в localStorage
+    localStorage.removeItem("isAuth");
+    localStorage.removeItem("login");
+    localStorage.removeItem("role");
   };
 
   const register = async (userData: { login: string; password: string }) => {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/user/register",
-        userData,
-        { withCredentials: true }
-      );
-      // Куки автоматически сохраняются в браузере, если сервер их устанавливает
-      // Здесь не нужно извлекать куки из заголовков
-      const authCookie = Cookies.get("auth"); // Извлекаем куку auth
-      if (authCookie) {
-        setAuth(authCookie, userData.login); // Устанавливаем токен и логин
+      const response = await axios.post("api/user/register", userData, {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        setAuth(userData.login);
       }
     } catch (error) {
       console.error("Registration error:", error);
-      throw error; // Обработка ошибки, если необходимо
+      throw error;
     }
   };
 
   const loginUser = async (userData: { login: string; password: string }) => {
     try {
-      const response = await axios.post(
-        "/api/user/login",
-        userData,
-        { withCredentials: true }
-      );
-      console.log(response);
-      // Куки автоматически сохраняются в браузере, если сервер их устанавливает
-      const authCookie = Cookies.get("auth"); // Извлекаем куку auth
-      console.log(authCookie);
-      if (authCookie) {
-        setAuth(authCookie, userData.login); // Устанавливаем токен и логин
+      const response = await axios.post("/api/user/login", userData, {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        setAuth(userData.login);
       }
     } catch (error) {
       console.error("Login error:", error);
-      throw error; // Обработка ошибки, если необходимо
+      throw error;
     }
   };
 
@@ -66,8 +70,9 @@ export const useUser = defineStore("user", () => {
   };
 
   return {
-    token,
+    isAuth,
     login,
+    role,
     register,
     loginUser,
     logout,
