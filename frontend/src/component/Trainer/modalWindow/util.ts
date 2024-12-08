@@ -30,7 +30,7 @@ export const getUidsFromSelectedOptions = (
   return uids;
 };
 
-const NameZoneToZone = {
+export const NameZoneToZone = {
   фываолдж: "Зона 1 (ФЫВАОЛДЖ)",
   пр: "Зона 2 (ПР)",
   кенг: "Зона 3 (КЕНГ)",
