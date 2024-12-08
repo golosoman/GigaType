@@ -36,6 +36,7 @@ import { defineComponent, ref } from 'vue';
 import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
+import { transformZones } from '@/component/Trainer/modalWindow'
 
 export default defineComponent({
     name: 'EditLevelWindow',
@@ -51,7 +52,7 @@ export default defineComponent({
             required: true,
         },
         keyboardZones: {
-            type: Array as () => string[],
+            type: Array as () => { keys: string; uid: string }[],
             required: true,
         },
         minCount: {
@@ -71,7 +72,14 @@ export default defineComponent({
         const minCountChar = ref(props.minCount);
         const maxCountChar = ref(props.maxCount);
         const timePressKey = ref(props.timePressKey);
-        const zoneKeyboard = ref(props.keyboardZones);
+
+
+
+
+
+        // Пример использования
+        const zoneKeyboard = ref(transformZones(props.keyboardZones)); // Преобразуем зоны
+
         const changeMinCountChar = (value: number) => {
             minCountChar.value = value;
         };
@@ -104,6 +112,7 @@ export default defineComponent({
             timePressKey,
             CloseUrl,
             zoneKeyboard,
+            transformZones,
             changeMinCountChar,
             changeMaxCountChar,
             changeTimePressKey,

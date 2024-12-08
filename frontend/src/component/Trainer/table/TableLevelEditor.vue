@@ -16,14 +16,14 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.level}`"
-                            target="_blank"
-                            style="background-color: transparent; text-decoration: underline; line-height: 20px;">
+                        <BaseLink :href="`/app/choose_exercise/level/${row.level}`" target="_blank"
+                            style="background-color: transparent; text-decoration: underline; line-height: 20px;"
+                            @click.prevent="handleLevelClick(row.uid)">
                             Уровень {{ row["level"] }}
                         </BaseLink>
                     </template>
                     <template v-else>
-                        {{ row["level"] }} <!-- Предполагаем, что у вас есть поле 'value' -->
+                        {{ row["level"] }}
                     </template>
                 </div>
             </div>
@@ -38,17 +38,22 @@ import PlusUrl from '@/assets/Plus.png';
 
 const props = defineProps<{
     headers: string[];
-    data: Array<{ level: number; }>; // Добавлены поля 'level' и 'number'
+    data: Array<{ level: number; name: string; uid: string }>; // Теперь добавлено поле uid
     customStyle?: string;
 }>();
 
 const emit = defineEmits<{
-    (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
+    (e: 'createButtonClick'): void; // Определяем событие addButtonClicked
+    (e: 'levelClick', uid: string): void; // Определяем событие для клика по уровню
 }>();
 
 const handleAddButtonClick = () => {
-    emit('addButtonClicked'); // Генерируем событие при нажатии на кнопку
+    emit('createButtonClick'); // Генерируем событие при нажатии на кнопку
     console.log('Кнопка "Добавить" нажата'); // Лог для проверки
+};
+
+const handleLevelClick = (uid: string) => {
+    emit('levelClick', uid); // Генерируем событие с uid при клике на уровень
 };
 </script>
 

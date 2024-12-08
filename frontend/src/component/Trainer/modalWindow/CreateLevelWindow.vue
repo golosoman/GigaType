@@ -4,7 +4,7 @@
             <div class="title">
                 Создание уровня сложности
             </div>
-            <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues">
+            <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues" :keyboard-zones="selectedOptions">
             </KeyboardWithCheckbox>
             <BaseInputWithLabel label="Минимальное количество символов"
                 inputPlaceholder="Введите минимальное количество символов:" :modelValue="min_count_char"
@@ -20,10 +20,10 @@
                 :modelValue="time_press_key" @update:modelValue="changeTimePressKey"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px; margin-top:10px;" input-type="number" />
-            <BaseInputWithLabel label="Максимальное количество ошибок"
+            <!-- <BaseInputWithLabel label="Максимальное количество ошибок"
                 inputPlaceholder="Максимальное количество ошибок:" :modelValue="maxErrors"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 20px; margin-top:10px;" input-type="number" />
+                customStyleForLabel="font-size: 20px; margin-top:10px;" input-type="number" /> -->
             <BaseButton @click="save"
                 customStyle="width: 150px; height: 30px; border-radius: 15px; margin-top: 41px; font-size: 20px; color: #012E4A;">
                 Сохранить
@@ -41,6 +41,33 @@ import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import axios from 'axios';
 import CloseUrl from '@/assets/Close.png';
+import { getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow'; // Импортируем наш метод
+
+// Определение типов и объекта ZoneToNameZone
+type ZoneKey =
+    | "Зона 1 (ФЫВАОЛДЖ)"
+    | "Зона 2 (ПР)"
+    | "Зона 3 (КЕНГ)"
+    | "Зона 4 (МИТЬ)"
+    | "Зона 5 (УСШБ)"
+    | "Зона 6 (ЦЧЩЮ)"
+    | "Зона 7 (ЁЙЯЗХЪЭ.,)"
+    | "Зона 8 (1234567890)"
+    | "Зона 9 (символы)"
+    | "Зона Пробела";
+
+const ZoneToNameZone: Record<ZoneKey, string> = {
+    "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
+    "Зона 2 (ПР)": "пр",
+    "Зона 3 (КЕНГ)": "кенг",
+    "Зона 4 (МИТЬ)": "мить",
+    "Зона 5 (УСШБ)": "усшб",
+    "Зона 6 (ЦЧЩЮ)": "цчщю",
+    "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
+    "Зона 8 (1234567890)": "1234567890",
+    "Зона 9 (символы)": '!"№;%:?*()_-+=',
+    "Зона Пробела": " ",
+};
 
 export default defineComponent({
     name: 'CreateLevelWindow',
@@ -61,21 +88,18 @@ export default defineComponent({
         const max_count_char = ref<number>(80);
         const time_press_key = ref<number>(1.5);
         const selectedOptions = ref<string[]>([]);
-        const extractedZones = ref<string[]>([]);
+        const extractedZones = ref<{ keys: string, uid: string }[]>([]);
 
-        // Новый метод для получения зон с сервера
         const fetchZones = async () => {
             try {
                 const response = await axios.get('/api/zone/get', { withCredentials: true });
                 console.log('Зоны:', response.data);
-                // Извлекаем uid из полученных данных
-                extractedZones.value = response.data.map((zone: { uid: string }) => zone.uid);
+                extractedZones.value = response.data; // Сохраняем данные зон
             } catch (error) {
                 console.error('Ошибка при получении зон:', error);
             }
         };
 
-        // Вызов fetchZones при монтировании компонента
         onMounted(() => {
             fetchZones();
         });
@@ -110,13 +134,15 @@ export default defineComponent({
         };
 
         const save = async () => {
+            const uids = getUidsFromSelectedOptions(selectedOptions.value, extractedZones.value, ZoneToNameZone); // Используем наш универсальный метод
+
             const payload = {
                 name: 0, // Название будет сгенерировано на сервере
                 min_length: min_count_char.value,
                 max_length: max_count_char.value,
                 key_press_time: time_press_key.value,
                 max_mistakes: maxErrors.value,
-                zones: extractedZones.value // Используем извлеченные uid
+                zones: uids // Используем полученные uid
             };
 
             try {
@@ -126,7 +152,7 @@ export default defineComponent({
                     },
                     withCredentials: true,
                 });
-                console.log('Ответ от сервера:', response.data);
+                console.log('Ответ от сервера:', payload);
                 // Можно добавить логику для уведомления пользователя об успешном создании уровня сложности
             } catch (error) {
                 if (axios.isAxiosError(error)) {
@@ -155,6 +181,7 @@ export default defineComponent({
     },
 });
 </script>
+
 
 <style scoped>
 .title {

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import KeyboardButton from './KeyboardButton.vue';
 import { KeyboardZones } from '../util';
 
@@ -83,7 +83,7 @@ export default defineComponent({
         const getKeyColor = (key: string[]) => {
             // Проверяем, является ли ключ пробелом
             if (key.includes(' ')) {
-                return zoneColors['Зона Пробела']; // Возвращаем цвет для пробела
+                return zoneColors[KeyboardZones.ZONE_10]; // Возвращаем цвет для пробела
             }
 
             for (let i = 0; i < props.selectedZones.length; i++) {
@@ -96,6 +96,8 @@ export default defineComponent({
             }
             return ''; // Если зона не выбрана, возвращаем пустую строку (без цвета)
         };
+
+
 
         return {
             keys,
