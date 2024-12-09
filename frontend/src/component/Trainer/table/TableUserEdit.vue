@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="table-body">
-            <div class="table-row" v-for="(user, rowIndex) in data" :key="rowIndex">
+            <div class="table-row" v-for="(user, rowIndex) in data" :key="user.id">
                 <div class="cell">
                     <BaseLink :href="`/app/user/${user.id}`" target="_blank"
                         style="background-color: transparent; text-decoration: underline; line-height: 30px;">
@@ -21,9 +21,10 @@
                     </BaseLink>
                 </div>
                 <div class="cell">
-                    <ButtonWithImage :imageSrc="BlockUrl" text="Блокировать"
-                        customStyleForImage="width: 20px; height: 20px;" customStyle="background-color: #FA5454; "
-                        @click="removeUser(rowIndex)">
+                    <ButtonWithImage :imageSrc="BlockUrl" :text="user.isBanned ? 'Разблокировать' : 'Заблокировать'"
+                        customStyleForImage="width: 20px; height: 20px;"
+                        :customStyle="user.isBanned ? 'background-color: #6492FF;' : 'background-color: #FF8080;'"
+                        @click="removeUser(user.uuid, user.isBanned)">
                     </ButtonWithImage>
                 </div>
             </div>
@@ -32,16 +33,18 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { defineProps } from 'vue';
 import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
-import BlockUrl from '@/assets/Block.png'
+import BlockUrl from '@/assets/Block.png';
+import axios from 'axios'; // Импортируем axios
 
 const props = defineProps<{
     headers: string[];
-    data: Array<{ id: number; name: string }>; // Обновлены поля для пользователей
+    data: Array<{ id: number; name: string; uuid: string; isBanned: boolean }>; // Обновлены поля для пользователей
     customStyle?: string;
 }>();
+
 const emit = defineEmits<{
     (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
 }>();
@@ -50,11 +53,28 @@ const handleAddButtonClick = () => {
     emit('addButtonClicked'); // Генерируем событие при нажатии на кнопку
     console.log('Кнопка "Добавить" нажата'); // Лог для проверки
 };
-const removeUser = (index: number) => {
-    // Здесь вы можете добавить логику для удаления пользователя из данных
-    // Например, вы можете использовать emit для уведомления родительского компонента
-    // или изменять локальное состояние, если это необходимо.
-    console.log(`Удаление пользователя с индексом: ${index}`);
+
+const removeUser = async (uuid: string, isBanned: boolean) => {
+    const url = isBanned
+        ? '/api/user/unblock'
+        : '/api/user/block';
+
+    const body = { "uuid": uuid };
+    console.log(body)
+    try {
+        const response = await axios.post(url, body, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+        });
+        console.log('Успешно изменено состояние пользователя:', response.data);
+
+        // Здесь вы можете обновить состояние пользователя в вашем компоненте, если это необходимо
+        // Например, если вы используете реактивный массив users
+    } catch (error) {
+        console.error('Ошибка при изменении состояния пользователя:', error);
+    }
 };
 </script>
 
@@ -107,3 +127,5 @@ const removeUser = (index: number) => {
     background-color: #D0E8F2;
 }
 </style>
+
+Найти еще

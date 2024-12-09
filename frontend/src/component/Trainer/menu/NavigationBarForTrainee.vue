@@ -18,7 +18,7 @@
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/developer">О
                 разработчиках
             </BaseLink>
-            <ImageLink url="/app/cabinet" :imageSrc="userUrl" altText="ЛК"
+            <ImageLink url="/app/cabinet/trainee" :imageSrc="userUrl" altText="ЛК"
                 customStyle="width: 58px; height: 58px; border-radius: 15px; background-color: #81BECE;" />
         </div>
     </nav>

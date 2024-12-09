@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onBeforeUnmount, onMounted } from 'vue';
-import TrainingField from './TrainingField.vue';
+import { TrainingField } from '.';
 
 export default defineComponent({
     name: 'TypingTrainer',

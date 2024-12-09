@@ -1,13 +1,11 @@
 <template>
-    <div>
-        <BaseCheckboxGroup :options="checkOptions" :columns="3" customStyle="width: 570px"
-            @update:selectedValues="handleSelectedValues" :values-selected="selectedOptions" />
-        <KeybordForZones :selectedZones="selectedOptions" custom-style="margin-top: 20px" />
-    </div>
+    <BaseCheckboxGroup :options="checkOptions" :columns="3" customStyle="width: 570px"
+        @update:selectedValues="handleSelectedValues" :values-selected="selectedOptions" />
+    <KeybordForZones :selectedZones="selectedOptions" custom-style="margin-top: 20px" />
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { BaseCheckboxGroup } from '@/component/UI';
 import { KeybordForZones } from '../keyboard';
 import { KeyboardZones } from '../util';
@@ -41,9 +39,16 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             selectedOptions.value = values;
-            console.log(`Появились изменения ${values}`)
+            // console.log(`Появились изменения ${values}`)
+            // console.log(`Появились изменения ${selectedOptions.value}`)
             emit('update:selectedValues', selectedOptions.value);
         };
+
+        // Слежение за изменением пропса selectedZones
+        watch(() => props.keyboardZones, (newZones) => {
+            selectedOptions.value = newZones
+            console.log(`Зоны изменились! ${newZones}`);
+        });
 
         return {
             selectedOptions,
