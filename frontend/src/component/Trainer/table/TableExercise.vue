@@ -9,14 +9,13 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`"
-                            target="_blank"
+                        <BaseLink href="#" @click.prevent="handleExerciseClick(row.levelId, row.taskId)"
                             style="background-color: transparent; text-decoration: underline; line-height: 20px;">
-                            Упражнение {{ row["level"] }}.{{ row['number'] }}
+                            Упражнение {{ row.level }}.{{ row.exercise }}
                         </BaseLink>
                     </template>
                     <template v-else>
-                        {{ row['number'] }}
+                        {{ row.exercise }}
                     </template>
                 </div>
             </div>
@@ -27,12 +26,22 @@
 <script setup lang="ts">
 import { BaseLink } from '@/component/UI';
 import { defineProps } from 'vue';
+import { useRouter } from 'vue-router'; // Импортируем useRouter
+import { useUser } from '@/store'; // Импортируем store
 
 const props = defineProps<{
     headers: string[];
     data: Array<Record<string, any>>;
     customStyle?: string;
 }>();
+
+const router = useRouter(); // Получаем доступ к маршрутизатору
+const userStore = useUser(); // Получаем доступ к store
+
+const handleExerciseClick = (levelId: string, taskId: string) => {
+    userStore.selectExercise(levelId, taskId); // Сохраняем выбор в store
+    router.push(`/app/trainer/${levelId}/${taskId}`); // Перенаправляем
+};
 </script>
 
 <style scoped>

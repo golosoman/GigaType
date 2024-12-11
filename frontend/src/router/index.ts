@@ -37,7 +37,7 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
     {
-      path: "/app/trainer",
+      path: "/app/trainer/:levelId/:exerciseId",
       name: "trainer",
       component: TrainerView,
       meta: { requiresAuth: true, roles: ["TRAINEE", "ADMIN"] },

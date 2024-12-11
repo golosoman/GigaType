@@ -72,7 +72,12 @@ export default defineComponent({
             type: Number,
             required: true,
         },
-        uid: {
+        difficultyId: {
+            type: String,
+            required: false, // или уберите это, если хотите сделать его необязательным
+            default: undefined,
+        },
+        taskId: {
             type: String,
             required: true,
         }
@@ -136,7 +141,7 @@ export default defineComponent({
         const saveChanges = async () => {
 
             const payload = {
-                uid: props.uid, // Используем uid из пропсов
+                uid: props.taskId, // Используем uid из пропсов
                 min_length: minCountChar.value,
                 max_length: maxCountChar.value,
                 key_press_time: timePressKey.value,

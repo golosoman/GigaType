@@ -145,7 +145,7 @@ def get():
         users = [user[0] for user in db.session.execute(select(User).where(User.login != "admin")).all()]
         return send_json_data(make_json_response(
             users,
-            additional=["uuid"],
+            additional=["uuid", "status_id"],
             exclude=["statistic", "password_hash"],
         ))
 
