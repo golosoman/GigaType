@@ -27,7 +27,7 @@ def create():
         return message("Неверный uuid пользователя", 404)
     user: User = user[0]
     data = request.json
-    if check_all_args(Statistic, data, additional=["task_uid"], exclude=["user_id", "task_id", "timestamp"]):
+    if check_all_args(Statistic, data, additional=["task_uid"], exclude=["user_id", "task_id", "timestamp", "clicks_per_minute"]):
         task = db.session.execute(select(Task).where(Task.uid == data['task_uid'])).first()
         if not task:
             return message("Неверный uid задания.", 404)
