@@ -58,7 +58,7 @@ def create():
 def update_():
     """
     URL запроса: /api/task/update
-    Payload: json{name: str, content: str, difficulty_id: str}
+    Payload: json{uid: str, content: str, difficulty_id: str}
     :return: {message: str}, code, Content-Type
     """
     data: dict = request.json

@@ -3,14 +3,14 @@
         <div v-for="(row, rowIndex) in keys" :key="rowIndex" class="keyboard-row">
             <KeyboardButton v-for="(key, keyIndex) in row" :key="keyIndex" :values="Array.isArray(key) ? key : [key]"
                 :onClick="handleButtonClick" :style="{ backgroundColor: getKeyColor(key) }"
-                :customStyle="getButtonStyle(key)" styleForOneItem="font-size: 40px;"
-                styleForTwoItem="font-size: 22px; margin-left: 10px; margin-bottom: 5px;" />
+                :customStyle="getButtonStyle(key)" styleForOneItem="font-size: 30px;"
+                styleForTwoItem="font-size: 17px; margin-left: 10px; margin-bottom: 5px;" />
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import KeyboardButton from './KeyboardButton.vue';
 import { KeyboardZones } from '../util';
 
@@ -73,9 +73,9 @@ export default defineComponent({
         };
 
         const getButtonStyle = (key: string | string[]): string => {
-            const baseStyle = 'background-color: #E8EDE7; width: 50px; height: 50px; font-size: 25px; border-radius: 10px;';
+            const baseStyle = 'background-color: #E8EDE7; width: 40px; height: 40px; font-size: 15px; border-radius: 10px;';
             if (key.includes(' ')) {
-                return `${baseStyle} width: 350px; height: 50px; font-size: 25px;`; // Увеличенная ширина для пробела
+                return `${baseStyle} width: 300px;  height: 35px; font-size: 25px;`; // Увеличенная ширина для пробела
             }
             return `${baseStyle}`; // Стандартный стиль
         };
@@ -83,7 +83,7 @@ export default defineComponent({
         const getKeyColor = (key: string[]) => {
             // Проверяем, является ли ключ пробелом
             if (key.includes(' ')) {
-                return zoneColors['Зона Пробела']; // Возвращаем цвет для пробела
+                return zoneColors[KeyboardZones.ZONE_10]; // Возвращаем цвет для пробела
             }
 
             for (let i = 0; i < props.selectedZones.length; i++) {
@@ -96,6 +96,8 @@ export default defineComponent({
             }
             return ''; // Если зона не выбрана, возвращаем пустую строку (без цвета)
         };
+
+
 
         return {
             keys,

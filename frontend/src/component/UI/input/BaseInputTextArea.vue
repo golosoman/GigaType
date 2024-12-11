@@ -17,20 +17,32 @@ export default defineComponent({
         },
         inputPlaceholder: {
             type: String,
-            default: 'Введите ваш текст здесь...'
+            default: 'Введите ваш текст здесь...',
         },
         customStyle: {
             type: String,
-            default: ''
+            default: '',
+        },
+        allowedCharacters: {
+            type: String,
+            required: true, // Новое свойство для разрешенных символов
         },
     },
     setup(props, { emit }) {
         const text = ref<string>(props.modelValue);
 
         const updateInput = (event: Event) => {
-            const target = event.target as HTMLInputElement;
-            text.value = target.value;
-            emit('update:modelValue', target.value);
+            const target = event.target as HTMLTextAreaElement;
+            const inputValue = target.value;
+
+            // Фильтрация вводимых символов независимо от регистра
+            const filteredValue = inputValue
+                .split('')
+                .filter(char => props.allowedCharacters.toLowerCase().includes(char.toLowerCase()))
+                .join('');
+
+            text.value = filteredValue;
+            emit('update:modelValue', filteredValue);
         };
 
         return {
@@ -53,18 +65,9 @@ export default defineComponent({
     font-size: 16px;
     padding: 10px;
     border: 1px solid #ccc;
+    border-color: #B7BBBC;
+    background-color: #B7BBBC;
     border-radius: 4px;
     resize: vertical;
-    /* Позволяет изменять размер по вертикали */
-}
-
-.text-preview {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    white-space: pre-wrap;
-    /* Сохраняет пробелы и переносы строк */
 }
 </style>

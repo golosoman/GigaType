@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Keyboard, TypingTrainer, NavigationBarForTrainee, FinishExerciseWindow } from '@/component/trainer';
 import { BaseCheckbox } from '@/component/UI';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRoute } from 'vue-router';
 
 interface CompletionData {
     level: string;
@@ -11,6 +13,7 @@ interface CompletionData {
     elapsedTime: number;
     score: number;
 }
+
 const isModalVisible = ref(false);
 const resultData = ref<CompletionData>({
     level: "",
@@ -22,6 +25,58 @@ const resultData = ref<CompletionData>({
 });
 const showKeyboard = ref(false);
 const currentCharacter = ref('');
+const textToType = ref(''); // Для хранения текста для печати
+
+const route = useRoute();
+
+const fetchDifficultyData = async (difficultyId: string) => {
+    try {
+        const response = await axios.get(`/api/difficulty/get?uid=${difficultyId}`);
+        const difficultyInfo = response.data[0];
+        console.log(difficultyInfo)
+        return {
+            name: difficultyInfo.name,
+            min_length: difficultyInfo.min_length,
+            max_length: difficultyInfo.max_length,
+            key_press_time: difficultyInfo.key_press_time,
+            max_mistakes: difficultyInfo.max_mistakes,
+        };
+    } catch (error) {
+        console.error("Ошибка при получении данных о сложности:", error);
+    }
+};
+
+const fetchTaskData = async (taskId: string) => {
+    try {
+        const response = await axios.get(`/api/task/get?uid=${taskId}`);
+        const taskInfo = response.data[0];
+        console.log(taskInfo)
+        return {
+            name: taskInfo.name,
+            content: taskInfo.content,
+        };
+    } catch (error) {
+        console.error("Ошибка при получении данных о задаче:", error);
+    }
+};
+
+onMounted(async () => {
+    const { params } = route;
+    const levelId = params.levelId; // id уровня сложности из URL
+    const exerciseId = params.exerciseId; // id упражнения из URL
+    console.log(params)
+
+    const difficultyData = await fetchDifficultyData(levelId);
+    const taskData = await fetchTaskData(exerciseId);
+
+    if (difficultyData && taskData) {
+        resultData.value.level = difficultyData.name;
+        resultData.value.exercise = taskData.name;
+        resultData.value.errorsCount = difficultyData.max_mistakes;
+        resultData.value.elapsedTime = difficultyData.key_press_time;
+        textToType.value = taskData.content; // Устанавливаем текст для печати
+    }
+});
 
 const handleSuccessCompletion = (data: any[]) => {
     resultData.value = {
@@ -32,7 +87,7 @@ const handleSuccessCompletion = (data: any[]) => {
         elapsedTime: data[4],
         score: data[5],
     };
-    isModalVisible.value = true
+    isModalVisible.value = true;
 };
 
 const handleErrorCompletion = (data: any[]) => {
@@ -44,12 +99,12 @@ const handleErrorCompletion = (data: any[]) => {
         elapsedTime: data[4],
         score: data[5],
     };
-    isModalVisible.value = true
+    isModalVisible.value = true;
 };
 
 const handleCurrentCharacter = (character: string) => {
     currentCharacter.value = character;
-}
+};
 
 const toggleKeyboardVisibility = (value: boolean) => {
     showKeyboard.value = value;
@@ -61,8 +116,8 @@ const toggleKeyboardVisibility = (value: boolean) => {
         <NavigationBarForTrainee></NavigationBarForTrainee>
         <div class="content">
             <div>
-                <TypingTrainer level="Легкий" exercise="Печать текста" :maxErrors="5"
-                    textToType="Пример текста для тренировки. 1234567890,()"
+                <TypingTrainer :level="resultData!.level" :exercise="resultData!.exercise" :maxErrors="5"
+                    :textToType="textToType"
                     customStyleForTrainingField="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px;"
                     @success-completion="handleSuccessCompletion" @error-completion="handleErrorCompletion"
                     @current-charrecter="handleCurrentCharacter" />
