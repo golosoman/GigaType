@@ -25,5 +25,4 @@ def get_keyboard_zones():
         # Если uid не указан, получаем все зоны клавиатуры
         zones = [zone[0] for zone in db.session.execute(select(KeyBoardZone)).all()]
         # zones.sort(key=lambda x: int(x.__getattribute__("keys")))
-        print(zones)
         return send_json_data(make_json_response(zones, additional=["uid"]))
