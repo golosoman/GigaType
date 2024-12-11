@@ -116,16 +116,11 @@ def get():
 
         from app.api.task import get
         tasks_data = json.loads(get()[0])
-        print(tasks_data)
         for task_data in tasks_data:
-            print(tasks_data)
             task_id = db.session.execute(select(Task.id).where(Task.uid == task_data["uid"])).first()[0]
-            task_id = 0
-            print(task_id)
             query = select(func.count()).where(
                     Statistic.task_id == task_id
             ).group_by(Statistic.task_id).select_from(Statistic)
-            print(db.session.execute(query).all())
             all_amount = db.session.execute(query).first()
 
             if not all_amount:
@@ -133,7 +128,11 @@ def get():
 
             all_amount = all_amount[0]
 
-            success_amount = db.session.execute(query.where(Statistic.success==True)).first()[0]
+            success_amount = db.session.execute(query.where(Statistic.success==True)).first()
+            if not success_amount:
+                success_amount = 0
+            else:
+                success_amount = success_amount[0]
 
             temp = StatisticInfo()
 
