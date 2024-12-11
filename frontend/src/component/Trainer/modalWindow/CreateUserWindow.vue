@@ -1,19 +1,19 @@
 <template>
     <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
-            <div>
+            <div class="title">
                 Создание нового пользователя
             </div>
             <BaseInputWithLabel label="Логин" inputPlaceholder="Введите логин:" :modelValue="login"
                 @update:modelValue="setLogin"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
+                customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                customStyleForLabel="font-size: 20px;" />
             <BaseInputWithLabel label="Пароль" inputPlaceholder="Введите пароль:" :modelValue="password"
                 @update:modelValue="setPassword"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
-            <BaseButton
-                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
+                customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                customStyleForLabel="font-size: 20px; margin-top:10px;" />
+            <BaseButton @click="registerUser"
+                customStyle="width: 150px; height: 30px; border-radius: 15px; margin-top: 41px; font-size: 20px; color: #012E4A;">
                 Сохранить
             </BaseButton>
             <ButtonWithImage class="close-button" @click="closeModal" :imageSrc="CloseUrl"
@@ -25,11 +25,13 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import axios from 'axios'; // Импортируем axios
 import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png'
+
 export default defineComponent({
-    name: 'CreateUser',
+    name: 'CreateUser ',
     components: {
         KeyboardWithCheckbox,
         BaseInputWithLabel,
@@ -58,19 +60,52 @@ export default defineComponent({
             emit('update:isVisible', false);
         };
 
+        const registerUser = async () => {
+            try {
+                const response = await axios.post('/api/user/register', {
+                    login: login.value,
+                    password: password.value,
+                });
+
+                // Обработка успешного ответа
+                console.log('Пользователь успешно создан:', response.data);
+                closeModal(); // Закрываем модальное окно после успешного создания
+            } catch (error) {
+                console.error('Ошибка при создании пользователя:', error);
+                // Здесь можно обработать ошибку, например, показать уведомление пользователю
+            }
+        };
+
         return {
             login,
             password,
             CloseUrl,
             closeModal,
             setLogin,
-            setPassword
+            setPassword,
+            registerUser  // Возвращаем метод для использования в шаблоне
         };
     },
 });
 </script>
 
 <style scoped>
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #012E4A;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -89,8 +124,7 @@ export default defineComponent({
     padding: 20px;
     border-radius: 5px;
     position: relative;
-    max-width: 70%;
-    width: 100%;
+    width: 50%;
 }
 
 .close-button {

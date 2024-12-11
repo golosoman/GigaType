@@ -1,11 +1,11 @@
 <template>
     <div class="dropdown" :style="customStyle">
         <button class="dropdown-toggle" @click="toggleDropdown">
-            {{ selectedOption || placeholder }} ▼
+            {{ selectedOption?.label || placeholder }} ▼
         </button>
         <div v-if="isOpen" class="dropdown-menu">
-            <div v-for="option in options" :key="option" class="dropdown-item" @click="selectOption(option)">
-                {{ option }}
+            <div v-for="option in options" :key="option.value" class="dropdown-item" @click="selectOption(option)">
+                {{ option.label }}
             </div>
         </div>
     </div>
@@ -18,11 +18,11 @@ export default defineComponent({
     name: 'BaseDropdown',
     props: {
         modelValue: {
-            type: String as () => string | null | undefined,
+            type: Object as () => { label: string; value: string } | null | undefined,
             default: null,
         },
         options: {
-            type: Array as () => string[],
+            type: Array as () => Array<{ label: string; value: string }>,
             required: true,
         },
         placeholder: {
@@ -37,20 +37,21 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const isOpen = ref(false);
-        const selectedOption = ref<string | null | undefined>(props.modelValue);
+        const selectedOption = ref<{ label: string; value: string } | null | undefined>(props.modelValue);
 
         const toggleDropdown = () => {
             isOpen.value = !isOpen.value;
         };
 
-        const selectOption = (option: string) => {
+        const selectOption = (option: { label: string; value: string }) => {
             selectedOption.value = option;
             isOpen.value = false;
-            emit('update:modelValue', option); // Эмитируем обновлённое значение
+            emit('update:modelValue', option); // Эмитируем весь объект option
         };
 
         // Слежение за изменением props.modelValue
         watch(() => props.modelValue, (newValue) => {
+
             selectedOption.value = newValue;
         });
 
@@ -97,7 +98,6 @@ export default defineComponent({
     margin-top: 1px;
     z-index: 1;
     width: 100%;
-
     border-radius: 10px;
 }
 

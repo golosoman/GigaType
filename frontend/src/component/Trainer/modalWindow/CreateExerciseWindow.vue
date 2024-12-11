@@ -1,41 +1,41 @@
 <template>
     <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
-            <div>
+            <div class="title">
                 Создание уровня сложности
             </div>
-            <KeyboardWithBlockCheckBox :keyboardZones="zoneKeyboard" />
+            <KeyboardWithBlockCheckBox @update:selectedOptions="handleSelectedValues" :keyboardZones="keyboardZones" />
             <div style="display: flex;">
-                <div>
-                    <BaseInput inputPlaceholder="Поле минимального количества символов:" :modelValue="minCountChar"
-                        :disabled="true"
-                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                        customStyleForLabel="font-size: 32px;" />
-                    <BaseInput inputPlaceholder="Поле максимального количества символов" :modelValue="maxCountChar"
-                        :disabled="true"
-                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                        customStyleForLabel="font-size: 32px;" />
-                    <BaseInput inputPlaceholder="Поле допустимого окличества ошибок" :modelValue="numberErrors"
-                        :disabled="true"
-                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                        customStyleForLabel="font-size: 32px;" />
-                    <BaseInput inputPlaceholder="Поле времени нажатия на клавишу" :modelValue="timePressKey"
-                        :disabled="true"
-                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                        customStyleForLabel="font-size: 32px;" />
+                <div style="width:400px;">
+                    <BaseInput inputPlaceholder="Поле минимального количества символов:"
+                        :modelValue="`Минимальное количество символов - ${minCount}`" :disabled="true"
+                        customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC;" />
+                    <BaseInput inputPlaceholder="Поле максимального количества символов"
+                        :modelValue="`Максимальное количество символов - ${maxCount}`" :disabled="true"
+                        customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC; margin-top: 10px;" />
+                    <BaseInput inputPlaceholder="Поле допустимого количества ошибок"
+                        :modelValue="`Допустимое количество ошибок - ${numberErrors}`" :disabled="true"
+                        customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC; margin-top: 10px;" />
+                    <BaseInput inputPlaceholder="Поле времени нажатия на клавишу"
+                        :modelValue="`Время нажатия на клавишу - ${timePressKey}`" :disabled="true"
+                        customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC; margin-top: 10px;" />
                 </div>
 
-                <div style="margin-left: 20px;">
+                <div style="display: flex; flex-direction: column; align-items: center; margin: auto 20px;">
                     <BaseInput inputPlaceholder="Введите количество символов для генерации:"
                         :modelValue="lengthExercise" @update:modelValue="changeLengthExercise"
-                        customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                        customStyleForLabel="font-size: 32px;" />
-                    <BaseButton>Генерация упражнения</BaseButton>
+                        customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                        inputType="number" />
+                    <BaseButton
+                        customStyle="width: 250px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 10px; color: #012E4A;">
+                        Генерация упражнения
+                    </BaseButton>
                 </div>
             </div>
-            <BaseInputTextArea v-model="textExercise" @update:modelValue="changeTextExercise" />
+            <BaseInputTextArea v-model="textExercise" @update:modelValue="changeTextExercise"
+                inputPlaceholder="Введите текст упражнения:" :allowedCharacters="getAllowedCharacters(keyboardZones)" />
             <BaseButton
-                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;"
+                customStyle="width: 150px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 41px; color: #012E4A;"
                 @click="saveChanges">
                 Сохранить
             </BaseButton>
@@ -48,8 +48,10 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import axios from 'axios'; // Импортируем Axios
 import { KeyboardWithBlockCheckBox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
+import { getZoneNameFromSelectedOptions } from '@/component/Trainer/modalWindow';
 import CloseUrl from '@/assets/Close.png';
 
 export default defineComponent({
@@ -87,57 +89,76 @@ export default defineComponent({
             type: Number,
             required: true,
         },
+        difficultyId: {
+            type: String,
+            required: false, // или уберите это, если хотите сделать его необязательным
+            default: undefined,
+        }
     },
     setup(props, { emit }) {
-        const minCountChar = ref(`Минимальное количество символов - ${props.minCount}`);
-        const maxCountChar = ref(`Максимальное количество символов - ${props.maxCount}`);
-        const timePressKey = ref(`Время нажатия на клавишу - ${props.timePressKey}`);
-        const numberErrors = ref(`Допустимое количество ошибок - ${props.numberErrors}`);
-        const zoneKeyboard = ref(props.keyboardZones);
-        const lengthExercise = ref<number | string>('')
-        const textExercise = ref('')
+        const lengthExercise = ref<number | string>('');
+        const textExercise = ref('');
+        const zoneKeyboard = ref<string[]>(props.keyboardZones);
+        const selectedZones = ref<string[]>(props.keyboardZones);
+
+        const handleSelectedValues = (values: string[]) => {
+            zoneKeyboard.value = values;
+            console.log(`Появились изменения cew ${values}`);
+        };
 
         const changeTextExercise = (value: string) => {
-            textExercise.value = value
-        }
+            textExercise.value = value;
+        };
 
         const changeLengthExercise = (value: number) => {
-            lengthExercise.value = value
-        }
+            lengthExercise.value = value;
+        };
 
         const closeModal = () => {
             emit('update:isVisible', false);
         };
 
-        const saveChanges = () => {
-            // Здесь вы можете обработать сохранение изменений
-            console.log('Сохраненные значения:', {
-                minCount: minCountChar.value,
-                maxCount: maxCountChar.value,
-                timePressKey: timePressKey.value,
-            });
-            closeModal();
+        const saveChanges = async () => {
+            try {
+                const response = await axios.post('/api/task/create', {
+                    content: textExercise.value,
+                    difficulty_id: props.difficultyId // Используем переданный difficulty_id
+                });
+                console.log('Сохраненные значения:', response.data);
+                closeModal();
+            } catch (error) {
+                console.error('Ошибка при сохранении:', error);
+            }
+        };
+
+        const getAllowedCharacters = (zones: string[]) => {
+            return getZoneNameFromSelectedOptions(zones).join('') + ' ';
         };
 
         return {
-            minCountChar,
-            maxCountChar,
-            timePressKey,
             CloseUrl,
-            zoneKeyboard,
-            numberErrors,
             lengthExercise,
             textExercise,
+            zoneKeyboard,
+            selectedZones,
+            handleSelectedValues,
             changeTextExercise,
             changeLengthExercise,
             closeModal,
             saveChanges,
+            getAllowedCharacters,
         };
     },
 });
 </script>
 
 <style scoped>
+.title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #012E4A;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;

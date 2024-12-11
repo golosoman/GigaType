@@ -16,14 +16,14 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <BaseLink :href="`/app/choose_exercise/level/${row.level}/exercise/${row.number}`"
-                            target="_blank"
-                            style="background-color: transparent; text-decoration: underline; line-height: 20px;">
-                            Упражнение {{ row["level"] }}.{{ row['number'] }}
+                        <BaseLink href="#" target="_blank"
+                            style="background-color: transparent; text-decoration: underline; line-height: 20px;"
+                            @click.prevent="handleExerciseClick(row.uid)">
+                            Упражнение {{ row.level }}.{{ row.value }}
                         </BaseLink>
                     </template>
                     <template v-else>
-                        {{ row['value'] }} <!-- Предполагаем, что у вас есть поле 'value' -->
+                        {{ row.value }}
                     </template>
                 </div>
             </div>
@@ -32,23 +32,31 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, } from 'vue';
 import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
 
 const props = defineProps<{
     headers: string[];
-    data: Array<{ name: string; value: number; level: number; number: number }>; // Добавлены поля 'level' и 'number'
+    data: Array<{ name: string; value: string; level: string; uid: string; }>;
     customStyle?: string;
 }>();
 
+
+
 const emit = defineEmits<{
-    (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
+    (e: 'addButtonClicked'): void;
+    (e: 'exerciseClick', uid: string): void;
 }>();
 
+const handleExerciseClick = (uid: string) => {
+    emit('exerciseClick', uid);
+    console.log(uid)
+};
+
 const handleAddButtonClick = () => {
-    emit('addButtonClicked'); // Генерируем событие при нажатии на кнопку
-    console.log('Кнопка "Добавить" нажата'); // Лог для проверки
+    emit('addButtonClicked');
+    console.log('Кнопка "Добавить" нажата');
 };
 </script>
 

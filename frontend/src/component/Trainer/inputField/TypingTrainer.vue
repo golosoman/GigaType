@@ -1,7 +1,7 @@
 <template>
     <div class="trainer-container">
         <div class="full-width">
-            <div>{{ level }} - {{ exercise }}</div>
+            <div>Упражнение {{ level }}.{{ exercise }}</div>
             <div>Скорость: {{ speed }} симв/мин</div>
             <div>Ошибки: {{ errorsCount }}/{{ maxErrors }}</div>
             <div>Время: {{ elapsedTime }} сек</div>

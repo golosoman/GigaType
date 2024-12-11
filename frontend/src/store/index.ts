@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import Cookies from "js-cookie";
 
 export const useUser = defineStore("user", () => {
@@ -8,16 +8,20 @@ export const useUser = defineStore("user", () => {
   const login = ref<string | null>(localStorage.getItem("login"));
   const role = ref<string | null>(localStorage.getItem("role"));
 
+  // Новые состояния для хранения uid уровня сложности и uid упражнения
+  const selectedLevelId = ref<string | null>(
+    localStorage.getItem("selectedLevelId")
+  );
+  const selectedTaskId = ref<string | null>(
+    localStorage.getItem("selectedTaskId")
+  );
+
   const setAuth = (loginValue: string) => {
     isAuth.value = true;
     login.value = loginValue;
 
     // Устанавливаем роль в зависимости от логина
-    if (loginValue === "admin") {
-      role.value = "ADMIN";
-    } else {
-      role.value = "TRAINEE";
-    }
+    role.value = loginValue === "admin" ? "ADMIN" : "TRAINEE";
 
     // Сохраняем состояние в localStorage
     localStorage.setItem("isAuth", "true");
@@ -69,12 +73,25 @@ export const useUser = defineStore("user", () => {
     clearAuth();
   };
 
+  // Новое действие для сохранения выбранного уровня сложности и упражнения
+  const selectExercise = (levelId: string, taskId: string) => {
+    selectedLevelId.value = levelId;
+    selectedTaskId.value = taskId;
+
+    // Сохраняем в localStorage
+    localStorage.setItem("selectedLevelId", levelId);
+    localStorage.setItem("selectedTaskId", taskId);
+  };
+
   return {
     isAuth,
     login,
     role,
+    selectedLevelId,
+    selectedTaskId,
     register,
     loginUser,
     logout,
+    selectExercise,
   };
 });

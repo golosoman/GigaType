@@ -152,7 +152,8 @@ export default defineComponent({
                     },
                     withCredentials: true,
                 });
-                console.log('Ответ от сервера:', payload);
+                console.log('Ответ от сервера:', response);
+                closeModal();
                 // Можно добавить логику для уведомления пользователя об успешном создании уровня сложности
             } catch (error) {
                 if (axios.isAxiosError(error)) {
@@ -184,6 +185,18 @@ export default defineComponent({
 
 
 <style scoped>
+/* Hide the spin buttons in WebKit browsers */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide spin buttons in Firefox */
+/* input[type="number"] {
+    -moz-appearance: textfield;
+} */
+
 .title {
     font-size: 20px;
     margin-bottom: 10px;

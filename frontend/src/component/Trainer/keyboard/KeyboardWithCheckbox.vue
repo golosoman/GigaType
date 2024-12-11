@@ -39,7 +39,7 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             selectedOptions.value = values;
-            // console.log(`Появились изменения ${values}`)
+            console.log(`Появились изменения ${values}`)
             // console.log(`Появились изменения ${selectedOptions.value}`)
             emit('update:selectedValues', selectedOptions.value);
         };

@@ -16,14 +16,14 @@
             <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
-                        <BaseLink :href="`/app/choose_exercise/level/${row.level}`" target="_blank"
+                        <BaseLink href="#" target="_blank"
                             style="background-color: transparent; text-decoration: underline; line-height: 20px;"
                             @click.prevent="handleLevelClick(row.uid)">
-                            Уровень {{ row["level"] }}
+                            Уровень {{ row.level }}
                         </BaseLink>
                     </template>
                     <template v-else>
-                        {{ row["level"] }}
+                        {{ row.level }}
                     </template>
                 </div>
             </div>
