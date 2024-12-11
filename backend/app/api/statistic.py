@@ -86,15 +86,19 @@ def get():
 
             statistic_list += [stat[0] for stat in db.session.execute(query).all()]
 
+        task_args = get_args(Task)
+        task_args.remove("name")
+
         resp = make_json_response(
             statistic_list,
             additional=["task"],
-            exclude=["user_id", "task_id"] + get_args(Task),
+            exclude=["user_id", "task_id"] + task_args,
             get={
                 "difficulty": "max_mistakes"
             })
         for stat in resp:
             stat["max_mistakes"] = stat["task"][0]["max_mistakes"]
+            stat['name'] = stat['task'][0]['name']
             stat.pop("task")
         return send_json_data(resp)
 
