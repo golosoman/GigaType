@@ -12,7 +12,7 @@ user_api = Blueprint('user_api', __name__, url_prefix="/user")
 
 
 def send_cookie(id_: int, uuid: str, login: str):
-    resp = make_response()
+    resp = make_response(jsonify({"uuid": uuid}))
     cookie = jwt.encode({"id": id_, "uuid": uuid, "login": login}, JWT_SECRET_KEY, algorithm="HS256")
     resp.set_cookie('auth', cookie, max_age=14 * 24 * 3600, secure=False, httponly=False)
     resp.status = 200
