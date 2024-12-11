@@ -1,26 +1,31 @@
 <template>
     <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
-            <div>
+            <div class="title">
                 Создание уровня сложности
             </div>
-            <KeyboardWithCheckbox></KeyboardWithCheckbox>
+            <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues" :keyboard-zones="selectedOptions">
+            </KeyboardWithCheckbox>
             <BaseInputWithLabel label="Минимальное количество символов"
                 inputPlaceholder="Введите минимальное количество символов:" :modelValue="min_count_char"
                 @update:modelValue="changeMinCountChar"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
+                customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                customStyleForLabel="font-size: 20px;" />
             <BaseInputWithLabel label="Максимальное количество символов"
                 inputPlaceholder="Введите максимальное количество символов:" :modelValue="max_count_char"
-                @update:modelValue="changeMaxCountChar"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
+                input-type="number" @update:modelValue="changeMaxCountChar"
+                customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                customStyleForLabel="font-size: 20px; margin-top:10px;" />
             <BaseInputWithLabel label="Время нажатия на клавишу" inputPlaceholder="Введите время нажатия на клавишу:"
                 :modelValue="time_press_key" @update:modelValue="changeTimePressKey"
-                customStyleForInput="width: 732px; height: 57px; font-size: 32px; background-color: #B7BBBC;"
-                customStyleForLabel="font-size: 32px;" />
-            <BaseButton
-                customStyle="width: 171px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
+                customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                customStyleForLabel="font-size: 20px; margin-top:10px;" input-type="number" />
+            <!-- <BaseInputWithLabel label="Максимальное количество ошибок"
+                inputPlaceholder="Максимальное количество ошибок:" :modelValue="maxErrors"
+                customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
+                customStyleForLabel="font-size: 20px; margin-top:10px;" input-type="number" /> -->
+            <BaseButton @click="save"
+                customStyle="width: 150px; height: 30px; border-radius: 15px; margin-top: 41px; font-size: 20px; color: #012E4A;">
                 Сохранить
             </BaseButton>
             <ButtonWithImage class="close-button" @click="closeModal" :imageSrc="CloseUrl"
@@ -31,10 +36,39 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
 import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
-import CloseUrl from '@/assets/Close.png'
+import axios from 'axios';
+import CloseUrl from '@/assets/Close.png';
+import { getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow'; // Импортируем наш метод
+
+// Определение типов и объекта ZoneToNameZone
+type ZoneKey =
+    | "Зона 1 (ФЫВАОЛДЖ)"
+    | "Зона 2 (ПР)"
+    | "Зона 3 (КЕНГ)"
+    | "Зона 4 (МИТЬ)"
+    | "Зона 5 (УСШБ)"
+    | "Зона 6 (ЦЧЩЮ)"
+    | "Зона 7 (ЁЙЯЗХЪЭ.,)"
+    | "Зона 8 (1234567890)"
+    | "Зона 9 (символы)"
+    | "Зона Пробела";
+
+const ZoneToNameZone: Record<ZoneKey, string> = {
+    "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
+    "Зона 2 (ПР)": "пр",
+    "Зона 3 (КЕНГ)": "кенг",
+    "Зона 4 (МИТЬ)": "мить",
+    "Зона 5 (УСШБ)": "усшб",
+    "Зона 6 (ЦЧЩЮ)": "цчщю",
+    "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
+    "Зона 8 (1234567890)": "1234567890",
+    "Зона 9 (символы)": '!"№;%:?*()_-+=',
+    "Зона Пробела": " ",
+};
+
 export default defineComponent({
     name: 'CreateLevelWindow',
     components: {
@@ -50,40 +84,125 @@ export default defineComponent({
         },
     },
     setup(props, { emit }) {
-        const min_count_char = ref('')
-        const changeMinCountChar = () => {
+        const min_count_char = ref<number>(20);
+        const max_count_char = ref<number>(80);
+        const time_press_key = ref<number>(1.5);
+        const selectedOptions = ref<string[]>([]);
+        const extractedZones = ref<{ keys: string, uid: string }[]>([]);
 
-        }
+        const fetchZones = async () => {
+            try {
+                const response = await axios.get('/api/zone/get', { withCredentials: true });
+                console.log('Зоны:', response.data);
+                extractedZones.value = response.data; // Сохраняем данные зон
+            } catch (error) {
+                console.error('Ошибка при получении зон:', error);
+            }
+        };
 
-        const max_count_char = ref('')
-        const changeMaxCountChar = () => {
+        onMounted(() => {
+            fetchZones();
+        });
 
-        }
+        const handleSelectedValues = (values: string[]) => {
+            selectedOptions.value = values;
+            console.log(`Появились изменения ${values}`);
+        };
 
-        const time_press_key = ref('')
-        const changeTimePressKey = () => {
+        const changeMinCountChar = (value: string) => {
+            min_count_char.value = Number(value);
+        };
 
-        }
+        const changeMaxCountChar = (value: string) => {
+            max_count_char.value = Number(value);
+        };
+
+        const changeTimePressKey = (value: string) => {
+            time_press_key.value = parseFloat(value);
+        };
+
+        const maxErrors = computed(() => {
+            if (min_count_char.value && max_count_char.value) {
+                const average = (min_count_char.value + max_count_char.value) / 2;
+                return Math.floor(average * 0.1);
+            }
+            return 0;
+        });
 
         const closeModal = () => {
             emit('update:isVisible', false);
+        };
+
+        const save = async () => {
+            const uids = getUidsFromSelectedOptions(selectedOptions.value, extractedZones.value, ZoneToNameZone); // Используем наш универсальный метод
+
+            const payload = {
+                name: 0, // Название будет сгенерировано на сервере
+                min_length: min_count_char.value,
+                max_length: max_count_char.value,
+                key_press_time: time_press_key.value,
+                max_mistakes: maxErrors.value,
+                zones: uids // Используем полученные uid
+            };
+
+            try {
+                const response = await axios.post('/api/difficulty/create', payload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    withCredentials: true,
+                });
+                console.log('Ответ от сервера:', response);
+                closeModal();
+                // Можно добавить логику для уведомления пользователя об успешном создании уровня сложности
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                } else {
+                    console.error('Неизвестная ошибка:', error);
+                }
+            }
         };
 
         return {
             min_count_char,
             max_count_char,
             time_press_key,
+            selectedOptions,
             CloseUrl,
             changeTimePressKey,
             changeMaxCountChar,
             changeMinCountChar,
             closeModal,
+            handleSelectedValues,
+            maxErrors,
+            save,
+            extractedZones // Возвращаем извлеченные зоны, если нужно использовать их в шаблоне
         };
     },
 });
 </script>
 
+
 <style scoped>
+/* Hide the spin buttons in WebKit browsers */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide spin buttons in Firefox */
+/* input[type="number"] {
+    -moz-appearance: textfield;
+} */
+
+.title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #012E4A;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;

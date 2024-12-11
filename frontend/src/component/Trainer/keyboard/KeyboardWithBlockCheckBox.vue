@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { CheckBoxGroupWithBlock } from '@/component/UI';
 import { KeybordForZones } from '../keyboard';
 import { KeyboardZones } from '../util';
@@ -42,9 +42,15 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             selectedOptions.value = values;
-            console.log(`Появились изменения ${values}`)
-            emit('update:selectedValues', selectedOptions.value);
+            console.log(`Появились изменения kwbc ${values}`)
+            emit('update:selectedOptions', selectedOptions.value);
         };
+
+        // Слежение за изменением
+        watch(() => props.keyboardZones, (newZones) => {
+            selectedOptions.value = newZones
+            console.log(`Зоны изменились! ${newZones}`);
+        });
 
         return {
             selectedOptions,

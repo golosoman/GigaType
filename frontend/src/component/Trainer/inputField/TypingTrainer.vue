@@ -1,7 +1,7 @@
 <template>
     <div class="trainer-container">
         <div class="full-width">
-            <div>{{ level }} - {{ exercise }}</div>
+            <div>Упражнение {{ level }}.{{ exercise }}</div>
             <div>Скорость: {{ speed }} симв/мин</div>
             <div>Ошибки: {{ errorsCount }}/{{ maxErrors }}</div>
             <div>Время: {{ elapsedTime }} сек</div>
@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onBeforeUnmount, onMounted } from 'vue';
-import TrainingField from './TrainingField.vue';
+import { TrainingField } from '.';
 
 export default defineComponent({
     name: 'TypingTrainer',
