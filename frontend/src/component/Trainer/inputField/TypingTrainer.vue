@@ -115,6 +115,7 @@ export default defineComponent({
                 errorsCount.value,
                 elapsedTime.value,
                 score.value,
+                textFromInput.value.length
             ]);
         };
 
@@ -135,6 +136,7 @@ export default defineComponent({
                     errorsCount.value,
                     elapsedTime.value,
                     score.value,
+                    textFromInput.value.length
                 ]);
             }
         };

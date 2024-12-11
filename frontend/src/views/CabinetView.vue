@@ -10,18 +10,11 @@
                 </div>
 
                 <div class="input-container">
-                    <BaseInputWithLabel v-model="userName" label="Пользователь"
+                    <BaseInputWithLabel v-model="userName!" label="Пользователь"
                         customStyleForInput="width: 450px; height: 57px; font-size: 32px; pointer-events: none;"
                         customStyleForLabel="font-size: 32px; pointer-events: none;">
                     </BaseInputWithLabel>
                 </div>
-
-            </div>
-            <div>
-                <BaseButton
-                    customStyle="width: 35s0px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
-                    Изменить фотографию
-                </BaseButton>
             </div>
             <div>
                 <h2>Статистика</h2>
@@ -52,7 +45,7 @@
                     </div>
                     <div v-else-if="activeTab === 'trainees'">
                         <h2>Рейтинг среди обучаемых</h2>
-                        <RatingTable :user-data="userData" custom-style="width: 500px"></RatingTable>
+                        <RatingTable :userData="traineeData" custom-style="width: 500px"></RatingTable>
                     </div>
                 </div>
             </div>
@@ -63,36 +56,63 @@
 <script setup lang="ts">
 import { NavigationBarForTrainee, RatingTable, LevelTable } from '@/component/trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
-import UserImage from '@/assets/User.png'
-import { ref } from 'vue'
-
+import UserImage from '@/assets/User.png';
+import { ref, onMounted, watch } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
 
+interface DifficultyLevel {
+    name: string;
+    uid: string;
+    min_length: number;
+    max_length: number;
+    key_press_time: number;
+    max_mistakes: number;
+    zones: { keys: string; uid: string }[];
+    tasks: Task[];
+}
+
+interface Task {
+    name: string;
+    content: string;
+    difficulty_id: string;
+    uid: string;
+}
+
+interface SpeedData {
+    clicks_per_minute: number;
+    timestamp: string;
+    uid: string;
+}
+
+interface UserStatisticsData {
+    used_time: number;
+    mistakes: number;
+    clicks_number: number;
+    success: boolean;
+    score: number;
+    clicks_per_minute: number;
+    timestamp: string;
+    max_mistakes: number;
+    name: string;
+}
+
+interface TraineeData {
+    login: string;
+    scores: number;
+}
+
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
-const options = ['Уровень 1', 'Уровень 2', 'Уровень 3']; // Опции для выпадающего списка
-const selectedOption = ref(null); // Двусторонняя привязка с опциями
+const options = ref<{ label: string; value: string }[]>([]);
+const selectedOption = ref<{ label: string; value: string } | null>(null);
 
 const chartData = ref({
-    labels: [
-        '2023-10-01 10:00',
-        '2023-10-01 11:00',
-        '2023-10-01 12:00',
-        '2023-10-01 13:00',
-        '2023-10-01 14:00',
-        '2023-10-02 10:00',
-        '2023-10-02 11:00',
-        '2023-10-02 12:00',
-        '2023-10-02 13:00',
-        '2023-10-02 14:00',
-        '2023-10-03 10:00',
-        '2023-10-03 11:00',
-    ],
+    labels: [] as string[],
     datasets: [
         {
             label: 'Скорость ввода (симв/мин)',
-            data: [100, 150, 120, 130, 160, 140, 170, 180, 190, 200, 210, 220],
+            data: [] as number[],
             borderColor: 'rgba(75, 192, 192, 1)',
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             fill: true,
@@ -113,22 +133,125 @@ const chartOptions = ref({
     },
 });
 
-const userName = ref('trainee')
+const userName = ref(localStorage.getItem("login"));
 
-const userData = ref([
-    { Место: 1, Пользователь: 'Ivan', Рейтинг: 1500 },
-    { Место: 2, Пользователь: 'Anna', Рейтинг: 1450 },
-    { Место: 3, Пользователь: 'Petr', Рейтинг: 1400 },
-    { Место: 4, Пользователь: 'Svetlana', Рейтинг: 1350 },
-    { Место: 5, Пользователь: 'Dmitry', Рейтинг: 1300 },
-]);
+const userStatistics = ref([] as any[]);
+interface TraineeRanking {
+    "Место": number;
+    "Пользователь": string;
+    "Рейтинг": number;
+}
 
-const userStatistics = ref([
-    { Упражнение: 1, Статус: 'Выполнено', Скорость: '110 симв/мин', Ошибки: '3/5', Время: '120 с' },
-    { Упражнение: 2, Статус: 'Не выполнено', Скорость: '130 симв/мин', Ошибки: '5/6', Время: '130 с' },
-    { Упражнение: 3, Статус: 'Выполнено', Скорость: '120 симв/мин', Ошибки: '5/5', Время: '125 с' },
-    // Добавьте дополнительные данные по мере необходимости
-]);
+const traineeData = ref<TraineeRanking[]>([]);
+
+// Функция для получения уровней сложности
+const fetchDifficultyLevels = async () => {
+    try {
+        const response = await fetch('/api/difficulty/get');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: DifficultyLevel[] = await response.json();
+
+        options.value = data.map(item => ({
+            label: `Уровень ${item.name}`,
+            value: item.uid,
+        }));
+
+        if (options.value.length > 0) {
+            selectedOption.value = options.value[0];
+        }
+
+    } catch (error) {
+        console.error('Ошибка при получении уровней сложности:', error);
+    }
+};
+
+// Функция для получения данных скорости
+const fetchSpeedData = async () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        console.error('User  ID not found in localStorage');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/stat/get?user_uuid=${userId}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: SpeedData[] = await response.json();
+
+        // Преобразование данных для графика
+        chartData.value.labels = data.map(item => item.timestamp);
+        chartData.value.datasets[0].data = data.map(item => item.clicks_per_minute);
+
+    } catch (error) {
+        console.error('Ошибка при получении данных скорости:', error);
+    }
+};
+
+// Функция для получения статистики по уровням
+const fetchUserStatistics = async () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId || !selectedOption.value) {
+        console.error('User  ID or selected difficulty not found');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/stat/get?difficulty_uid=${selectedOption.value.value}&user_uuid=${userId}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: UserStatisticsData[] = await response.json();
+
+        // Преобразование данных для таблицы
+        userStatistics.value = data.map(item => ({
+            "Упражнение": item.name,
+            "Статус": item.success ? 'Выполнено' : 'Не выполнено',
+            "Скорость": `${item.clicks_per_minute} симв/мин`,
+            "Ошибки": `${item.mistakes}/${item.max_mistakes}`,
+            "Время": `${item.used_time} с`
+        }));
+
+    } catch (error) {
+        console.error('Ошибка при получении статистики по уровням:', error);
+    }
+};
+
+// Функция для получения рейтинга среди обучаемых
+const fetchTraineeData = async () => {
+    try {
+        const response = await fetch('/api/stat/top');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: TraineeData[] = await response.json();
+
+        // Преобразование данных для таблицы
+        traineeData.value = data.map((item, index) => ({
+            "Место": index + 1,
+            "Пользователь": item.login,
+            "Рейтинг": item.scores,
+        }));
+
+    } catch (error) {
+        console.error('Ошибка при получении данных рейтинга:', error);
+    }
+};
+
+// Вызов функций при монтировании компонента
+onMounted(() => {
+    fetchDifficultyLevels();
+    fetchSpeedData();
+    fetchTraineeData(); // Добавлено для получения данных рейтинга
+});
+
+// Следим за изменением выбранного уровня сложности и загружаем данные
+watch(selectedOption, () => {
+    fetchUserStatistics();
+});
 
 // Reactive property to track which tab is active
 const activeTab = ref('');
