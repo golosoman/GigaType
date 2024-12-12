@@ -5,9 +5,10 @@
         @createButtonClick="openModal" @levelClick="handleLevelClick" />
     <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event"></CreateLevelWindow>
     <EditLevelWindow :isVisible="isEditModalVisible" :keyboardZones="selectedLevelData.zones"
-        :minCount="selectedLevelData.min_length" :maxCount="selectedLevelData.max_length"
-        :maxErrors="selectedLevelData.max_mistakes" :timePressKey="selectedLevelData.key_press_time"
-        :uid="selectedLevelData.uid" @update:isVisible="isEditModalVisible = $event" v-if="isEditModalVisible">
+        :difficulty-id="selectedLevelUid" :minCount="selectedLevelData.min_length"
+        :maxCount="selectedLevelData.max_length" :maxErrors="selectedLevelData.max_mistakes"
+        :timePressKey="selectedLevelData.key_press_time" :uid="selectedLevelData.uid"
+        @update:isVisible="isEditModalVisible = $event" v-if="isEditModalVisible">
     </EditLevelWindow>
 </template>
 

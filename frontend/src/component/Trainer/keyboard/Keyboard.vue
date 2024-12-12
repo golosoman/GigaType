@@ -44,17 +44,17 @@ export default defineComponent({
         };
 
         const getButtonStyle = (key: string | string[]): string => {
-            // Проверяем, совпадает ли с текущим символом
-            const isActive = Array.isArray(key) ? key[0] === currentCharacter.value.toLowerCase() || key[1] === currentCharacter.value.toLowerCase() : key;
+            const currentChar = currentCharacter.value ? currentCharacter.value.toLowerCase() : ''; // Проверка на null
+            const isActive = Array.isArray(key) ? key[0] === currentChar || key[1] === currentChar : key === currentChar;
 
             const baseStyle = 'background-color: #E8EDE7; width: 60px; height: 60px; font-size: 30px; border-radius: 10px;';
-            const activeStyle = 'background-color: orange;'; // Оранжевый цвет для активной кнопки
-
-            // Проверяем, является ли ключ пробелом
+            const activeStyle = 'background-color: orange;';
+            // console.log('Current Character:', currentCharacter.value);
+            // console.log('Key:', key);
             if (key.includes(' ')) {
-                return `${baseStyle} width: 400px; height: 60px; font-size: 30px; ${isActive ? activeStyle : ''}`; // Увеличенная ширина для пробела
+                return `${baseStyle} width: 400px; height: 60px; font-size: 30px; ${isActive ? activeStyle : ''}`;
             }
-            return `${baseStyle} ${isActive ? activeStyle : ''}`; // Стандартный стиль
+            return `${baseStyle} ${isActive ? activeStyle : ''}`;
         };
 
         return {

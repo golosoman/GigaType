@@ -1,10 +1,10 @@
 <template>
     <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
-            <div>
-                Создание уровня сложности
+            <div class="title">
+                Измененеие упражнения
             </div>
-            <KeyboardWithBlockCheckBox :keyboardZones="keyboardZones" />
+            <KeyboardWithBlockCheckBox @update:selectedOptions="handleSelectedValues" :keyboardZones="keyboardZones" />
             <div style="display: flex;">
                 <div style="width:400px;">
                     <BaseInput inputPlaceholder="Поле минимального количества символов:"
@@ -26,7 +26,7 @@
                         :modelValue="lengthExercise" @update:modelValue="changeLengthExercise"
                         customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                         inputType="number" />
-                    <BaseButton
+                    <BaseButton @click="generateExercise"
                         customStyle="width: 250px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 10px; color: #012E4A;">
                         Генерация упражнения
                     </BaseButton>
@@ -47,11 +47,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch, onMounted } from 'vue';
 import { KeyboardWithBlockCheckBox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
-import { getZoneNameFromSelectedOptions } from '@/component/Trainer/modalWindow';
+import axios from 'axios'; // Импортируем Axios
+import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
 
 export default defineComponent({
     name: 'EditExerciseWindow',
@@ -107,18 +108,24 @@ export default defineComponent({
         const zoneKeyboard = ref(props.keyboardZones);
         const lengthExercise = ref<number | string>('')
 
-        const textsExercise = ref(props.textExercise); // Создаем реактивную переменную
+        // Слежение за изменением
+        watch(() => props.keyboardZones, (newZones) => {
+            zoneKeyboard.value = newZones
+            console.log(`Зоны изменились! ${newZones}`);
+        });
 
+        const textsExercise = ref(props.textExercise); // Создаем реактивную переменную
         // Подписываемся на изменения props.textExercise
         watch(() => props.textExercise, (newValue) => {
             textsExercise.value = newValue; // Обновляем textsExercise при изменении пропса
+            console.log('textsExercise изменился на:', newValue);
         });
 
-        // Подписываемся на изменения textsExercise
-        watch(textsExercise, (newValue) => {
-            console.log('textsExercise изменился на:', newValue);
-            // Здесь вы можете выполнять дополнительные действия при изменении textsExercise
-        });
+        const handleSelectedValues = (values: string[]) => {
+            zoneKeyboard.value = values;
+
+            console.log(`Появились изменения cew ${zoneKeyboard.value}`);
+        };
 
         const changeTextExercise = (value: string) => {
             textsExercise.value = value; // Обновляем значение textsExercise
@@ -162,6 +169,64 @@ export default defineComponent({
                 // Здесь вы можете отобразить сообщение об ошибке пользователю, если это необходимо
             }
         };
+
+        const extractedZones = ref<{ keys: string, uid: string }[]>([]);
+
+        const fetchZones = async () => {
+            try {
+                const response = await axios.get('/api/zone/get', { withCredentials: true });
+                console.log('Зоны:', response.data);
+                extractedZones.value = response.data; // Сохраняем данные зон
+            } catch (error) {
+                console.error('Ошибка при получении зон:', error);
+            }
+        };
+
+        onMounted(() => {
+            fetchZones();
+        });
+
+        type ZoneKey =
+            | "Зона 1 (ФЫВАОЛДЖ)"
+            | "Зона 2 (ПР)"
+            | "Зона 3 (КЕНГ)"
+            | "Зона 4 (МИТЬ)"
+            | "Зона 5 (УСШБ)"
+            | "Зона 6 (ЦЧЩЮ)"
+            | "Зона 7 (ЁЙЯЗХЪЭ.,)"
+            | "Зона 8 (1234567890)"
+            | "Зона 9 (символы)"
+            | "Зона Пробела";
+
+        const ZoneToNameZone: Record<ZoneKey, string> = {
+            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
+            "Зона 2 (ПР)": "пр",
+            "Зона 3 (КЕНГ)": "кенг",
+            "Зона 4 (МИТЬ)": "мить",
+            "Зона 5 (УСШБ)": "усшб",
+            "Зона 6 (ЦЧЩЮ)": "цчщю",
+            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
+            "Зона 8 (1234567890)": "1234567890",
+            "Зона 9 (символы)": '!"№;%:?*()_-+=',
+            "Зона Пробела": " ",
+        };
+
+        const generateExercise = async () => {
+            try {
+                console.log(zoneKeyboard.value)
+                const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone); // Используем наш универсальный метод
+                const response = await axios.post('/api/content/generate', {
+                    uids: uids, // Используем выбранные зоны клавиатуры
+                    length: lengthExercise.value // Используем длину упражнения
+                });
+
+                textsExercise.value = response.data.content; // Устанавливаем текст упражнения
+                console.log('Сгенерированное упражнение:', response.data.content);
+            } catch (error) {
+                console.error('Ошибка при генерации упражнения:', error);
+            }
+        };
+
         const getAllowedCharacters = (zones: string[]) => {
             return getZoneNameFromSelectedOptions(zones).join('') + ' ';
         };
@@ -170,6 +235,8 @@ export default defineComponent({
             CloseUrl,
             zoneKeyboard,
             lengthExercise,
+            handleSelectedValues,
+            generateExercise,
             getAllowedCharacters,
             changeTextExercise,
             changeLengthExercise,
@@ -181,6 +248,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #012E4A;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
