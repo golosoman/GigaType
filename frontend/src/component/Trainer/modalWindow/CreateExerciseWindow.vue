@@ -5,6 +5,7 @@
                 Создание упражнения
             </div>
             <KeyboardWithBlockCheckBox @update:selectedOptions="handleSelectedValues" :keyboardZones="keyboardZones" />
+            <div v-if="zoneError" style="color: red;">{{ zoneError }}</div>
             <div style="display: flex;">
                 <div style="width:400px;">
                     <BaseInput inputPlaceholder="Поле минимального количества символов:"
@@ -26,6 +27,7 @@
                         :modelValue="lengthExercise" @update:modelValue="changeLengthExercise"
                         customStyle="width: 400px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                         inputType="number" />
+                    <div v-if="lengthError" style="color: red;">{{ lengthError }}</div>
                     <BaseButton @click="generateExercise"
                         customStyle="width: 250px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 10px; color: #012E4A;">
                         Генерация упражнения
@@ -34,6 +36,7 @@
             </div>
             <BaseInputTextArea v-model="textExercise" @update:modelValue="changeTextExercise"
                 inputPlaceholder="Введите текст упражнения:" :allowedCharacters="getAllowedCharacters(keyboardZones)" />
+            <div v-if="textError" style="color: red;">{{ textError }}</div>
             <BaseButton
                 customStyle="width: 150px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 41px; color: #012E4A;"
                 @click="saveChanges">
@@ -48,7 +51,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
-import axios from 'axios'; // Импортируем Axios
+import axios from 'axios';
 import { KeyboardWithBlockCheckBox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
 import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
@@ -99,27 +102,29 @@ export default defineComponent({
         const lengthExercise = ref<number | string>('');
         const textExercise = ref('');
         const zoneKeyboard = ref<string[]>(props.keyboardZones);
-        const selectedZones = ref<string[]>(props.keyboardZones);
+        const lengthError = ref('');
+        const textError = ref('');
+        const zoneError = ref('');
 
-        // Слежение за изменением
         watch(() => props.keyboardZones, (newZones) => {
-            zoneKeyboard.value = newZones
+            zoneKeyboard.value = newZones;
             console.log(`Зоны изменились! ${newZones}`);
         });
 
-
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
-
+            validateSelectedZones();
             console.log(`Появились изменения cew ${zoneKeyboard.value}`);
         };
 
         const changeTextExercise = (value: string) => {
+            validateTextExercise();
             textExercise.value = value;
         };
 
         const changeLengthExercise = (value: number) => {
             lengthExercise.value = value;
+            validateLengthExercise();
         };
 
         const closeModal = () => {
@@ -143,56 +148,119 @@ export default defineComponent({
             fetchZones();
         });
 
-        type ZoneKey =
-            | "Зона 1 (ФЫВАОЛДЖ)"
-            | "Зона 2 (ПР)"
-            | "Зона 3 (КЕНГ)"
-            | "Зона 4 (МИТЬ)"
-            | "Зона 5 (УСШБ)"
-            | "Зона 6 (ЦЧЩЮ)"
-            | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-            | "Зона 8 (1234567890)"
-            | "Зона 9 (символы)"
-            | "Зона Пробела";
+        const validateSelectedZones = () => {
+            if (zoneKeyboard.value.length === 0) {
+                zoneError.value = "Нужно выбрать хотя бы одну зону!"
+            } else {
+                zoneError.value = '';
+            }
+        };
 
-        const ZoneToNameZone: Record<ZoneKey, string> = {
-            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-            "Зона 2 (ПР)": "пр",
-            "Зона 3 (КЕНГ)": "кенг",
-            "Зона 4 (МИТЬ)": "мить",
-            "Зона 5 (УСШБ)": "усшб",
-            "Зона 6 (ЦЧЩЮ)": "цчщю",
-            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-            "Зона 8 (1234567890)": "1234567890",
-            "Зона 9 (символы)": '!"№;%:?*()_-+=',
-            "Зона Пробела": " ",
+        const validateLengthExercise = () => {
+            const length = Number(lengthExercise.value);
+            if (length < props.minCount || length > props.maxCount) {
+                lengthError.value = `Количество символов должно быть от ${props.minCount} до ${props.maxCount}.`;
+            } else {
+                lengthError.value = '';
+            }
+        };
+
+        const validateTextExercise = () => {
+            if (textExercise.value.length < props.minCount) {
+                textError.value = `Текст упражнения должен содержать минимум ${props.minCount} символов.`;
+            } else {
+                textError.value = '';
+            }
         };
 
         const saveChanges = async () => {
+            validateTextExercise();
+            if (textError.value) {
+                emit('show-error', textError.value);
+                return;
+            }
+
             try {
                 const response = await axios.post('/api/task/create', {
                     content: textExercise.value,
                     difficulty_id: props.difficultyId // Используем переданный difficulty_id
                 });
                 console.log('Сохраненные значения:', response.data);
+                emit('show-success', "Упражнение успешно создано!");
                 closeModal();
             } catch (error) {
-                console.error('Ошибка при сохранении:', error);
+                if (axios.isAxiosError(error)) {
+                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                    if (error.response?.status === 418) {
+                        console.error('Достигнуто максимальное количество упражнений:', error.response.data);
+                        emit('show-error', 'Достигнуто максимальное количество упражнений.');
+                    } else {
+                        console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.message}`);
+                    }
+                } else {
+                    console.error('Неизвестная ошибка:', error);
+                    emit('show-error', `Неизвестная ошибка: ${error}`)
+                }
             }
         };
 
         const generateExercise = async () => {
+            validateSelectedZones()
+            validateLengthExercise();
+            if (lengthError.value || zoneError.value) {
+                emit('show-error', lengthError.value || zoneError.value);
+                return;
+            }
+            type ZoneKey =
+                | "Зона 1 (ФЫВАОЛДЖ)"
+                | "Зона 2 (ПР)"
+                | "Зона 3 (КЕНГ)"
+                | "Зона 4 (МИТЬ)"
+                | "Зона 5 (УСШБ)"
+                | "Зона 6 (ЦЧЩЮ)"
+                | "Зона 7 (ЁЙЯЗХЪЭ.,)"
+                | "Зона 8 (1234567890)"
+                | "Зона 9 (символы)"
+                | "Зона Пробела";
+
+            const ZoneToNameZone: Record<ZoneKey, string> = {
+                "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
+                "Зона 2 (ПР)": "пр",
+                "Зона 3 (КЕНГ)": "кенг",
+                "Зона 4 (МИТЬ)": "мить",
+                "Зона 5 (УСШБ)": "усшб",
+                "Зона 6 (ЦЧЩЮ)": "цчщю",
+                "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
+                "Зона 8 (1234567890)": "1234567890",
+                "Зона 9 (символы)": '!"№;%:?*()_-+=',
+                "Зона Пробела": " ",
+            };
+
             try {
-                const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone); // Используем наш универсальный метод
+                const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);
                 const response = await axios.post('/api/content/generate', {
-                    uids: uids, // Используем выбранные зоны клавиатуры
-                    length: lengthExercise.value // Используем длину упражнения
+                    uids: uids,
+                    length: lengthExercise.value
                 });
 
                 textExercise.value = response.data.content; // Устанавливаем текст упражнения
                 console.log('Сгенерированное упражнение:', response.data.content);
+                emit('show-success', "Упражнение успешно сгенерировано!");
             } catch (error) {
-                console.error('Ошибка при генерации упражнения:', error);
+                if (axios.isAxiosError(error)) {
+                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                    if (error.response?.status === 418) {
+                        console.error('Достигнуто максимальное количество упражнений:', error.response.data);
+                        emit('show-error', 'Достигнуто максимальное количество упражнений.');
+                    } else {
+                        console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.message}`);
+                    }
+                } else {
+                    console.error('Неизвестная ошибка:', error);
+                    emit('show-error', `Неизвестная ошибка: ${error}`)
+                }
             }
         };
 
@@ -205,14 +273,16 @@ export default defineComponent({
             lengthExercise,
             textExercise,
             zoneKeyboard,
-            selectedZones,
             handleSelectedValues,
             changeTextExercise,
             changeLengthExercise,
             closeModal,
             saveChanges,
-            generateExercise, // Возвращаем новый метод
+            generateExercise,
             getAllowedCharacters,
+            lengthError,
+            textError,
+            zoneError,
         };
     },
 });

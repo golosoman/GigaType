@@ -5,14 +5,16 @@
     <TableExerciseEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
         @addButtonClicked="openModal" @exerciseClick="handleExerciseClick" />
 
-    <CreateExerciseWindow :isVisible="isModalVisible" :keyboardZones="keyboardZones" :minCount="minCount"
-        :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
+    <CreateExerciseWindow @show-error="showToast" :isVisible="isModalVisible" :keyboardZones="keyboardZones"
+        :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
         :difficulty-id="selectedOption?.value" @update:isVisible="isModalVisible = $event" />
 
-    <EditExerciseWindow :isVisible="isEditModalVisible" :keyboardZones="keyboardZones" :minCount="minCount"
-        :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime" :taskId="tableData[0]?.uid"
-        :difficultyId="selectedOption?.value" :textExercise="currentExerciseContent"
+    <EditExerciseWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="keyboardZones"
+        :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
+        :taskId="tableData[0]?.uid" :difficultyId="selectedOption?.value" :textExercise="currentExerciseContent"
         @update:isVisible="isEditModalVisible = $event" />
+    <Toast v-if="toastVisible" v-model="toastVisible" :message="toastMessage" type="error"
+        @close="toastVisible = false" />
 </template>
 
 <script setup lang="ts">
@@ -20,6 +22,19 @@ import { ref, onMounted, watch } from 'vue'
 import { NavigationBarForAdmin, TableExerciseEditor, CreateExerciseWindow, EditExerciseWindow } from '@/component/trainer';
 import { BaseDropdown } from '@/component/UI';
 import { transformZones } from '@/component/Trainer/modalWindow';
+
+import { Toast } from '@/component/UI';
+
+const toastVisible = ref(false)
+const toastMessage = ref('')
+
+const showToast = (message: string) => {
+    toastMessage.value = message;
+    toastVisible.value = true;
+    setTimeout(() => {
+        toastVisible.value = false;
+    }, 3000);
+}
 
 interface DifficultyLevel {
     name: string;

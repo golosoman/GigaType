@@ -205,13 +205,21 @@ export default defineComponent({
                     withCredentials: true,
                 });
                 console.log('Ответ от сервера:', response);
-                emit('show-success', minCountError.value || maxCountError.value || timePressError.value || zoneError.value);
+                emit('show-success', "Уровень сложности успешно создан!");
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                    if (error.response?.status === 418) {
+                        console.error('Достигнуто максимальное количество уровней:', error.response.data);
+                        emit('show-error', 'Достигнуто максимальное количество уровней.');
+                    } else {
+                        console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.message}`);
+                    }
                 } else {
                     console.error('Неизвестная ошибка:', error);
+                    emit('show-error', `Неизвестная ошибка: ${error}`)
                 }
             }
         };
