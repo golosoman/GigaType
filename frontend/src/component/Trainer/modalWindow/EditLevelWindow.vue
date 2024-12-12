@@ -4,28 +4,35 @@
             <div class="title">
                 Изменение уровня сложности
             </div>
-            <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues" :keyboardZones="zoneKeyboard" />
+            <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues" :keyboard-zones="zoneKeyboard" />
+            <div v-if="zoneError" style="color: red;">{{ zoneError }}</div>
             <BaseInputWithLabel label="Минимальное количество символов"
                 inputPlaceholder="Введите минимальное количество символов:" :modelValue="minCountChar"
                 @update:modelValue="changeMinCountChar"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
+            <div v-if="minCountError" style="color: red;">{{ minCountError }}</div>
+
             <BaseInputWithLabel label="Максимальное количество символов"
                 inputPlaceholder="Введите максимальное количество символов:" :modelValue="maxCountChar"
                 @update:modelValue="changeMaxCountChar"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
+            <div v-if="maxCountError" style="color: red;">{{ maxCountError }}</div>
+
             <BaseInputWithLabel label="Время нажатия на клавишу" inputPlaceholder="Введите время нажатия на клавишу:"
                 :modelValue="timePressKey" @update:modelValue="changeTimePressKey"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
+            <div v-if="timePressError" style="color: red;">{{ timePressError }}</div>
+
             <BaseButton
                 customStyle="width: 150px; height: 30px; border-radius: 15px; margin-top: 41px; font-size: 20px; color: #012E4A;"
                 @click="saveChanges">
                 Сохранить
             </BaseButton>
             <ButtonWithImage class="close-button" @click="closeModal" :imageSrc="CloseUrl"
-                customStyle="background-color: #D9D9D9;" customStyleForImage="width: 30px; height: 30px;">
+                customStyle="background-color: #D9D9D9;" customStyleForImage="width: 30px;">
             </ButtonWithImage>
         </div>
     </div>
@@ -37,7 +44,7 @@ import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
 import axios from 'axios';
-import { transformZones, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow'
+import { transformZones, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
 
 export default defineComponent({
     name: 'EditLevelWindow',
@@ -95,20 +102,24 @@ export default defineComponent({
             "Зона 9 (символы)": '!"№;%:?*()_-+=',
             "Зона Пробела": " ",
         };
+
         const minCountChar = ref(props.minCount);
         const maxCountChar = ref(props.maxCount);
         const timePressKey = ref(props.timePressKey);
         const maxErrors = ref(props.maxErrors);
-        // Пример использования
-        const zoneKeyboard = ref(transformZones(props.keyboardZones)); // Преобразуем зоны
-        console.log(`Вот прилетели зоны: ${zoneKeyboard.value}`);
+        const zoneKeyboard = ref(transformZones(props.keyboardZones));
         const extractedZones = ref<{ keys: string, uid: string }[]>([]);
+
+        // Валидационные ошибки
+        const minCountError = ref('');
+        const maxCountError = ref('');
+        const timePressError = ref('');
+        const zoneError = ref('');
 
         const fetchZones = async () => {
             try {
                 const response = await axios.get('/api/zone/get', { withCredentials: true });
-                console.log('Зоны:', response.data);
-                extractedZones.value = response.data; // Сохраняем данные зон
+                extractedZones.value = response.data;
             } catch (error) {
                 console.error('Ошибка при получении зон:', error);
             }
@@ -120,18 +131,56 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
-            console.log(`Появились изменения ${values}`);
+            validateZones();
         };
+
         const changeMinCountChar = (value: number) => {
             minCountChar.value = value;
+            validateMinCountChar();
         };
 
         const changeMaxCountChar = (value: number) => {
             maxCountChar.value = value;
+            validateMaxCountChar();
         };
 
         const changeTimePressKey = (value: number) => {
             timePressKey.value = value;
+            validateTimePressKey();
+        };
+
+        const validateZones = () => {
+            if (zoneKeyboard.value.length === 0) {
+                zoneError.value = "Нужно выбрать хотя бы одну зону!";
+            } else {
+                zoneError.value = '';
+            }
+        };
+
+        const validateMinCountChar = () => {
+            if (minCountChar.value < 20 || minCountChar.value > 80) {
+                minCountError.value = 'Минимальное количество символов должно быть от 20 до 80.';
+            } else {
+                minCountError.value = '';
+            }
+        };
+
+        const validateMaxCountChar = () => {
+            if (maxCountChar.value < 20 || maxCountChar.value > 80) {
+                maxCountError.value = 'Максимальное количество символов должно быть от 20 до 80.';
+            } else if (maxCountChar.value <= minCountChar.value + 9) {
+                maxCountError.value = 'Максимальное количество символов должно быть больше минимального на 10.';
+            } else {
+                maxCountError.value = '';
+            }
+        };
+
+        const validateTimePressKey = () => {
+            if (timePressKey.value < 0.5 || timePressKey.value > 1.5) {
+                timePressError.value = 'Время нажатия на клавишу должно быть от 0.5 до 1.5.';
+            } else {
+                timePressError.value = '';
+            }
         };
 
         const closeModal = () => {
@@ -139,13 +188,22 @@ export default defineComponent({
         };
 
         const saveChanges = async () => {
+            validateMinCountChar();
+            validateMaxCountChar();
+            validateTimePressKey();
+            validateZones();
+
+            if (minCountError.value || maxCountError.value || timePressError.value || zoneError.value) {
+                emit('show-error', minCountError.value || maxCountError.value || timePressError.value || zoneError.value);
+                return;
+            }
 
             const payload = {
-                uid: props.difficultyId, // Используем uid из пропсов
+                uid: props.difficultyId,
                 min_length: minCountChar.value,
                 max_length: maxCountChar.value,
                 key_press_time: timePressKey.value,
-                max_mistakes: maxErrors.value, // Убедитесь, что maxErrors определен в вашем компоненте
+                max_mistakes: maxErrors.value,
                 zones: getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone)
             };
 
@@ -157,17 +215,17 @@ export default defineComponent({
                     withCredentials: true,
                 });
                 console.log('Ответ от сервера:', response.data);
-                // console.log(payload)
-                // Можно добавить логику для уведомления пользователя об успешном обновлении уровня сложности
+                emit('show-success', 'Уровень сложности успешно обновлен!');
+                closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                    emit('show-error', `Ошибка при отправке запроса: ${error.response?.data || error.message}`)
                 } else {
                     console.error('Неизвестная ошибка:', error);
+                    emit('show-error', `Неизвестная ошибка: ${error}`)
                 }
             }
-
-            closeModal();
         };
 
         return {
@@ -177,12 +235,15 @@ export default defineComponent({
             CloseUrl,
             zoneKeyboard,
             handleSelectedValues,
-            transformZones,
             changeMinCountChar,
             changeMaxCountChar,
             changeTimePressKey,
             closeModal,
             saveChanges,
+            minCountError,
+            maxCountError,
+            timePressError,
+            zoneError
         };
     },
 });

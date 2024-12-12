@@ -3,13 +3,16 @@
     <h2>Редактор уровня</h2>
     <TableLevelEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
         @createButtonClick="openModal" @levelClick="handleLevelClick" />
-    <CreateLevelWindow :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event"></CreateLevelWindow>
-    <EditLevelWindow :isVisible="isEditModalVisible" :keyboardZones="selectedLevelData.zones"
+    <CreateLevelWindow @show-error="showToast" :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
+    </CreateLevelWindow>
+    <EditLevelWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="selectedLevelData.zones"
         :difficulty-id="selectedLevelUid" :minCount="selectedLevelData.min_length"
         :maxCount="selectedLevelData.max_length" :maxErrors="selectedLevelData.max_mistakes"
         :timePressKey="selectedLevelData.key_press_time" :uid="selectedLevelData.uid"
         @update:isVisible="isEditModalVisible = $event" v-if="isEditModalVisible">
     </EditLevelWindow>
+    <Toast v-if="toastVisible" v-model="toastVisible" :message="toastMessage" type="error"
+        @close="toastVisible = false" />
 </template>
 
 <script setup lang="ts">
@@ -17,6 +20,19 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { NavigationBarForAdmin } from '@/component/trainer';
 import { TableLevelEditor, CreateLevelWindow, EditLevelWindow } from '@/component/trainer';
+import { Toast } from '@/component/UI';
+
+const toastVisible = ref(false)
+const toastMessage = ref('')
+
+const showToast = (message: string) => {
+    toastMessage.value = message;
+    toastVisible.value = true;
+    setTimeout(() => {
+        toastVisible.value = false;
+    }, 3000);
+}
+
 
 const isModalVisible = ref(false);
 const isEditModalVisible = ref(false); // Новая переменная для управления видимостью модального окна редактирования
