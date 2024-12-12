@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
     name: 'TextAreaComponent',
@@ -30,6 +30,11 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const text = ref<string>(props.modelValue);
+
+        // Наблюдатель за изменением пропса modelValue
+        watch(() => props.modelValue, (newValue) => {
+            text.value = newValue;
+        });
 
         const updateInput = (event: Event) => {
             const target = event.target as HTMLTextAreaElement;

@@ -2,11 +2,11 @@
     <nav class="navigation-bar">
         <div style="margin-left: 26px">
             <BaseLogo :logoSrc="logoUrl" customStyleForText="color: #012E4A; font-family: 'Alata'; font-size: 36px;"
-                customStyleForImg="width: 91px; height: 82px; ">
+                customStyleForImg="width: 91px; height: 82px;">
             </BaseLogo>
         </div>
         <div class="nav-links">
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/trainer">Тренажер
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" :href="trainerLink">Тренажер
             </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/choose_exercise">
                 Упражнения</BaseLink>
@@ -25,12 +25,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
 import BaseLogo from '../logo/BaseLogo.vue';
 import { BaseLink, ImageLink } from "@/component/UI";
-import LogoUrl from '@/assets/Logo.png'
-import UserUrl from '@/assets/User.png'
+import LogoUrl from '@/assets/Logo.png';
+import UserUrl from '@/assets/User.png';
 
+interface DifficultyLevel {
+    name: string;
+    uid: string;
+    min_length: number;
+    max_length: number;
+    key_press_time: number;
+    max_mistakes: number;
+    zones: { keys: string; uid: string }[];
+    tasks: Task[];
+}
+
+interface Task {
+    name: string;
+    content: string;
+    difficulty_id: string;
+    uid: string;
+}
 
 export default defineComponent({
     name: 'NavigationBar',
@@ -39,10 +56,51 @@ export default defineComponent({
         BaseLink,
         ImageLink,
     },
-    setup(props) {
+    setup() {
         const logoUrl = ref(LogoUrl);
         const userUrl = ref(UserUrl);
-        return { logoUrl, userUrl }
+        const trainerLink = ref('/app/trainer'); // Ссылка по умолчанию
+
+        const fetchDifficultyAndTasks = async () => {
+            const selectedLevelId = localStorage.getItem('selectedLevelId');
+            const selectedTaskId = localStorage.getItem('selectedTaskId');
+
+            if (selectedLevelId && selectedTaskId) {
+                // Если оба значения есть, формируем ссылку
+                trainerLink.value = `/app/trainer/${selectedLevelId}/${selectedTaskId}`;
+            } else {
+                // Если нет, запрашиваем уровень сложности
+                try {
+                    const response = await fetch('/api/difficulty/get');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data: DifficultyLevel[] = await response.json();
+
+                    // Находим уровень сложности и задание
+                    const levelWithTasks = data.find(level => level.tasks.length > 0);
+
+                    if (levelWithTasks && levelWithTasks.tasks.length > 0) {
+                        // Если нашел уровень с заданиями, берем первое задание
+                        const taskId = levelWithTasks.tasks[0].uid;
+                        localStorage.setItem('selectedLevelId', levelWithTasks.uid);
+                        localStorage.setItem('selectedTaskId', taskId);
+                        trainerLink.value = `/app/trainer/${levelWithTasks.uid}/${taskId}`;
+                    } else {
+                        // Если заданий нет, перенаправляем на страницу выбора упражнений
+                        window.location.href = '/app/choose_exercise';
+                    }
+                } catch (error) {
+                    console.error('Ошибка при получении уровней сложности:', error);
+                }
+            }
+        };
+
+        onMounted(() => {
+            fetchDifficultyAndTasks();
+        });
+
+        return { logoUrl, userUrl, trainerLink };
     }
 });
 </script>
@@ -60,7 +118,6 @@ export default defineComponent({
     border-radius: 30px;
     padding-top: 8px;
     padding-bottom: 8px;
-
 }
 
 .nav-links {

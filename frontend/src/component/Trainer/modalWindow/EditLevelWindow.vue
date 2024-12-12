@@ -2,7 +2,7 @@
     <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
             <div class="title">
-                Создание уровня сложности
+                Изменение уровня сложности
             </div>
             <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues" :keyboardZones="zoneKeyboard" />
             <BaseInputWithLabel label="Минимальное количество символов"
@@ -74,8 +74,8 @@ export default defineComponent({
         },
         difficultyId: {
             type: String,
-            required: false, // или уберите это, если хотите сделать его необязательным
-            default: undefined,
+            required: false,
+            default: null,
         },
         taskId: {
             type: String,
@@ -141,7 +141,7 @@ export default defineComponent({
         const saveChanges = async () => {
 
             const payload = {
-                uid: props.taskId, // Используем uid из пропсов
+                uid: props.difficultyId, // Используем uid из пропсов
                 min_length: minCountChar.value,
                 max_length: maxCountChar.value,
                 key_press_time: timePressKey.value,

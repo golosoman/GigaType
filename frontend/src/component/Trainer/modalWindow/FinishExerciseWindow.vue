@@ -2,9 +2,10 @@
     <div class="modal-overlay" v-if="isVisible">
         <div class="modal">
             <div class="modal-header">
-                <h2>{{ levelName }}</h2>
+                <h1>Результаты</h1>
             </div>
             <div class="modal-body">
+                <p><strong>Уровень:</strong> {{ levelName }}</p>
                 <p><strong>Упражнение:</strong> {{ exerciseName }}</p>
                 <p><strong>Скорость нажатий в минуту:</strong> {{ wpm }}</p>
                 <p><strong>Количество допущенных ошибок:</strong> {{ errorsMade }}/{{ allowedErrors }}</p>
@@ -12,14 +13,18 @@
                 <p><strong>Счет:</strong> {{ score }}</p>
             </div>
             <div class="modal-footer">
-                <a href="#link1Url" class="modal-link">Перейти на страницу 1</a>
-                <a href="#link2Url" class="modal-link">Перейти на страницу 2</a>
+                <BaseLink
+                    customStyle="width: 160px; height: 40px; border-radius: 15px; font-size: 25px; color: #012E4A;"
+                    href="#" @click.prevent="reloadPage">Повторить</BaseLink>
+                <BaseLink customStyle="width: 200px; height: 40px;border-radius: 15px; font-size: 25px; color: #012E4A;"
+                    href="/app/choose_exercise">К упражнениям</BaseLink>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import BaseLink from '@/component/UI/link/BaseLink.vue';
 import { defineProps } from 'vue';
 
 const props = defineProps<{
@@ -32,6 +37,10 @@ const props = defineProps<{
     timeSpent: number; // Затраченное время в секундах
     score: number; // Счет
 }>();
+
+const reloadPage = () => {
+    window.location.reload();
+};
 </script>
 
 <style scoped>
@@ -58,7 +67,7 @@ const props = defineProps<{
 
 .modal-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 

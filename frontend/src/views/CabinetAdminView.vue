@@ -10,21 +10,17 @@
                 </div>
 
                 <div class="input-container">
-                    <BaseInputWithLabel v-model="userName" label="Пользователь"
+                    <BaseInputWithLabel v-model="userName!" label="Пользователь"
                         customStyleForInput="width: 450px; height: 57px; font-size: 32px; pointer-events: none;"
                         customStyleForLabel="font-size: 32px; pointer-events: none;">
                     </BaseInputWithLabel>
                 </div>
-
             </div>
             <div>
                 <BaseButton
-                    customStyle="width: 35s0px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
+                    customStyle="width: 350px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
                     Изменить фотографию
                 </BaseButton>
-            </div>
-            <div>
-                <StackedBarChart></StackedBarChart>
             </div>
             <div>
                 <h2>Статистика</h2>
@@ -44,12 +40,12 @@
                         <BaseDropdown v-model="selectedOption" :options="options"
                             placeholder="Выберите уровень сложности" />
                         <div style="width: 600px; height: 300px;">
-                            <Bar :data="chartData" :options="chartOptions" />
+                            <Bar v-model:data="chartData" v-model:options="chartOptions" />
                         </div>
                     </div>
                     <div v-else-if="activeTab === 'trainees'">
                         <h2>Рейтинг среди обучаемых</h2>
-                        <RatingTable :user-data="userData" custom-style="width: 500px"></RatingTable>
+                        <RatingTable :userData="traineeData" custom-style="width: 500px"></RatingTable>
                     </div>
                 </div>
             </div>
@@ -58,41 +54,74 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, watch, type Ref } from 'vue';
 import { NavigationBarForAdmin, RatingTable } from '@/component/trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
-import UserImage from '@/assets/User.png'
-import { ref } from 'vue'
+import UserImage from '@/assets/User.png';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 
+interface DifficultyLevel {
+    name: string;
+    uid: string;
+}
+
+interface TraineeData {
+    login: string;
+    scores: number;
+}
+
+interface TraineeRanking {
+    Место: number;
+    Пользователь: string;
+    Рейтинг: number;
+}
+
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-const options = ['Уровень 1', 'Уровень 2', 'Уровень 3']; // Опции для выпадающего списка
-const selectedOption = ref(null); // Двусторонняя привязка с опциями
+const options = ref<{ label: string; value: string }[]>([]);
+const selectedOption = ref<{ label: string; value: string } | null>(null);
+// Определяем тип данных, которые вы получаете
+interface ExerciseData {
+    attempts: number[]; // Массив чисел
+    name: string;       // Имя упражнения
+}
 
-const chartData = ref({
-    labels: ['Упражнение 1', 'Упражнение 2', 'Упражнение 3'],
+// Определяем тип для данных гистограммы
+interface ChartData {
+    labels: string[];
+    datasets: {
+        label: string;
+        data: number[]; // Предполагаем, что данные будут числовыми
+        backgroundColor: string;
+    }[];
+}
+
+// Явно указываем тип для chartData
+const chartData: Ref<ChartData> = ref({
+    labels: [],
     datasets: [
         {
             label: 'Верные решения',
-            data: [15, 20, 0], // Количество верных решений для каждого упражнения
+            data: [],
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
         },
         {
             label: 'Ошибочные решения',
-            data: [5, 10, 0], // Количество ошибочных решений для каждого упражнения
+            data: [],
             backgroundColor: 'rgba(255, 99, 132, 0.6)',
         },
     ],
-})
+});
+
 const chartOptions = ref({
     responsive: true,
     scales: {
         x: {
-            stacked: true, // Включаем накопление по оси X
+            stacked: true,
         },
         y: {
-            stacked: true, // Включаем накопление по оси Y
+            stacked: true,
             beginAtZero: true,
         },
     },
@@ -105,31 +134,89 @@ const chartOptions = ref({
             text: 'Накопительная диаграмма верных и ошибочных решений',
         },
     },
-})
+});
 
+const userName = ref(localStorage.getItem("login"));
+const traineeData = ref<TraineeRanking[]>([]);
 
+const fetchDifficultyLevels = async () => {
+    try {
+        const response = await fetch('/api/difficulty/get');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: DifficultyLevel[] = await response.json();
 
-const userName = ref('admin')
+        options.value = data.map(item => ({
+            label: `Уровень ${item.name}`,
+            value: item.uid,
+        }));
 
-const userData = ref([
-    { Место: 1, Пользователь: 'Ivan', Рейтинг: 1500 },
-    { Место: 2, Пользователь: 'Anna', Рейтинг: 1450 },
-    { Место: 3, Пользователь: 'Petr', Рейтинг: 1400 },
-    { Место: 4, Пользователь: 'Svetlana', Рейтинг: 1350 },
-    { Место: 5, Пользователь: 'Dmitry', Рейтинг: 1300 },
-]);
+        if (options.value.length > 0) {
+            selectedOption.value = options.value[0];
+        }
+    } catch (error) {
+        console.error('Ошибка при получении уровней сложности:', error);
+    }
+};
 
-const userStatistics = ref([
-    { Упражнение: 1, Статус: 'Выполнено', Скорость: '110 симв/мин', Ошибки: '3/5', Время: '120 с' },
-    { Упражнение: 2, Статус: 'Не выполнено', Скорость: '130 симв/мин', Ошибки: '5/6', Время: '130 с' },
-    { Упражнение: 3, Статус: 'Выполнено', Скорость: '120 симв/мин', Ошибки: '5/5', Время: '125 с' },
-    // Добавьте дополнительные данные по мере необходимости
-]);
+const fetchTraineeData = async () => {
+    try {
+        const response = await fetch('/api/stat/top');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: TraineeData[] = await response.json();
 
-// Reactive property to track which tab is active
+        traineeData.value = data.map((item, index) => ({
+            Место: index + 1,
+            Пользователь: item.login,
+            Рейтинг: item.scores,
+        }));
+    } catch (error) {
+        console.error('Ошибка при получении данных рейтинга:', error);
+    }
+};
+
+// Функция для получения данных по упражнениям
+const fetchExerciseData = async (difficultyUid: string) => {
+    try {
+        const response = await fetch(`/api/stat/get?difficulty_uid=${difficultyUid}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data: ExerciseData[] = await response.json();
+
+        // Проверка, есть ли данные, и обновление данных для гистограммы
+        if (data.length > 0) {
+            chartData.value.labels = data.map((item: ExerciseData) => `Упражнение ${item.name}`);
+            chartData.value.datasets[0].data = data.map((item: ExerciseData) => item.attempts[0]); // Верные решения
+            chartData.value.datasets[1].data = data.map((item: ExerciseData) => item.attempts[1]); // Ошибочные решения
+        } else {
+            // Если данных нет, обнуляем массивы
+            chartData.value.labels = [];
+            chartData.value.datasets[0].data = [0];
+            chartData.value.datasets[1].data = [0];
+        }
+    } catch (error) {
+        console.error('Ошибка при получении данных по упражнениям:', error);
+    }
+};
+
+// Вызов функций при монтировании компонента
+onMounted(() => {
+    fetchDifficultyLevels();
+    fetchTraineeData();
+});
+
+// Следим за изменением выбранного уровня сложности
+watch(selectedOption, (newValue) => {
+    if (newValue) {
+        fetchExerciseData(newValue.value); // Передаем uid уровня сложности
+    }
+});
+
 const activeTab = ref('');
-
-// Function to set the active tab
 const setActiveTab = (tab: string) => {
     activeTab.value = tab;
 };

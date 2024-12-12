@@ -67,6 +67,7 @@ export default defineComponent({
         // Флаг для отслеживания состояния таймера (возможно таймер или отслеживание кликов можно удалить)
         const timerRunning = ref(false);
         let timer: ReturnType<typeof setInterval>;
+        let pressTimer: ReturnType<typeof setInterval>;
 
         const calculateScore = () => {
             const timeBonus = Math.max(0, 120 - elapsedTime.value);
@@ -81,7 +82,7 @@ export default defineComponent({
 
         const handleUpdateTextInput = (inputText: string) => {
             textFromInput.value = inputText;
-            checkLastKeyPressTime();
+            lastKeyPressTime.value = Date.now();
         };
 
         const handleThrowCurrentCharacter = (character: string) => {
@@ -115,11 +116,12 @@ export default defineComponent({
                 errorsCount.value,
                 elapsedTime.value,
                 score.value,
+                textFromInput.value.length
             ]);
         };
 
         const handleInvalidCharacter = (invalidChar: string) => {
-            checkLastKeyPressTime();
+            lastKeyPressTime.value = Date.now();
             if (errorsCount.value < props.maxErrors) {
                 errorsCount.value += 1;
                 console.log(`Неверный символ: ${invalidChar}`);
@@ -135,12 +137,14 @@ export default defineComponent({
                     errorsCount.value,
                     elapsedTime.value,
                     score.value,
+                    textFromInput.value.length
                 ]);
             }
         };
 
         const resetStatistics = () => {
             clearInterval(timer);
+            clearInterval(pressTimer);
             score.value = 0;
             trackClicks.value = false;
             timerRunning.value = false; // Остановить таймер
@@ -159,6 +163,11 @@ export default defineComponent({
                     elapsedTime.value += 1;
                     updateSpeed();
                 }, 1000);
+                pressTimer = setInterval(() => {
+                    if (timerRunning.value) {
+                        checkLastKeyPressTime()
+                    }
+                }, props.maxKeyPressInterval);
             }
         };
 

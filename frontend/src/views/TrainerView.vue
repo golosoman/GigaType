@@ -12,6 +12,7 @@ interface CompletionData {
     errorsCount: number;
     elapsedTime: number;
     score: number;
+    numbersCount: number;
 }
 
 const isModalVisible = ref(false);
@@ -21,10 +22,21 @@ const resultData = ref<CompletionData>({
     speed: 0,
     errorsCount: 0,
     elapsedTime: 0,
-    score: 0
+    score: 0,
+    numbersCount: 0
+});
+
+const exerciseData = ref<CompletionData>({
+    level: "",
+    exercise: "",
+    speed: 0,
+    errorsCount: 0,
+    elapsedTime: 0,
+    score: 0,
+    numbersCount: 0
 });
 const showKeyboard = ref(false);
-const currentCharacter = ref('');
+const currentCharacter = ref(' ');
 const textToType = ref(''); // Для хранения текста для печати
 
 const route = useRoute();
@@ -60,6 +72,26 @@ const fetchTaskData = async (taskId: string) => {
     }
 };
 
+const sendCompletionData = async (success: boolean) => {
+    const taskUid = route.params.exerciseId; // id упражнения из URL
+    const data = {
+        task_uid: taskUid,
+        used_time: resultData.value.elapsedTime,
+        mistakes: resultData.value.errorsCount,
+        clicks_number: resultData.value.numbersCount, // Замените на реальное количество нажатий, если нужно
+        success: success,
+        score: resultData.value.score,
+    };
+
+    try {
+        await axios.post('/api/stat/create', data);
+        console.log("Данные успешно отправлены на сервер:", data);
+    } catch (error) {
+        console.log(`${data} - данные все сломали`)
+        console.error("Ошибка при отправке данных на сервер:", error);
+    }
+};
+
 onMounted(async () => {
     const { params } = route;
     const levelId = params.levelId; // id уровня сложности из URL
@@ -70,10 +102,10 @@ onMounted(async () => {
     const taskData = await fetchTaskData(exerciseId);
 
     if (difficultyData && taskData) {
-        resultData.value.level = difficultyData.name;
-        resultData.value.exercise = taskData.name;
-        resultData.value.errorsCount = difficultyData.max_mistakes;
-        resultData.value.elapsedTime = difficultyData.key_press_time;
+        exerciseData.value.level = difficultyData.name;
+        exerciseData.value.exercise = taskData.name;
+        exerciseData.value.errorsCount = difficultyData.max_mistakes;
+        exerciseData.value.elapsedTime = difficultyData.key_press_time;
         textToType.value = taskData.content; // Устанавливаем текст для печати
     }
 });
@@ -86,8 +118,10 @@ const handleSuccessCompletion = (data: any[]) => {
         errorsCount: data[3],
         elapsedTime: data[4],
         score: data[5],
+        numbersCount: data[6]
     };
     isModalVisible.value = true;
+    sendCompletionData(true); // Отправляем данные с успехом
 };
 
 const handleErrorCompletion = (data: any[]) => {
@@ -98,11 +132,14 @@ const handleErrorCompletion = (data: any[]) => {
         errorsCount: data[3],
         elapsedTime: data[4],
         score: data[5],
+        numbersCount: data[6]
     };
     isModalVisible.value = true;
+    sendCompletionData(false); // Отправляем данные с ошибкой
 };
 
 const handleCurrentCharacter = (character: string) => {
+    console.log("Новый символ" + character)
     currentCharacter.value = character;
 };
 
@@ -116,8 +153,8 @@ const toggleKeyboardVisibility = (value: boolean) => {
         <NavigationBarForTrainee></NavigationBarForTrainee>
         <div class="content">
             <div>
-                <TypingTrainer :level="resultData!.level" :exercise="resultData!.exercise" :maxErrors="5"
-                    :textToType="textToType"
+                <TypingTrainer :level="exerciseData!.level" :exercise="exerciseData!.exercise"
+                    :maxErrors="exerciseData!.errorsCount" :textToType="textToType"
                     customStyleForTrainingField="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px;"
                     @success-completion="handleSuccessCompletion" @error-completion="handleErrorCompletion"
                     @current-charrecter="handleCurrentCharacter" />
@@ -130,7 +167,8 @@ const toggleKeyboardVisibility = (value: boolean) => {
             <Keyboard v-if="showKeyboard" class="keyboard" :currentCharacter="currentCharacter" />
             <FinishExerciseWindow :isVisible="isModalVisible" :levelName="resultData!.level"
                 :exerciseName="resultData!.exercise" :wpm="resultData!.speed" :errorsMade="resultData!.errorsCount"
-                :allowedErrors="5" :timeSpent="resultData!.elapsedTime" :score="resultData!.score">
+                :allowedErrors="exerciseData.errorsCount" :timeSpent="resultData!.elapsedTime"
+                :score="resultData!.score">
             </FinishExerciseWindow>
         </div>
     </div>
