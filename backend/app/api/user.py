@@ -38,7 +38,7 @@ def register():
     if check_all_args(User, data, "login", "password"):
         try:
             if db.session.execute(select(User).where(User.login == data["login"])).first():
-                return message("Пользователь с таким именем уже существует.", 406)
+                return message("Пользователь с таким именем уже существует.", 418)
             password_hash = generate_password_hash(data['password'])
             new_user = User(data['login'], password_hash)
             db.session.add(new_user)
@@ -92,10 +92,10 @@ def login():
         if not exist_user:
             return message("Неверный логин", 404)
         exist_user: User = exist_user[0]
-        if exist_user.status_id == 2:
-            return delete_cookie("Вы заблокированы")
         if not check_password_hash(exist_user.password_hash, data['password']):
             return message("Неверный пароль.", 403)
+        if exist_user.status_id == 2:
+            return delete_cookie("Вы заблокированы")
         return send_cookie(exist_user.id, exist_user.uuid, exist_user.login)
     else:
         return message("Недостаточно данных", 406)
