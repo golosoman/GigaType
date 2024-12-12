@@ -36,8 +36,12 @@ export default defineComponent({
                 } else {
                     router.push('/app/cabinet/trainee'); // Перенаправляем обычного пользователя
                 }
-            } catch (error) {
+            } catch (error: any) { // Явно указываем тип error как any
                 console.error('Ошибка входа:', error); // Обработка ошибки
+
+                // Извлекаем сообщение об ошибке из ответа сервера
+                const errorMessage = error.response?.data?.message || 'Ошибка входа. Пожалуйста, попробуйте еще раз.';
+                emit('show-error', errorMessage); // Генерируем событие с сообщением об ошибке
             }
         };
 

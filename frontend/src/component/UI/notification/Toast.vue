@@ -27,6 +27,7 @@ export default defineComponent({
         },
         duration: {
             type: Number,
+            required: false,
             default: 3000, // продолжительность отображения в миллисекундах
         },
     },
