@@ -20,7 +20,7 @@ def create():
     :return: {message: str}, code, Content-Type
     """
     if len(db.session.execute(select(Difficulty)).all()) == 12:
-        return message("Достигнуто максимальное количество уровней сложности (12).", 403)
+        return message("Достигнуто максимальное количество уровней сложности (12).", 418)
     data = request.json
     if check_all_args(Difficulty, data, exclude=["tasks", "name", "max_mistakes"]):
         if len(db.session.execute(select(Difficulty)).all()) == 3:
