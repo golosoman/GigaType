@@ -36,7 +36,7 @@ const exerciseData = ref<CompletionData>({
     numbersCount: 0
 });
 const showKeyboard = ref(false);
-const currentCharacter = ref('');
+const currentCharacter = ref(' ');
 const textToType = ref(''); // Для хранения текста для печати
 
 const route = useRoute();
@@ -139,6 +139,7 @@ const handleErrorCompletion = (data: any[]) => {
 };
 
 const handleCurrentCharacter = (character: string) => {
+    console.log("Новый символ" + character)
     currentCharacter.value = character;
 };
 
