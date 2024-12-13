@@ -42,6 +42,7 @@ def generate():
     content = ""
     prev_chunk_length = 0
     while len(content) < int(data['length']):
+        print(f"{(len(content)/int(data['length']))*100}%")
         if content:
             content += " "
         while True:
@@ -53,4 +54,6 @@ def generate():
         content += " ".join([base_chunk for _ in range(randint(1, 5))])
     content = content[:int(data['length'])]
     content = content.strip()
-    return send_json_data({"content": content})
+    if len(content) != int(data['length']):
+        content += "".join(choices(available_chars, k=int(data['length'])-len(content)))
+    return send_json_data({"content": content, "length": len(content)})
