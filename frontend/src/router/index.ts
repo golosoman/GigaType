@@ -21,9 +21,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
-      component: HomeView,
-      meta: { requiresAuth: false },
+      redirect: { name: "auth" }, // Перенаправляем на страницу авторизации
     },
     {
       path: "/test",
@@ -112,8 +110,16 @@ router.beforeEach((to, from, next) => {
       // Если пользователь не авторизован, перенаправляем на страницу авторизации
       next({ name: "auth" });
     } else if (Array.isArray(to.meta.roles) && !to.meta.roles.includes(role)) {
-      // Удалена строка перенаправления на домашнюю страницу
-      next({ name: "auth" });
+      // Если у пользователя нет прав доступа к маршруту
+      if (role === "admin") {
+        // Перенаправляем админа на страницу личного кабинета администратора
+        next({ name: "admin_cabinet" });
+      } else if (role === "user") {
+        // Перенаправляем пользователя на страницу личного кабинета пользователя
+        next({ name: "cabinet" });
+      } else {
+        next({ name: "auth" }); // Если роль не распознана, перенаправляем на страницу авторизации
+      }
     } else {
       next(); // Разрешаем доступ
     }

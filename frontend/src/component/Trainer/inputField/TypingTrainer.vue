@@ -2,6 +2,7 @@
     <div class="trainer-container">
         <div class="full-width">
             <div>Упражнение {{ level }}.{{ exercise }}</div>
+            <div>Количество символов {{ textFromInput.length }}/{{ textToType.length }}</div>
             <div>Скорость: {{ speed }} симв/мин</div>
             <div>Ошибки: {{ errorsCount }}/{{ maxErrors }}</div>
             <div>Время: {{ elapsedTime }} сек</div>
