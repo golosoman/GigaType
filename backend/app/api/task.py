@@ -20,14 +20,16 @@ def create():
     Payload: json{content: str, difficulty_id: str}
     :return: {message: str}, code, Content-Type
     """
-    if len(db.session.execute(select(Task)).all()) == 20:
-        return message("Достигнуто максимальное количество упражнений для данного уровня.", 418)
     data = request.json
     if check_all_args(Task, data, exclude=["difficulty", "name"]):
         difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid == data['difficulty_id'])).first()
         if not difficulty:
             return message("Неверный uid сложности.", 404)
         difficulty: Difficulty = difficulty[0]
+
+        if len(db.session.execute(select(Task).where(Task.difficulty_id==difficulty.id)).all()) == 20:
+            return message("Достигнуто максимальное количество упражнений для данного уровня.", 418)
+
         if len(db.session.execute(select(Task).where(Task.difficulty_id == difficulty.id)).all()) == 0:
             data["name"] = "1"
         else:
