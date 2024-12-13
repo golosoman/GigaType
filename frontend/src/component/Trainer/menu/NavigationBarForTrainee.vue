@@ -10,7 +10,7 @@
             </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/choose_exercise">
                 Упражнения</BaseLink>
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/trainer">Тестовое
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/trainer/test">Тестовое
                 задание
             </BaseLink>
             <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/system">О

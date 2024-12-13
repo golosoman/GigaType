@@ -15,6 +15,14 @@
                         customStyleForLabel="font-size: 32px; pointer-events: none;">
                     </BaseInputWithLabel>
                 </div>
+
+                <!-- Кнопка "Выход" -->
+                <div class="logout-button-container">
+                    <BaseButton @click="handleLogout"
+                        customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; background-color: #FF8080; margin-left: 10px;">
+                        Выход
+                    </BaseButton>
+                </div>
             </div>
             <div>
                 <h2>Статистика</h2>
@@ -60,6 +68,11 @@ import UserImage from '@/assets/User.png';
 import { ref, onMounted, watch } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
+import { useUser } from '@/store'; // Импортируем store
+
+
+// Инициализация store
+const userStore = useUser();
 
 interface DifficultyLevel {
     name: string;
@@ -101,6 +114,17 @@ interface TraineeData {
     login: string;
     scores: number;
 }
+
+// Функция для выхода из аккаунта
+const handleLogout = async () => {
+    try {
+        await userStore.logout(); // Вызов метода logout из store
+        // Дополнительные действия после выхода (например, перенаправление на главную страницу)
+        window.location.href = '/'; // Перенаправление на главную страницу (или другую страницу)
+    } catch (error) {
+        console.error('Ошибка при выходе:', error);
+    }
+};
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
@@ -272,6 +296,8 @@ const setActiveTab = (tab: string) => {
     display: flex;
     align-items: flex-start;
     margin-top: 20px;
+    justify-content: space-between;
+    /* Добавлено для выравнивания по краям */
 }
 
 .input-container {
@@ -280,6 +306,15 @@ const setActiveTab = (tab: string) => {
     justify-content: flex-start;
     margin-left: 50px;
     margin-top: 50px;
+}
+
+.logout-button-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    /* Выровнять кнопку по правому краю */
+    margin-top: 50px;
+    /* Добавить отступ сверху для выравнивания */
 }
 
 .BaseImage {

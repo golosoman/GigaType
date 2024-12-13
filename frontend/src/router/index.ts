@@ -14,6 +14,7 @@ import {
 } from "@/views";
 import c from "@/store/c.vue";
 import { useUser } from "@/store/index"; // Импортируем хранилище пользователей
+import TestExerciseView from "@/views/TestExerciseView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +41,12 @@ const router = createRouter({
       path: "/app/trainer/:levelId/:exerciseId",
       name: "trainer",
       component: TrainerView,
+      meta: { requiresAuth: true, roles: ["TRAINEE", "ADMIN"] },
+    },
+    {
+      path: "/app/trainer/test",
+      name: "trainer_test",
+      component: TestExerciseView,
       meta: { requiresAuth: true, roles: ["TRAINEE", "ADMIN"] },
     },
     {
@@ -105,8 +112,8 @@ router.beforeEach((to, from, next) => {
       // Если пользователь не авторизован, перенаправляем на страницу авторизации
       next({ name: "auth" });
     } else if (Array.isArray(to.meta.roles) && !to.meta.roles.includes(role)) {
-      // Если у пользователя нет прав доступа к маршруту
-      next({ name: "home" }); // Или перенаправьте на другую страницу
+      // Удалена строка перенаправления на домашнюю страницу
+      next({ name: "auth" });
     } else {
       next(); // Разрешаем доступ
     }
