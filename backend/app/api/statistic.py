@@ -149,13 +149,14 @@ def get():
 
     elif "user_uuid" in request.args:
         user = db.session.execute(select(User).where(User.uuid == request.args["user_uuid"])).first()
+        print(user)
         if not user:
             return message("Неверный uuid пользователя.", 404)
         user: User = user[0]
         statistics = [statistic[0] for statistic in
                       db.session.execute(select(Statistic)
                                          .where(
-                          User.uuid == user.uuid
+                          Statistic.user_id == user.id
                       ).order_by(Statistic.timestamp)).all()]
         return send_json_data(
             make_json_response(statistics, "clicks_per_minute", "timestamp", "task", exclude=["task"], get={"task": "uid"}))
