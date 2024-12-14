@@ -1,11 +1,14 @@
+import copy
+import json
 import pprint
 from typing import List
 
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request
 from sqlalchemy import select, and_, delete
 
 from app import db
-from app.models import Task, Difficulty
+from app.api.content import generate
+from app.models import Task, Difficulty, KeyBoardZone
 from app.utils import (admin_required, message, send_json_data, check_all_args, check_one_arg, make_json_response,
                        util_round, login_required)
 
@@ -21,11 +24,21 @@ def create():
     :return: {message: str}, code, Content-Type
     """
     data = request.json
-    if check_all_args(Task, data, exclude=["difficulty", "name"]):
+    if check_all_args(Task, data, exclude=["difficulty", "name", "zones"], additional=["zones"]):
         difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid == data['difficulty_id'])).first()
         if not difficulty:
             return message("Неверный uid сложности.", 404)
         difficulty: Difficulty = difficulty[0]
+
+        zones: List["KeyBoardZone"] = []
+        for uid in data['zones']:
+            zone = db.session.execute(select(KeyBoardZone).where(KeyBoardZone.uid == uid)).first()
+            if not zone:
+                return message("Неверный id зоны клавиатуры", 404)
+            zones.append(zone[0])
+        for zone in zones:
+            if zone not in difficulty.zones:
+                return message("Одна из выбранных зон не входит в список доступных зон для сложности")
 
         if len(db.session.execute(select(Task).where(Task.difficulty_id==difficulty.id)).all()) == 20:
             return message("Достигнуто максимальное количество упражнений для данного уровня.", 418)
@@ -42,7 +55,8 @@ def create():
                 Task(
                     name=data['name'],
                     content=data['content'],
-                    difficulty=difficulty
+                    difficulty=difficulty,
+                    zones=zones
                 )
             )
             db.session.commit()
@@ -53,7 +67,7 @@ def create():
             db.session.commit()
             return message("Произошла ошибка", 500)
     else:
-        message("Недостаточно данных", 406)
+        return message("Недостаточно данных", 406)
 
 
 @task_api.route("/update", methods=["PATCH"])
@@ -64,7 +78,7 @@ def update_():
     Payload: json{uid: str, content: str, difficulty_id: str}
     :return: {message: str}, code, Content-Type
     """
-    data: dict = request.json
+    data: dict = copy.copy(request.json)
     if check_one_arg(Task, data, should_be=['uid']):
         task = db.session.execute(select(Task).where(Task.uid==data['uid'])).first()
         if not task:
@@ -78,9 +92,33 @@ def update_():
                     if not difficulty:
                         return message("Неверный uid сложности", 404)
                     task.difficulty = difficulty[0]
+
+                elif arg == "zones":
+                    zones: List["KeyBoardZone"] = []
+                    for uid in data['zones']:
+                        zone = db.session.execute(select(KeyBoardZone).where(KeyBoardZone.uid == uid)).first()
+                        if not zone:
+                            return message("Неверный id зоны клавиатуры", 404)
+                        zones.append(zone[0])
+                    for zone in zones:
+                        if zone not in task.difficulty.zones:
+                            return message("Одна из выбранных зон не входит в список доступных зон для сложности")
+                    if task.zones != zones:
+                        if "content" not in data:
+                            request.json["length"] = len(task.content)
+                            request.json['uids'] = request.json['zones']
+                            task.content = json.loads(generate()[0])['content']
+                        task.zones = zones
+
                 else:
                     if task.__getattribute__(arg) != data[arg]:
                         task.__setattr__(arg, data[arg])
+            if db.session.execute(select(Task).where(and_(
+                Task.uid != task.uid,
+                Task.difficulty_id == task.difficulty_id,
+                Task.content == task.content
+            ))).first():
+                return message("Контент задания должен быть уникальным")
             db.session.commit()
             return message("Okay", 200)
         except BaseException as e:
@@ -142,3 +180,13 @@ def get():
         tasks = [task[0] for task in db.session.execute(select(Task)).all()]
         tasks.sort(key=lambda x: (int(getattr(getattr(x, "difficulty"), "name")), int(getattr(x, "name"))))
         return send_json_data(make_json_response(tasks, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": ["uid", "name"]}))
+
+
+def check_content(task: Task, zones: List["KeyBoardZone"]):
+    shouldRegenerate = False
+    for zone in task.zones:
+        if zone not in zones:
+            shouldRegenerate = True
+    if shouldRegenerate:
+        request.json['length'] = len(task.content)
+        task.content = json.loads(generate()[0])['content']
