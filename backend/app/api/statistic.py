@@ -189,4 +189,6 @@ def top():
         temp.scores = int(statistic[1])
         top_list.append(temp)
     print(top_list)
+    top_list.sort(key=lambda x: x.scores)
+    top_list.reverse()
     return send_json_data(make_json_response(top_list))
