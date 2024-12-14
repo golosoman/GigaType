@@ -1,9 +1,11 @@
+import copy
 from typing import List
 
-from flask import Blueprint, request, make_response
-from sqlalchemy import select, and_, delete
+from flask import Blueprint, request
+from sqlalchemy import select, delete
 
 from app import db
+from app.api.task import check_content
 from app.models import Difficulty, KeyBoardZone
 from app.utils import (admin_required, message, send_json_data, check_all_args, check_one_arg, make_json_response,
                        util_round, login_required)
@@ -68,7 +70,7 @@ def update_():
     Payload: json{uid:str, name: str | min_length: int | max_length: int | key_press_time: float | max_mistakes: int | zones: list[str]}
     :return: {message: str}, code, Content-Type
     """
-    data: dict = request.json
+    data: dict = copy.copy(request.json)
     if check_one_arg(Difficulty, data, should_be=["uid"]):
         difficulty = db.session.execute(select(Difficulty).where(Difficulty.uid == data['uid'])).first()
         if not difficulty:
@@ -84,7 +86,11 @@ def update_():
                         if not zone:
                             return message("Неверный id зоны клавиатуры", 404)
                         zones.append(zone[0])
-                    difficulty.zones = zones
+                    if difficulty.zones != zones:
+                        difficulty.zones = zones
+                        for task in difficulty.tasks:
+                            request.json['uids'] = request.json["zones"]
+                            check_content(task, zones)
                 else:
                     if difficulty.__getattribute__(arg)!=data[arg]:
                         difficulty.__setattr__(arg, data[arg])
