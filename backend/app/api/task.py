@@ -38,7 +38,7 @@ def create():
             zones.append(zone[0])
         for zone in zones:
             if zone not in difficulty.zones:
-                return message("Одна из выбранных зон не входит в список доступных зон для сложности")
+                return message("Одна из выбранных зон не входит в список доступных зон для сложности", 406)
 
         if len(db.session.execute(select(Task).where(Task.difficulty_id==difficulty.id)).all()) == 20:
             return message("Достигнуто максимальное количество упражнений для данного уровня.", 418)
@@ -55,7 +55,7 @@ def create():
                 Task.difficulty_id == difficulty.id,
                 Task.content == data['content']
         ))).first():
-            return message("Контент задания должен быть уникальным")
+            return message("Контент задания должен быть уникальным", 406)
 
         try:
             db.session.add(
@@ -109,7 +109,7 @@ def update_():
                         zones.append(zone[0])
                     for zone in zones:
                         if zone not in task.difficulty.zones:
-                            return message("Одна из выбранных зон не входит в список доступных зон для сложности")
+                            return message("Одна из выбранных зон не входит в список доступных зон для сложности", 406)
                     if task.zones != zones:
                         if "content" not in data:
                             request.json["length"] = len(task.content)
@@ -125,7 +125,7 @@ def update_():
                 Task.difficulty_id == task.difficulty_id,
                 Task.content == task.content
             ))).first():
-                return message("Контент задания должен быть уникальным")
+                return message("Контент задания должен быть уникальным", 406)
             db.session.commit()
             return message("Okay", 200)
         except BaseException as e:
