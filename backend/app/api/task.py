@@ -50,6 +50,13 @@ def create():
             data["name"] = str(int(name[0])+1)
         if db.session.execute(select(Task).where(and_(Task.name==data['name'], Task.difficulty_id==difficulty.id))).first():
             return message("Название уже используется.", 406)
+
+        if db.session.execute(select(Task).where(and_(
+                Task.difficulty_id == difficulty.id,
+                Task.content == data['content']
+        ))).first():
+            return message("Контент задания должен быть уникальным")
+
         try:
             db.session.add(
                 Task(
