@@ -59,6 +59,13 @@ difficulty_zone = Table(
     Column("keyboardzone_id", ForeignKey("keyboardzone.id", ondelete="CASCADE"))
 )
 
+task_zone = Table(
+    "task_zone",
+    Base.metadata,
+    Column("task_id", ForeignKey("task.id", ondelete="CASCADE")),
+    Column("keyboardzone_id", ForeignKey("keyboardzone.id", ondelete="CASCADE"))
+)
+
 
 class KeyBoardZone(Base):
     uid: Mapped[str] = mapped_column(String(36), unique=True)
@@ -66,6 +73,10 @@ class KeyBoardZone(Base):
     difficulty: Mapped[List["Difficulty"]] = relationship(
         secondary=difficulty_zone,
         back_populates="zones",
+    )
+    task: Mapped[List["Task"]] = relationship(
+        secondary=task_zone,
+        back_populates="zones"
     )
 
     def __init__(self, keys: str):
@@ -82,12 +93,17 @@ class Task(Base):
         back_populates="tasks",
         uselist=False
     )
+    zones: Mapped[List["KeyBoardZone"]] = relationship(
+        secondary=task_zone,
+        back_populates="task"
+    )
 
     def __init__(self,
                  name: str,
                  content: str,
                  difficulty_id: int = None,
                  difficulty=None,
+                 zones=None
                  ):
         self.uid = str(uuid4())
         self.name = name
@@ -96,6 +112,8 @@ class Task(Base):
             self.difficulty_id = difficulty_id
         if difficulty:
             self.difficulty = difficulty
+        if zones:
+            self.zones = zones
 
 
 class Difficulty(Base):

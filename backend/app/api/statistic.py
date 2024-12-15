@@ -64,6 +64,9 @@ def get():
             return message("Неверный uuid пользователя.", 404)
         user: User = user[0]
 
+        if user.status_id == 2:
+            return message("Пользователь заблокирован", 418)
+
         difficulty = db.session.execute(
             select(Difficulty).where(Difficulty.uid == request.args["difficulty_uid"])).first()
         if not difficulty:
@@ -122,9 +125,10 @@ def get():
         tasks_data = json.loads(get()[0])
         for task_data in tasks_data:
             task_id = db.session.execute(select(Task.id).where(Task.uid == task_data["uid"])).first()[0]
-            query = select(func.count()).where(
-                    Statistic.task_id == task_id
-            ).group_by(Statistic.task_id).select_from(Statistic)
+            query = select(func.count()).where(and_(
+                Statistic.task_id == task_id,
+                User.status_id != 2
+            )).group_by(Statistic.task_id).join(User).select_from(Statistic)
             all_amount = db.session.execute(query).first()
 
             if not all_amount:
@@ -153,6 +157,10 @@ def get():
         if not user:
             return message("Неверный uuid пользователя.", 404)
         user: User = user[0]
+
+        if user.status_id == 2:
+            return message("Пользователь заблокирован", 418)
+
         statistics = [statistic[0] for statistic in
                       db.session.execute(select(Statistic)
                                          .where(
@@ -175,7 +183,8 @@ def top():
         .where(
             and_(
                 Statistic.user_id != 1,
-                Statistic.success == 1
+                Statistic.success == 1,
+                User.status_id != 2
             )
         ).group_by(Statistic.user_id)
         .join(User).select_from(Statistic))
@@ -189,4 +198,6 @@ def top():
         temp.scores = int(statistic[1])
         top_list.append(temp)
     print(top_list)
+    top_list.sort(key=lambda x: x.scores)
+    top_list.reverse()
     return send_json_data(make_json_response(top_list))
