@@ -121,6 +121,16 @@ export default defineComponent({
         const textError = ref('');
         const zoneError = ref('');
 
+        const resetValues = () => {
+            textsExercise.value = props.textExercise;
+            lengthExercise.value = '';
+            zoneKeyboard.value = props.keyboardZones;
+
+            lengthError.value = "";
+            textError.value = "";
+            zoneError.value = "";
+        }
+
         watch(() => props.keyboardZones, (newZones) => {
             zoneKeyboard.value = newZones;
             console.log(`Зоны изменились! ${newZones}`);
@@ -148,6 +158,7 @@ export default defineComponent({
         };
 
         const closeModal = () => {
+            resetValues();
             emit('update:isVisible', false);
         };
 

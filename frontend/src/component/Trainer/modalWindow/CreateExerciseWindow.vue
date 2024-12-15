@@ -108,6 +108,21 @@ export default defineComponent({
         const textError = ref('');
         const zoneError = ref('');
 
+        const resetValues = () => {
+            textExercise.value = '';
+            lengthExercise.value = '';
+            zoneKeyboard.value = props.keyboardZones;
+
+            lengthError.value = "";
+            textError.value = "";
+            zoneError.value = "";
+        }
+
+        const closeModal = () => {
+            resetValues();
+            emit('update:isVisible', false);
+        };
+
         watch(() => props.keyboardZones, (newZones) => {
             zoneKeyboard.value = newZones;
             console.log(`Зоны изменились! ${newZones}`);
@@ -127,11 +142,6 @@ export default defineComponent({
         const changeLengthExercise = (value: number) => {
             lengthExercise.value = value;
             validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
-        };
-
-        const closeModal = () => {
-            textExercise.value = '';
-            emit('update:isVisible', false);
         };
 
         const extractedZones = ref<{ keys: string, uid: string }[]>([]);

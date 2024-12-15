@@ -53,13 +53,16 @@ export default defineComponent({
         const loginError = ref('');
         const passwordError = ref('');
 
-        const closeModal = () => {
-            emit('update:isVisible', false);
-            // Сбрасываем значения и ошибки при закрытии модального окна
+        const resetValues = () => {
             login.value = '';
             password.value = '';
             loginError.value = '';
             passwordError.value = '';
+        }
+
+        const closeModal = () => {
+            resetValues()
+            emit('update:isVisible', false);
         };
 
         const onLoginInput = (value: string) => {

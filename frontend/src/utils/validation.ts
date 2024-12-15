@@ -97,10 +97,20 @@ export const validateLengthExercise = (
   lengthError: { value: string }
 ) => {
   const length = Number(lengthExercise.value);
-  if (length < minCount || length > maxCount) {
+
+  // Проверка на пустое значение
+  if (
+    lengthExercise.value === null ||
+    lengthExercise.value === undefined ||
+    String(lengthExercise.value) === ""
+  ) {
+    lengthError.value = "Длина не должна быть пустой.";
+  } else if (!Number.isInteger(length)) {
+    lengthError.value = "Количество символов должно быть целым числом.";
+  } else if (length < minCount || length > maxCount) {
     lengthError.value = `Количество символов должно быть от ${minCount} до ${maxCount}.`;
   } else {
-    lengthError.value = "";
+    lengthError.value = ""; // Устанавливаем пустую строку, если ошибок нет
   }
 };
 
@@ -121,10 +131,13 @@ export const validateTextExercise = (
 };
 
 export const validateLogin = (value: string, loginError: { value: string }) => {
+  const latinRegex = /^[a-zA-Z0-9]+$/; // Регулярное выражение для проверки латиницы
   if (value.length < 4) {
     loginError.value = "Логин должен содержать минимум 4 символа.";
   } else if (value.length > 10) {
     loginError.value = "Логин не может превышать 10 символов.";
+  } else if (!latinRegex.test(value)) {
+    loginError.value = "Логин может содержать только латиницу и цифры.";
   } else {
     loginError.value = ""; // Устанавливаем пустую строку, если ошибок нет
   }

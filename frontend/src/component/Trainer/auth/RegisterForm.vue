@@ -4,7 +4,6 @@ import { BaseInputWithLabel, BaseButton, BaseLink } from "@/component/UI";
 import { defineComponent, ref } from 'vue';
 import { useUser } from '@/store'; // Импортируем store
 import { useRouter } from 'vue-router'; // Импортируем useRouter
-import type axios from "axios";
 import { validateLogin, validatePassword, validateRepeatPassword } from "@/utils";
 
 export default defineComponent({

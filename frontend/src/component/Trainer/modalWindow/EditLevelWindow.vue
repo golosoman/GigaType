@@ -103,6 +103,19 @@ export default defineComponent({
         const timePressError = ref('');
         const zoneError = ref('');
 
+        const resetValues = () => {
+            minCountChar.value = props.minCount;
+            maxCountChar.value = props.maxCount;
+            timePressKey.value = props.timePressKey;
+            zoneKeyboard.value = transformZones(props.keyboardZones);
+            extractedZones.value = [];
+
+            minCountError.value = "";
+            maxCountError.value = "";
+            timePressError.value = "";
+            zoneError.value = "";
+        }
+
         const fetchZones = async () => {
             try {
                 const response = await axios.get('/api/zone/get', { withCredentials: true });
@@ -137,6 +150,7 @@ export default defineComponent({
         };
 
         const closeModal = () => {
+            resetValues();
             emit('update:isVisible', false);
         };
 

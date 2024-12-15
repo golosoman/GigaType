@@ -74,6 +74,19 @@ export default defineComponent({
         const timePressError = ref('');
         const zoneError = ref('');
 
+        const resetValues = () => {
+            minCountChar.value = 20;
+            maxCountChar.value = 80;
+            timePressKey.value = 1.5;
+            selectedOptions.value = [];
+            extractedZones.value = [];
+
+            minCountError.value = "";
+            maxCountError.value = "";
+            timePressError.value = "";
+            zoneError.value = "";
+        }
+
         const fetchZones = async () => {
             try {
                 const response = await axios.get('/api/zone/get', { withCredentials: true });
@@ -109,6 +122,7 @@ export default defineComponent({
 
 
         const closeModal = () => {
+            resetValues();
             emit('update:isVisible', false);
         };
 
