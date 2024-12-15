@@ -3,14 +3,15 @@
     <h2>Редактор пользователей</h2>
     <TableUserEdit :headers="headers" v-model:data="users" customStyle="margin: 20px; width: 500px"
         @addButtonClicked="openModal" />
-    <CreateUserWindow @show-error="showToast" :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
+    <CreateUserWindow @show-error="showToast" @new-user-add="handleUserAdd" :isVisible="isModalVisible"
+        @update:isVisible="isModalVisible = $event">
     </CreateUserWindow>
     <Toast v-if="toastVisible" v-model="toastVisible" :message="toastMessage" type="error"
         @close="toastVisible = false" />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, handleError } from 'vue';
 import axios from 'axios'; // Не забудьте импортировать axios
 import { NavigationBarForAdmin } from '@/component/trainer';
 import { TableUserEdit, CreateUserWindow } from '@/component/trainer';
@@ -31,7 +32,16 @@ const isModalVisible = ref(false);
 const headers = ['Пользователь', 'Действие'];
 
 // Динамические данные пользователей
-const users = ref<{ id: number; name: string; uuid: string, isBanned: boolean }[]>([]);
+const users = ref<{ id: number; name: string; uuid: string; isBanned: boolean }[]>([]);
+
+const handleUserAdd = (user: { name: string, uuid: string, isBanned: boolean }) => {
+    users.value.push({
+        id: users.value.length + 1,
+        name: user.name,
+        uuid: user.uuid,
+        isBanned: user.isBanned,
+    })
+}
 
 // Метод для загрузки данных пользователей с сервера
 const fetchUsers = async () => {
