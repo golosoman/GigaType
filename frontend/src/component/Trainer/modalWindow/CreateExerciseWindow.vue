@@ -176,6 +176,13 @@ export default defineComponent({
                 });
                 console.log('Сохраненные значения:', response.data);
                 emit('show-success', "Упражнение успешно создано!");
+                // Эмитируем добавленное упражнение
+                emit('exercise-added', {
+                    name: response.data.name, // Предполагается, что API возвращает имя
+                    value: textExercise.value,
+                    level: props.difficultyId, // или нужное значение уровня
+                    uid: response.data.uid // Предполагается, что API возвращает uid
+                });
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
