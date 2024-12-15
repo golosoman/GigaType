@@ -8,21 +8,21 @@
             </KeyboardWithCheckbox>
             <div v-if="zoneError" style="color: red;">{{ zoneError }}</div>
             <BaseInputWithLabel label="Минимальное количество символов" input-type="number"
-                inputPlaceholder="Введите минимальное количество символов:" :modelValue="min_count_char"
+                inputPlaceholder="Введите минимальное количество символов:" :modelValue="minCountChar"
                 @update:modelValue="changeMinCountChar"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
             <div v-if="minCountError" style="color: red;">{{ minCountError }}</div>
 
             <BaseInputWithLabel label="Максимальное количество символов"
-                inputPlaceholder="Введите максимальное количество символов:" :modelValue="max_count_char"
+                inputPlaceholder="Введите максимальное количество символов:" :modelValue="maxCountChar"
                 input-type="number" @update:modelValue="changeMaxCountChar"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px; margin-top:10px;" />
             <div v-if="maxCountError" style="color: red;">{{ maxCountError }}</div>
 
             <BaseInputWithLabel label="Время нажатия на клавишу" inputPlaceholder="Введите время нажатия на клавишу:"
-                :modelValue="time_press_key" @update:modelValue="changeTimePressKey"
+                :modelValue="timePressKey" @update:modelValue="changeTimePressKey"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px; margin-top:10px;" input-type="number" />
             <div v-if="timePressError" style="color: red;">{{ timePressError }}</div>
@@ -44,7 +44,9 @@ import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import axios from 'axios';
 import CloseUrl from '@/assets/Close.png';
-import { getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
+import { getUidsFromSelectedOptions } from '@/component/Trainer';
+import { ZoneToNameZone } from '@/types';
+import { validateMaxCountChar, validateMinCountChar, validateTimePressKey, validateZones } from '@/utils';
 
 export default defineComponent({
     name: 'CreateLevelWindow',
@@ -61,34 +63,9 @@ export default defineComponent({
         },
     },
     setup(props, { emit }) {
-
-        type ZoneKey =
-            | "Зона 1 (ФЫВАОЛДЖ)"
-            | "Зона 2 (ПР)"
-            | "Зона 3 (КЕНГ)"
-            | "Зона 4 (МИТЬ)"
-            | "Зона 5 (УСШБ)"
-            | "Зона 6 (ЦЧЩЮ)"
-            | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-            | "Зона 8 (1234567890)"
-            | "Зона 9 (символы)"
-            | "Зона Пробела";
-
-        const ZoneToNameZone: Record<ZoneKey, string> = {
-            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-            "Зона 2 (ПР)": "пр",
-            "Зона 3 (КЕНГ)": "кенг",
-            "Зона 4 (МИТЬ)": "мить",
-            "Зона 5 (УСШБ)": "усшб",
-            "Зона 6 (ЦЧЩЮ)": "цчщю",
-            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-            "Зона 8 (1234567890)": "1234567890",
-            "Зона 9 (символы)": '!"№;%:?*()_-+=',
-            "Зона Пробела": " ",
-        };
-        const min_count_char = ref<number>(20);
-        const max_count_char = ref<number>(80);
-        const time_press_key = ref<number>(1.5);
+        const minCountChar = ref<number>(20);
+        const maxCountChar = ref<number>(80);
+        const timePressKey = ref<number>(1.5);
         const selectedOptions = ref<string[]>([]);
         const extractedZones = ref<{ keys: string, uid: string }[]>([]);
 
@@ -112,77 +89,37 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             selectedOptions.value = values;
-            validateZones();
+            validateZones(selectedOptions.value, zoneError);
         };
 
         const changeMinCountChar = (value: string) => {
-            min_count_char.value = Number(value);
-            validateMinCountChar();
+            minCountChar.value = Number(value);
+            validateMinCountChar(minCountChar, minCountError);
         };
 
         const changeMaxCountChar = (value: string) => {
-            max_count_char.value = Number(value);
-            validateMaxCountChar();
+            maxCountChar.value = Number(value);
+            validateMaxCountChar(maxCountChar, minCountChar, maxCountError);
         };
 
         const changeTimePressKey = (value: string) => {
-            time_press_key.value = parseFloat(value);
-            validateTimePressKey();
+            timePressKey.value = parseFloat(value);
+            validateTimePressKey(timePressKey, timePressError);
         };
 
-        const validateZones = () => {
-            console.log(selectedOptions.value.length)
-            if (selectedOptions.value.length === 0) {
-                zoneError.value = "Нужно выбрать хотя бы одну зону!"
-            } else {
-                zoneError.value = '';
-            }
-        }
-
-        const validateMinCountChar = () => {
-            if (min_count_char.value === null || min_count_char.value === undefined || String(min_count_char.value) === '') {
-                minCountError.value = 'Минимальное количество символов не должно быть пустым.';
-            } else if (min_count_char.value < 20 || min_count_char.value > 80) {
-                minCountError.value = 'Минимальное количество символов должно быть от 20 до 80.';
-            } else {
-                minCountError.value = '';
-            }
-        };
-
-        const validateMaxCountChar = () => {
-            if (max_count_char.value === null || max_count_char.value === undefined || String(min_count_char.value) === '') {
-                maxCountError.value = 'Максимальное количество символов не должно быть пустым.';
-            } else if (max_count_char.value < 20 || max_count_char.value > 80) {
-                maxCountError.value = 'Максимальное количество символов должно быть от 20 до 80.';
-            } else if (max_count_char.value <= min_count_char.value + 9) {
-                maxCountError.value = 'Максимальное количество символов должно быть больше минимального на 10.';
-            } else {
-                maxCountError.value = '';
-            }
-        };
-
-        const validateTimePressKey = () => {
-            if (time_press_key.value === null || time_press_key.value === undefined || String(time_press_key.value) === '') {
-                timePressError.value = 'Время нажатия на клавишу не должно быть пустым.';
-            } else if (time_press_key.value < 0.5 || time_press_key.value > 1.5) {
-                timePressError.value = 'Время нажатия на клавишу должно быть от 0.5 до 1.5.';
-            } else {
-                timePressError.value = '';
-            }
-        };
 
         const closeModal = () => {
             emit('update:isVisible', false);
         };
 
         const save = async () => {
-            validateMinCountChar();
-            validateMaxCountChar();
-            validateTimePressKey();
-            validateZones();
+            validateZones(selectedOptions.value, zoneError);
+            validateMinCountChar(minCountChar, minCountError);
+            validateMaxCountChar(maxCountChar, minCountChar, maxCountError);
+            validateTimePressKey(timePressKey, timePressError);
 
-            if (minCountError.value || maxCountError.value || timePressError.value || zoneError.value) {
-                emit('show-error', minCountError.value || maxCountError.value || timePressError.value || zoneError.value);
+            if (zoneError.value || minCountError.value || maxCountError.value || timePressError.value) {
+                emit('show-error', zoneError.value || minCountError.value || maxCountError.value || timePressError.value);
                 // console.log(minCountError.value || maxCountError.value || timePressError.value || zoneError)
                 return;
             }
@@ -190,10 +127,10 @@ export default defineComponent({
             const uids = getUidsFromSelectedOptions(selectedOptions.value, extractedZones.value, ZoneToNameZone);
             const payload = {
                 name: 0,
-                min_length: min_count_char.value,
-                max_length: max_count_char.value,
-                key_press_time: time_press_key.value,
-                max_mistakes: Math.floor((min_count_char.value + max_count_char.value) / 2 * 0.1),
+                min_length: minCountChar.value,
+                max_length: maxCountChar.value,
+                key_press_time: timePressKey.value,
+                max_mistakes: Math.floor((minCountChar.value + maxCountChar.value) / 2 * 0.1),
                 zones: uids
             };
 
@@ -225,9 +162,9 @@ export default defineComponent({
         };
 
         return {
-            min_count_char,
-            max_count_char,
-            time_press_key,
+            minCountChar,
+            maxCountChar,
+            timePressKey,
             selectedOptions,
             CloseUrl,
             changeTimePressKey,
@@ -247,13 +184,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Hide the spin buttons in WebKit browsers */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
 .title {
     font-size: 20px;
     margin-bottom: 10px;

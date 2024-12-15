@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { BaseLogo, AuthButtons, AuthForm, RegisterForm } from '@/component/trainer';
+import { BaseLogo, AuthButtons, AuthForm, RegisterForm } from '@/component/Trainer';
 import { Toast } from '@/component/UI';
 import ImageUrl from '@/assets/Logo.png';
 import { ref } from 'vue'

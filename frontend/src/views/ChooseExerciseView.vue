@@ -19,7 +19,7 @@
 
 
 <script setup lang="ts">
-import { NavigationBarForTrainee, TableExercise } from '@/component/trainer';
+import { NavigationBarForTrainee, TableExercise } from '@/component/Trainer';
 import { BaseDropdown } from '@/component/UI';
 import { ref, onMounted, watch } from 'vue'
 

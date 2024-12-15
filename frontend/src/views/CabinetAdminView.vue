@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, type Ref } from 'vue';
-import { NavigationBarForAdmin, RatingTable } from '@/component/trainer';
+import { NavigationBarForAdmin, RatingTable } from '@/component/Trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
 import UserImage from '@/assets/User.png';
 import { Bar } from 'vue-chartjs';

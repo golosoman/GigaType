@@ -13,8 +13,7 @@
 <script setup lang="ts">
 import { ref, onMounted, handleError } from 'vue';
 import axios from 'axios'; // Не забудьте импортировать axios
-import { NavigationBarForAdmin } from '@/component/trainer';
-import { TableUserEdit, CreateUserWindow } from '@/component/trainer';
+import { TableUserEdit, CreateUserWindow, NavigationBarForAdmin } from '@/component/Trainer';
 import { Toast } from '@/component/UI';
 
 const toastVisible = ref(false)

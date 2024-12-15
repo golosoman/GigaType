@@ -55,7 +55,9 @@ import { KeyboardWithBlockCheckBox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
 import axios from 'axios';
-import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
+import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer';
+import { ZoneToNameZone } from '@/types';
+import { validateLengthExercise, validateTextExercise, validateZones } from '@/utils';
 
 export default defineComponent({
     name: 'EditExerciseWindow',
@@ -99,7 +101,7 @@ export default defineComponent({
         difficultyId: {
             type: String,
             required: false,
-            default: undefined,
+            default: null,
         },
         taskId: {
             type: String,
@@ -131,51 +133,26 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
-            validateSelectedZones();
+            validateZones(zoneKeyboard.value, zoneError);
             console.log(`Появились изменения cew ${zoneKeyboard.value}`);
         };
 
         const changeTextExercise = (value: string) => {
             textsExercise.value = value;
-            validateTextExercise();
+            validateTextExercise(textsExercise, props.minCount, props.maxCount, textError);
         };
 
         const changeLengthExercise = (value: number) => {
             lengthExercise.value = value;
-            validateLengthExercise();
+            validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
         };
 
         const closeModal = () => {
             emit('update:isVisible', false);
         };
 
-        type ZoneKey =
-            | "Зона 1 (ФЫВАОЛДЖ)"
-            | "Зона 2 (ПР)"
-            | "Зона 3 (КЕНГ)"
-            | "Зона 4 (МИТЬ)"
-            | "Зона 5 (УСШБ)"
-            | "Зона 6 (ЦЧЩЮ)"
-            | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-            | "Зона 8 (1234567890)"
-            | "Зона 9 (символы)"
-            | "Зона Пробела";
-
-        const ZoneToNameZone: Record<ZoneKey, string> = {
-            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-            "Зона 2 (ПР)": "пр",
-            "Зона 3 (КЕНГ)": "кенг",
-            "Зона 4 (МИТЬ)": "мить",
-            "Зона 5 (УСШБ)": "усшб",
-            "Зона 6 (ЦЧЩЮ)": "цчщю",
-            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-            "Зона 8 (1234567890)": "1234567890",
-            "Зона 9 (символы)": '!"№;%:?*()_-+=',
-            "Зона Пробела": " ",
-        };
-
         const saveChanges = async () => {
-            validateTextExercise();
+            validateTextExercise(textsExercise, props.minCount, props.maxCount, textError);
             if (textError.value) {
                 emit('show-error', textError.value);
                 return;
@@ -221,37 +198,9 @@ export default defineComponent({
             fetchZones();
         });
 
-        const validateSelectedZones = () => {
-            if (zoneKeyboard.value.length === 0) {
-                zoneError.value = "Нужно выбрать хотя бы одну зону!";
-            } else {
-                zoneError.value = '';
-            }
-        };
-
-        const validateLengthExercise = () => {
-            const length = Number(lengthExercise.value);
-            if (length < props.minCount || length > props.maxCount) {
-                lengthError.value = `Количество символов должно быть от ${props.minCount} до ${props.maxCount}.`;
-            } else {
-                lengthError.value = '';
-            }
-        };
-
-        const validateTextExercise = () => {
-            const length = textsExercise.value.length; // Получаем длину текста
-            if (length < props.minCount) {
-                textError.value = `Текст упражнения должен содержать минимум ${props.minCount} символов.`;
-            } else if (length > props.maxCount) {
-                textError.value = `Текст упражнения не должен превышать ${props.maxCount} символов.`;
-            } else {
-                textError.value = ''; // Если длина текста в допустимых пределах, очищаем ошибку
-            }
-        };
-
         const generateExercise = async () => {
-            validateSelectedZones();
-            validateLengthExercise();
+            validateZones(zoneKeyboard.value, zoneError);
+            validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
             if (lengthError.value || zoneError.value) {
                 emit('show-error', lengthError.value || zoneError.value);
                 return;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Keyboard, TypingTrainer, NavigationBarForTrainee, FinishExerciseWindow } from '@/component/trainer';
+import { Keyboard, TypingTrainer, NavigationBarForTrainee, FinishExerciseWindow } from '@/component/Trainer';
 import { BaseCheckbox } from '@/component/UI';
 import { ref } from 'vue';
 

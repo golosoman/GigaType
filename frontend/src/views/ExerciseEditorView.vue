@@ -19,9 +19,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { NavigationBarForAdmin, TableExerciseEditor, CreateExerciseWindow, EditExerciseWindow } from '@/component/trainer';
+import { NavigationBarForAdmin, TableExerciseEditor, CreateExerciseWindow, EditExerciseWindow, transformZones } from '@/component/Trainer';
 import { BaseDropdown } from '@/component/UI';
-import { transformZones } from '@/component/Trainer/modalWindow';
 
 import { Toast } from '@/component/UI';
 

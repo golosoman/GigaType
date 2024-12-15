@@ -16,7 +16,7 @@ import {
   EditLevelWindow,
   CreateExerciseWindow,
   EditExerciseWindow
-} from '@/component/trainer';
+} from '@/component/Trainer';
 import ImageUrl from '@/assets/Logo.png'
 import UserUrl from '@/assets/User.png'
 import CloseUrl from '@/assets/Close.png'

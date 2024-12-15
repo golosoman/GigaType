@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { NavigationBarForTrainee, RatingTable, LevelTable } from '@/component/trainer';
+import { NavigationBarForTrainee, RatingTable, LevelTable } from '@/component/Trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
 import UserImage from '@/assets/User.png';
 import { ref, onMounted, watch } from 'vue';

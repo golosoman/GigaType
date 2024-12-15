@@ -18,8 +18,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { NavigationBarForAdmin } from '@/component/trainer';
-import { TableLevelEditor, CreateLevelWindow, EditLevelWindow } from '@/component/trainer';
+import { TableLevelEditor, CreateLevelWindow, EditLevelWindow, NavigationBarForAdmin } from '@/component/Trainer';
 import { Toast } from '@/component/UI';
 
 const toastVisible = ref(false)
@@ -36,7 +35,7 @@ const showToast = (message: string) => {
 
 const isModalVisible = ref(false);
 const isEditModalVisible = ref(false); // Новая переменная для управления видимостью модального окна редактирования
-const selectedLevelUid = ref<string | null>(null);
+const selectedLevelUid = ref<string | undefined>(undefined); // Изменено на string | undefined
 const selectedLevelData = ref<any>(null); // Данные уровня сложности
 const tableHeaders = ['Уровень', 'Название']; // Заголовки таблицы
 const tableData = ref<{ level: number; name: string; uid: string }[]>([]); // Динамические данные таблицы
