@@ -166,10 +166,13 @@ export default defineComponent({
         };
 
         const validateTextExercise = () => {
-            if (textExercise.value.length < props.minCount) {
+            const length = textExercise.value.length; // Получаем длину текста
+            if (length < props.minCount) {
                 textError.value = `Текст упражнения должен содержать минимум ${props.minCount} символов.`;
+            } else if (length > props.maxCount) {
+                textError.value = `Текст упражнения не должен превышать ${props.maxCount} символов.`;
             } else {
-                textError.value = '';
+                textError.value = ''; // Если длина текста в допустимых пределах, очищаем ошибку
             }
         };
 

@@ -101,6 +101,15 @@ export default defineComponent({
             if (currentTime - lastKeyPressTime.value > props.maxKeyPressInterval) {
                 console.log(`Превышено ожидание нажатия на клавишу! ${currentTime - lastKeyPressTime.value} против ${props.maxKeyPressInterval}`);
                 resetStatistics();
+                emit('error-completion', [
+                    props.level,
+                    props.exercise,
+                    speed.value,
+                    errorsCount.value,
+                    elapsedTime.value,
+                    score.value,
+                    textFromInput.value.length
+                ])
             }
             lastKeyPressTime.value = currentTime;
         };
