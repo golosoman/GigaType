@@ -10,9 +10,9 @@
         :difficulty-id="selectedOption?.value" @update:isVisible="isModalVisible = $event" />
 
     <EditExerciseWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="keyboardZones"
-        :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
-        :taskId="tableData[0]?.uid" :difficultyId="selectedOption?.value" :textExercise="currentExerciseContent"
-        @update:isVisible="isEditModalVisible = $event" />
+        :keyboardZonesForTask="zonesTask" :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes"
+        :timePressKey="keyPressTime" :taskId="uidTask" :difficultyId="selectedOption?.value"
+        :textExercise="currentExerciseContent" @update:isVisible="isEditModalVisible = $event" />
     <Toast v-if="toastVisible" v-model="toastVisible" :message="toastMessage" type="error"
         @close="toastVisible = false" />
 </template>
@@ -51,12 +51,15 @@ interface Task {
     name: string;
     content: string;
     difficulty_id: string;
+    zones: { keys: string; uid: string }[];
     uid: string;
 }
 
 const isModalVisible = ref(false);
 const isEditModalVisible = ref(false);
 const currentExerciseContent = ref('');
+const zonesTask = ref([])
+const uidTask = ref('')
 
 const options = ref<{ label: string; value: string }[]>([]);
 const selectedOption = ref<{ label: string; value: string } | null>(null);
@@ -140,6 +143,8 @@ const handleExerciseClick = async (uid: string) => {
         if (data.length > 0) {
             const exercise = data[0];
             currentExerciseContent.value = exercise.content; // Содержимое упражнения
+            zonesTask.value = exercise.zones;
+            uidTask.value = exercise.uid;
             // Установить другие свойства, если необходимо
             isEditModalVisible.value = true; // Открыть модальное окно редактирования
         }

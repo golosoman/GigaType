@@ -74,23 +74,27 @@ import { useUser } from '@/store'; // Импортируем store
 // Инициализация store
 const userStore = useUser();
 
+// interface DifficultyLevel {
+//     name: string;
+//     uid: string;
+//     min_length: number;
+//     max_length: number;
+//     key_press_time: number;
+//     max_mistakes: number;
+//     zones: { keys: string; uid: string }[];
+//     tasks: Task[];
+// }
 interface DifficultyLevel {
     name: string;
     uid: string;
-    min_length: number;
-    max_length: number;
-    key_press_time: number;
-    max_mistakes: number;
-    zones: { keys: string; uid: string }[];
-    tasks: Task[];
 }
 
-interface Task {
-    name: string;
-    content: string;
-    difficulty_id: string;
-    uid: string;
-}
+// interface Task {
+//     name: string;
+//     content: string;
+//     difficulty_id: string;
+//     uid: string;
+// }
 
 interface SpeedData {
     clicks_per_minute: number;

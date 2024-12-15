@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { defineProps, watch, ref } from 'vue';
 import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
 import BlockUrl from '@/assets/Block.png';
@@ -45,6 +45,13 @@ const props = defineProps<{
     customStyle?: string;
 }>();
 
+const users = ref(props.data);
+
+watch(() => props.data, (userData) => {
+    users.value = userData;
+    console.log(`Пользователи изменились! ${userData}`);
+});
+
 const emit = defineEmits<{
     (e: 'addButtonClicked'): void; // Определяем событие addButtonClicked
 }>();
@@ -55,12 +62,9 @@ const handleAddButtonClick = () => {
 };
 
 const removeUser = async (uuid: string, isBanned: boolean) => {
-    const url = isBanned
-        ? '/api/user/unblock'
-        : '/api/user/block';
-
+    const url = isBanned ? '/api/user/unblock' : '/api/user/block';
     const body = { "uuid": uuid };
-    console.log(body)
+
     try {
         const response = await axios.post(url, body, {
             headers: {
@@ -68,10 +72,14 @@ const removeUser = async (uuid: string, isBanned: boolean) => {
             },
             withCredentials: true,
         });
+
         console.log('Успешно изменено состояние пользователя:', response.data);
 
-        // Здесь вы можете обновить состояние пользователя в вашем компоненте, если это необходимо
-        // Например, если вы используете реактивный массив users
+        // Обновляем состояние пользователя в массиве users
+        const userIndex = users.value.findIndex(user => user.uuid === uuid);
+        if (userIndex !== -1) {
+            users.value[userIndex].isBanned = !isBanned; // Переключаем состояние isBanned
+        }
     } catch (error) {
         console.error('Ошибка при изменении состояния пользователя:', error);
     }

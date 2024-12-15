@@ -26,11 +26,6 @@ import { ref, onMounted, watch } from 'vue'
 interface DifficultyLevel {
     name: string;
     uid: string;
-    min_length: number;
-    max_length: number;
-    key_press_time: number;
-    max_mistakes: number;
-    zones: { keys: string; uid: string }[];
     tasks: Task[];
 }
 

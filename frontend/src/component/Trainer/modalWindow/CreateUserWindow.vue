@@ -96,6 +96,12 @@ export default defineComponent({
                     password: password.value,
                 });
 
+                emit("new-user-add", {
+                    name: login.value, // Используем логин
+                    uuid: response.data.uuid, // UUID нового пользователя
+                    isBanned: false // Новый пользователь не заблокирован
+                })
+
                 // Обработка успешного ответа
                 console.log('Пользователь успешно создан:', response.data);
                 closeModal(); // Закрываем модальное окно после успешного создания

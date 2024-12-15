@@ -176,6 +176,31 @@ export default defineComponent({
             }
         };
 
+        type ZoneKey =
+            | "Зона 1 (ФЫВАОЛДЖ)"
+            | "Зона 2 (ПР)"
+            | "Зона 3 (КЕНГ)"
+            | "Зона 4 (МИТЬ)"
+            | "Зона 5 (УСШБ)"
+            | "Зона 6 (ЦЧЩЮ)"
+            | "Зона 7 (ЁЙЯЗХЪЭ.,)"
+            | "Зона 8 (1234567890)"
+            | "Зона 9 (символы)"
+            | "Зона Пробела";
+
+        const ZoneToNameZone: Record<ZoneKey, string> = {
+            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
+            "Зона 2 (ПР)": "пр",
+            "Зона 3 (КЕНГ)": "кенг",
+            "Зона 4 (МИТЬ)": "мить",
+            "Зона 5 (УСШБ)": "усшб",
+            "Зона 6 (ЦЧЩЮ)": "цчщю",
+            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
+            "Зона 8 (1234567890)": "1234567890",
+            "Зона 9 (символы)": '!"№;%:?*()_-+=',
+            "Зона Пробела": " ",
+        };
+
         const saveChanges = async () => {
             validateTextExercise();
             if (textError.value) {
@@ -184,9 +209,11 @@ export default defineComponent({
             }
 
             try {
+                const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);
                 const response = await axios.post('/api/task/create', {
                     content: textExercise.value,
-                    difficulty_id: props.difficultyId // Используем переданный difficulty_id
+                    difficulty_id: props.difficultyId, // Используем переданный difficulty_id
+                    zones: uids
                 });
                 console.log('Сохраненные значения:', response.data);
                 emit('show-success', "Упражнение успешно создано!");
@@ -215,30 +242,6 @@ export default defineComponent({
                 emit('show-error', lengthError.value || zoneError.value);
                 return;
             }
-            type ZoneKey =
-                | "Зона 1 (ФЫВАОЛДЖ)"
-                | "Зона 2 (ПР)"
-                | "Зона 3 (КЕНГ)"
-                | "Зона 4 (МИТЬ)"
-                | "Зона 5 (УСШБ)"
-                | "Зона 6 (ЦЧЩЮ)"
-                | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-                | "Зона 8 (1234567890)"
-                | "Зона 9 (символы)"
-                | "Зона Пробела";
-
-            const ZoneToNameZone: Record<ZoneKey, string> = {
-                "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-                "Зона 2 (ПР)": "пр",
-                "Зона 3 (КЕНГ)": "кенг",
-                "Зона 4 (МИТЬ)": "мить",
-                "Зона 5 (УСШБ)": "усшб",
-                "Зона 6 (ЦЧЩЮ)": "цчщю",
-                "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-                "Зона 8 (1234567890)": "1234567890",
-                "Зона 9 (символы)": '!"№;%:?*()_-+=',
-                "Зона Пробела": " ",
-            };
 
             try {
                 const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);

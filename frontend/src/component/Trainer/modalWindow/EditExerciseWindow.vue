@@ -76,6 +76,10 @@ export default defineComponent({
             type: Array as () => string[],
             required: true,
         },
+        keyboardZonesForTask: {
+            type: Array as () => string[],
+            required: true,
+        },
         minCount: {
             type: Number,
             required: true,
@@ -145,6 +149,31 @@ export default defineComponent({
             emit('update:isVisible', false);
         };
 
+        type ZoneKey =
+            | "Зона 1 (ФЫВАОЛДЖ)"
+            | "Зона 2 (ПР)"
+            | "Зона 3 (КЕНГ)"
+            | "Зона 4 (МИТЬ)"
+            | "Зона 5 (УСШБ)"
+            | "Зона 6 (ЦЧЩЮ)"
+            | "Зона 7 (ЁЙЯЗХЪЭ.,)"
+            | "Зона 8 (1234567890)"
+            | "Зона 9 (символы)"
+            | "Зона Пробела";
+
+        const ZoneToNameZone: Record<ZoneKey, string> = {
+            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
+            "Зона 2 (ПР)": "пр",
+            "Зона 3 (КЕНГ)": "кенг",
+            "Зона 4 (МИТЬ)": "мить",
+            "Зона 5 (УСШБ)": "усшб",
+            "Зона 6 (ЦЧЩЮ)": "цчщю",
+            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
+            "Зона 8 (1234567890)": "1234567890",
+            "Зона 9 (символы)": '!"№;%:?*()_-+=',
+            "Зона Пробела": " ",
+        };
+
         const saveChanges = async () => {
             validateTextExercise();
             if (textError.value) {
@@ -155,24 +184,19 @@ export default defineComponent({
             const requestBody = {
                 uid: props.taskId,
                 difficulty_id: props.difficultyId,
-                content: textsExercise.value
+                content: textsExercise.value,
+                zones: getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone)
             };
-
+            console.log(requestBody)
             try {
-                const response = await fetch('/api/task/update', {
-                    method: 'PATCH',
+
+                const response = await axios.patch('/api/task/update', requestBody, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestBody),
                 });
 
-                if (!response.ok) {
-                    throw new Error('Ошибка при обновлении упражнения');
-                }
-
-                const result = await response.json();
-                console.log('Упражнение обновлено успешно:', result);
+                console.log('Упражнение обновлено успешно:', response.data);
                 emit('show-success', "Упражнение успешно обновлено!");
                 closeModal();
             } catch (error) {
@@ -232,31 +256,6 @@ export default defineComponent({
                 emit('show-error', lengthError.value || zoneError.value);
                 return;
             }
-
-            type ZoneKey =
-                | "Зона 1 (ФЫВАОЛДЖ)"
-                | "Зона 2 (ПР)"
-                | "Зона 3 (КЕНГ)"
-                | "Зона 4 (МИТЬ)"
-                | "Зона 5 (УСШБ)"
-                | "Зона 6 (ЦЧЩЮ)"
-                | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-                | "Зона 8 (1234567890)"
-                | "Зона 9 (символы)"
-                | "Зона Пробела";
-
-            const ZoneToNameZone: Record<ZoneKey, string> = {
-                "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-                "Зона 2 (ПР)": "пр",
-                "Зона 3 (КЕНГ)": "кенг",
-                "Зона 4 (МИТЬ)": "мить",
-                "Зона 5 (УСШБ)": "усшб",
-                "Зона 6 (ЦЧЩЮ)": "цчщю",
-                "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-                "Зона 8 (1234567890)": "1234567890",
-                "Зона 9 (символы)": '!"№;%:?*()_-+=',
-                "Зона Пробела": " ",
-            };
 
             try {
                 const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);
