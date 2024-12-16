@@ -107,6 +107,7 @@ export default defineComponent({
         const lengthError = ref('');
         const textError = ref('');
         const zoneError = ref('');
+        const sendingZones = ref(zoneKeyboard.value);
 
         const resetValues = () => {
             textExercise.value = '';
@@ -130,9 +131,24 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
+            console.log(`Поменяли, поменяли !${zoneKeyboard.value}`)
             validateZones(zoneKeyboard.value, zoneError);
             console.log(`Появились изменения cew ${zoneKeyboard.value}`);
+            checkTextSymbols()
         };
+
+        const checkTextSymbols = () => {
+            // Получаем разрешенные символы
+            const allowedCharacters = getAllowedCharacters(zoneKeyboard.value);
+            console.log(allowedCharacters)
+            // Фильтруем символы в textExercise
+            textExercise.value = textExercise.value
+                .split('')
+                .filter(char => allowedCharacters.includes(char))
+                .join('');
+            console.log(`Обновленный текст упражнения: ${textExercise.value}`);
+            // validateTextExercise(textExercise, props.minCount, props.maxCount, textError);
+        }
 
         const changeTextExercise = (value: string) => {
             textExercise.value = value;

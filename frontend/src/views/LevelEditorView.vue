@@ -1,7 +1,10 @@
 <template>
     <NavigationBarForAdmin></NavigationBarForAdmin>
-    <h2>Редактор уровня</h2>
-    <TableLevelEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
+    <h1>Редактор уровня</h1>
+    <div v-if="isLoading">
+        <SpinLoader v-if="isLoading"></SpinLoader>
+    </div>
+    <TableLevelEditor v-else :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
         @createButtonClick="openModal" @levelClick="handleLevelClick" />
     <CreateLevelWindow @show-error="showToast" :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
     </CreateLevelWindow>
@@ -19,8 +22,8 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { TableLevelEditor, CreateLevelWindow, EditLevelWindow, NavigationBarForAdmin } from '@/component/Trainer';
-import { Toast } from '@/component/UI';
-
+import { Toast, SpinLoader } from '@/component/UI';
+const isLoading = ref(true); // Состояние загрузки
 const toastVisible = ref(false)
 const toastMessage = ref('')
 
@@ -31,7 +34,6 @@ const showToast = (message: string) => {
         toastVisible.value = false;
     }, 3000);
 }
-
 
 const isModalVisible = ref(false);
 const isEditModalVisible = ref(false); // Новая переменная для управления видимостью модального окна редактирования
@@ -46,6 +48,7 @@ const openModal = () => {
 
 // Метод для загрузки данных с сервера
 const fetchLevels = async () => {
+    isLoading.value = true; // Начинаем загрузку
     try {
         const response = await axios.get('/api/difficulty/get', { withCredentials: true });
         // Фильтруем данные, чтобы использовать только те уровни, которые имеют подлинные значения
@@ -58,6 +61,8 @@ const fetchLevels = async () => {
             }));
     } catch (error) {
         console.error('Ошибка при загрузке уровней:', error);
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -86,4 +91,10 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+h1 {
+    margin-left: 15px;
+    color: #012e4a;
+    font-family: "Alegreya Sans SC";
+}
+</style>

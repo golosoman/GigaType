@@ -24,8 +24,17 @@
                     </BaseButton>
                 </div>
             </div>
+            <!-- <div>
+                <div>
+                    <BaseButton @click="handleImageUpload"
+                        customStyle="width: 350px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
+                        Изменить фотографию
+                    </BaseButton>
+                    <input type="file" @change="onFileChange" accept="image/*" />
+                </div>
+            </div> -->
             <div>
-                <h2>Статистика</h2>
+                <h1>Статистика</h1>
                 <div>
                     <BaseButton @click="setActiveTab('speed')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A;">
@@ -69,6 +78,48 @@ import { ref, onMounted, watch } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
 import { useUser } from '@/store'; // Импортируем store
+
+const userImage = ref(UserImage); // Инициализация с изображением по умолчанию
+const selectedFile = ref<File | null>(null); // Для хранения выбранного файла
+
+// Функция для обработки изменения файла
+const onFileChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+        selectedFile.value = target.files[0];
+
+        // Создаем временный URL для выбранного изображения
+        userImage.value = URL.createObjectURL(selectedFile.value);
+    }
+};
+
+// Функция для загрузки изображения на сервер
+const handleImageUpload = async () => {
+    if (!selectedFile.value) {
+        console.error('Файл не выбран');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedFile.value);
+
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка при загрузке изображения');
+        }
+
+        const data = await response.json();
+        userImage.value = data.imageUrl; // Предполагается, что сервер возвращает URL изображения
+        console.log('Изображение загружено:', data.imageUrl);
+    } catch (error) {
+        console.error('Ошибка при загрузке изображения:', error);
+    }
+};
 
 
 // Инициализация store
@@ -240,7 +291,8 @@ const fetchUserStatistics = async () => {
             "Статус": item.success ? 'Выполнено' : 'Не выполнено',
             "Скорость": `${item.clicks_per_minute} симв/мин`,
             "Ошибки": `${item.mistakes}/${item.max_mistakes}`,
-            "Время": `${item.used_time} с`
+            "Время": `${item.used_time} с`,
+            "Дата": `${item.timestamp}`
         }));
 
     } catch (error) {
@@ -291,6 +343,14 @@ const setActiveTab = (tab: string) => {
 </script>
 
 <style scoped>
+h1 {
+    color: #012e4a;
+}
+
+h2 {
+    color: #012e4a;
+}
+
 .content {
     display: flex;
     flex-direction: column;

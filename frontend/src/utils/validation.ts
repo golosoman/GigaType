@@ -1,5 +1,8 @@
 // src/utils/validation.ts
 
+const latinRegex = /^[a-zA-Z0-9]+$/; // Регулярное выражение для проверки латиницы
+const isNumberRegex = /^\d+$/;
+
 export const validateZones = (
   selectedOptions: any[],
   zoneError: { value: string }
@@ -23,7 +26,7 @@ export const validateMinCountChar = (
   ) {
     minCountError.value =
       "Минимальное количество символов не должно быть пустым.";
-  } else if (!Number.isInteger(min_count_char.value)) {
+  } else if (!isNumberRegex.test(String(min_count_char.value))) {
     minCountError.value =
       "Минимальное количество символов должно быть целым числом.";
   } else if (min_count_char.value < 20 || min_count_char.value > 80) {
@@ -51,7 +54,7 @@ export const validateMaxCountChar = (
   ) {
     maxCountError.value =
       "Максимальное количество символов не должно быть пустым.";
-  } else if (!Number.isInteger(max_count_char.value)) {
+  } else if (!isNumberRegex.test(String(max_count_char.value))) {
     maxCountError.value =
       "Максимальное количество символов должно быть целым числом.";
   } else if (max_count_char.value < 20 || max_count_char.value > 80) {
@@ -61,9 +64,6 @@ export const validateMaxCountChar = (
     min_count_char.value !== null &&
     max_count_char.value < Number(min_count_char.value) + 10 // Исправлено на +10
   ) {
-    console.log(max_count_char.value < min_count_char.value + 10);
-    console.log("max_count_char:", max_count_char.value);
-    console.log("min_count_char:", min_count_char.value);
     maxCountError.value =
       "Максимальное количество символов должно быть больше минимального на 10.";
   } else {
@@ -105,7 +105,7 @@ export const validateLengthExercise = (
     String(lengthExercise.value) === ""
   ) {
     lengthError.value = "Длина не должна быть пустой.";
-  } else if (!Number.isInteger(length)) {
+  } else if (!isNumberRegex.test(String(length))) {
     lengthError.value = "Количество символов должно быть целым числом.";
   } else if (length < minCount || length > maxCount) {
     lengthError.value = `Количество символов должно быть от ${minCount} до ${maxCount}.`;
@@ -131,7 +131,6 @@ export const validateTextExercise = (
 };
 
 export const validateLogin = (value: string, loginError: { value: string }) => {
-  const latinRegex = /^[a-zA-Z0-9]+$/; // Регулярное выражение для проверки латиницы
   if (value.length < 4) {
     loginError.value = "Логин должен содержать минимум 4 символа.";
   } else if (value.length > 10) {

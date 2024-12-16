@@ -1,9 +1,13 @@
 <template>
     <NavigationBarForAdmin></NavigationBarForAdmin>
-    <h2>Редактор упражнений</h2>
-    <BaseDropdown v-model="selectedOption" :options="options" placeholder="Выберите уровень сложности" />
-    <TableExerciseEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
-        @addButtonClicked="openModal" @exerciseClick="handleExerciseClick" />
+    <h1>Редактор упражнений</h1>
+    <BaseDropdown custom-style="margin-left: 15px;" v-model="selectedOption" :options="options"
+        placeholder="Выберите уровень сложности" />
+    <div v-if="isLoading">
+        <SpinLoader v-if="isLoading"></SpinLoader>
+    </div>
+    <TableExerciseEditor v-else :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
+        :isLoading="isLoading" @addButtonClicked="openModal" @exerciseClick="handleExerciseClick" />
 
     <CreateExerciseWindow @show-error="showToast" :isVisible="isModalVisible" :keyboardZones="keyboardZones"
         :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
@@ -20,10 +24,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { NavigationBarForAdmin, TableExerciseEditor, CreateExerciseWindow, EditExerciseWindow, transformZones } from '@/component/Trainer';
-import { BaseDropdown } from '@/component/UI';
+import { BaseDropdown, SpinLoader } from '@/component/UI';
 
 import { Toast } from '@/component/UI';
-
+const isLoading = ref(true); // Состояние загрузки
 const toastVisible = ref(false)
 const toastMessage = ref('')
 
@@ -103,6 +107,7 @@ const fetchDifficultyLevels = async () => {
 };
 
 const fetchTasksForSelectedLevel = async (uid: string) => {
+    isLoading.value = true; // Начинаем загрузку
     try {
         const response = await fetch(`/api/difficulty/get?uid=${uid}`);
         if (!response.ok) {
@@ -126,9 +131,10 @@ const fetchTasksForSelectedLevel = async (uid: string) => {
                 uid: task.uid
             }));
         }
-
     } catch (error) {
         console.error('Ошибка при получении задач для уровня сложности:', error);
+    } finally {
+        isLoading.value = false; // Завершаем загрузку
     }
 };
 
@@ -166,4 +172,10 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+h1 {
+    margin-left: 15px;
+    color: #012e4a;
+    font-family: "Alegreya Sans SC";
+}
+</style>

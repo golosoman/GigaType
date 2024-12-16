@@ -15,8 +15,8 @@
         <div class="table-body">
             <div class="table-row" v-for="(user, rowIndex) in data" :key="user.id">
                 <div class="cell">
-                    <BaseLink :href="`/app/user/${user.id}`" target="_blank"
-                        style="background-color: transparent; text-decoration: underline; line-height: 30px;">
+                    <BaseLink class="disabled" :href="`/app/cabinet/trainee/${user.uuid}`" target="_blank"
+                        style="background-color: transparent; line-height: 30px;">
                         {{ user.name }}
                     </BaseLink>
                 </div>
@@ -87,6 +87,11 @@ const removeUser = async (uuid: string, isBanned: boolean) => {
 </script>
 
 <style scoped>
+.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
 .centered-cell {
     display: flex;
     justify-content: center;
@@ -99,6 +104,7 @@ const removeUser = async (uuid: string, isBanned: boolean) => {
     flex-direction: column;
     width: 100%;
     border: 1px solid #012E4A;
+    color: #012e4a;
 }
 
 .table-header {

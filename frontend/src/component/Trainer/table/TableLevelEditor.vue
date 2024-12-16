@@ -70,6 +70,7 @@ const handleLevelClick = (uid: string) => {
     flex-direction: column;
     width: 100%;
     border: 1px solid #012E4A;
+    color: #012e4a;
 }
 
 .table-header {
@@ -98,6 +99,7 @@ const handleLevelClick = (uid: string) => {
     flex: 1;
     padding: 10px;
     border: 1px solid #012E4A;
+    text-align: center;
 }
 
 .table-row:hover {

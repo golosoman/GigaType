@@ -26,7 +26,7 @@ const resultData = ref<CompletionData>({
 
 const exerciseData = ref<CompletionData>({
     level: "",
-    exercise: "На краю света, где океан встречается с небом, раскинулись бескрайние просторы. Здесь время останавливается, и каждый вдох наполняется энергией природы. Ветер нежно колышет травы, а волны омывают берег, создавая мелодию, которая звучит в унисон с нашими мечтами. Это место, где мы можем быть собой и забыть о заботах.",
+    exercise: "На горизонте в 5 часов вечера появилось 3 ярких солнца, освещая 7 волшебных островов, где 12 мифических существ охраняли древние тайны природы.",
     speed: 0,
     errorsCount: 5, // Максимальное количество ошибок для начального уровня
     elapsedTime: 0,
@@ -36,24 +36,50 @@ const exerciseData = ref<CompletionData>({
 
 const showKeyboard = ref(false);
 const currentCharacter = ref(' ');
-const textToType = ref("На краю света, где океан встречается с небом, раскинулись бескрайние просторы. Здесь время останавливается, и каждый вдох наполняется энергией природы. Ветер нежно колышет травы, а волны омывают берег, создавая мелодию, которая звучит в унисон с нашими мечтами. Это место, где мы можем быть собой и забыть о заботах."); // Статический текст
+const textToType = ref("На горизонте в 5 часов вечера появилось 3 ярких солнца, освещая 7 волшебных островов, где 12 мифических существ охраняли древние тайны природы."); // Статический текст
+
+const calculateScore = (speed: number, errorsCount: number, elapsedTime: number, totalLength: number): number => {
+    // Базовая скорость (например, 100 - это идеальная скорость)
+    const baseSpeed = 100;
+
+    // Учитываем ошибки: каждая ошибка уменьшает очки
+    const errorPenalty = errorsCount * 5; // за каждую ошибку -5 очков
+
+    // Учитываем время: чем дольше, тем меньше очков
+    const timePenalty = Math.max(0, elapsedTime - 60) * 2; // за каждую минуту свыше 1 минуты -2 очка
+
+    // Процент завершенного задания
+    const completionRate = (totalLength > 0) ? (speed / totalLength) : 0;
+
+    // Базовый расчет очков
+    let score = speed - errorPenalty - timePenalty;
+
+    // Учитываем процент завершения задания
+    if (completionRate < 0.5) {
+        score *= 0.5; // Если менее 50% текста введено, уменьшаем очки вдвое
+    }
+
+    // Убедимся, что очки не отрицательные
+    return Math.max(0, score);
+};
 
 const determineLevel = (speed: number, errorsCount: number, elapsedTime: number, totalLength: number): string => {
-    // Учитываем ошибки и время, а также процент завершенного задания
     const adjustedSpeed = speed - (errorsCount * 2) - (elapsedTime / 60);
-    const completionRate = (totalLength > 0) ? (speed / totalLength) : 0; // Процент введенного текста
+    const completionRate = (totalLength > 0) ? (speed / totalLength) : 0;
 
-    if (completionRate < 0.5) {
-        return "Не завершено"; // Если менее 50% текста введено
-    } else if (adjustedSpeed < 60) {
+    const score = calculateScore(speed, errorsCount, elapsedTime, totalLength);
+    if (completionRate < 0.7) {
+        return "Не завершено";
+    } else if (score < 280) {
         return "Начальный";
-    } else if (adjustedSpeed >= 60 && adjustedSpeed <= 120) {
+    } else if (score >= 280 && score < 300) {
         return "Средний";
-    } else if (adjustedSpeed > 120) {
+    } else if (score >= 300) {
         return "Продвинутый";
     }
     return "Неопределенный уровень";
 };
+
 const handleSuccessCompletion = (data: any[]) => {
     const [level, exercise, speed, errorsCount, elapsedTime, score, numbersCount] = data;
     resultData.value = {
@@ -96,8 +122,7 @@ const toggleKeyboardVisibility = (value: boolean) => {
         <NavigationBarForTrainee></NavigationBarForTrainee>
         <div class="content">
             <div>
-                <TypingTrainer :level="exerciseData!.level" exercise="test" :maxErrors="exerciseData!.errorsCount"
-                    :textToType="textToType"
+                <TypingTrainer level="0" exercise="0" :maxErrors="exerciseData!.errorsCount" :textToType="textToType"
                     customStyleForTrainingField="width: 1378px; height: 140px; border-radius: 20px; font-size: 48px;"
                     @success-completion="handleSuccessCompletion" @error-completion="handleErrorCompletion"
                     @current-charrecter="handleCurrentCharacter" />

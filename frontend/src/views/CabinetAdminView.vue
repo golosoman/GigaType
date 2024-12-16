@@ -23,14 +23,14 @@
                     </BaseButton>
                 </div>
             </div>
-            <div>
+            <!-- <div>
                 <BaseButton
                     customStyle="width: 350px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
                     Изменить фотографию
                 </BaseButton>
-            </div>
+            </div> -->
             <div>
-                <h2>Статистика</h2>
+                <h1>Статистика</h1>
                 <div>
                     <BaseButton @click="setActiveTab('exercise')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A; margin-left: 20px;">
@@ -271,6 +271,14 @@ const setActiveTab = (tab: string) => {
 </script>
 
 <style scoped>
+h1 {
+    color: #012e4a;
+}
+
+h2 {
+    color: #012e4a;
+}
+
 .content {
     display: flex;
     flex-direction: column;
