@@ -165,13 +165,13 @@ export default defineComponent({
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
-                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                    console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
                     if (error.response?.status === 418) {
-                        console.error('Достигнуто максимальное количество уровней:', error.response.data);
+                        console.error('Достигнуто максимальное количество уровней:', error.response?.data.message || error.message);
                         emit('show-error', 'Достигнуто максимальное количество уровней.');
                     } else {
-                        console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
-                        emit('show-error', `Ошибка при отправке запроса: ${error.message}`);
+                        console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.response?.data.message || error.message}`);
                     }
                 } else {
                     console.error('Неизвестная ошибка:', error);

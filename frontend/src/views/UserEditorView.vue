@@ -38,7 +38,7 @@ const isLoading = ref(true); // Состояние загрузки
 const toastVisible = ref(false)
 const toastMessage = ref('')
 
-const totalPages = computed(() => Math.ceil(users.value.length / itemsPerPage));
+const totalPages = computed(() => Math.max(Math.ceil(users.value.length / itemsPerPage), 1));
 
 const paginatedUsers = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;

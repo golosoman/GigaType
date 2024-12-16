@@ -187,8 +187,8 @@ export default defineComponent({
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
-                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
-                    emit('show-error', `Ошибка при отправке запроса: ${error.response?.data || error.message}`)
+                    console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                    emit('show-error', `Ошибка при отправке запроса: ${error.response?.data.message || error.message}`)
                 } else {
                     console.error('Неизвестная ошибка:', error);
                     emit('show-error', `Неизвестная ошибка: ${error}`)

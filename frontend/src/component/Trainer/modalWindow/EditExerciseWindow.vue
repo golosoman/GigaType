@@ -203,8 +203,19 @@ export default defineComponent({
                 emit('show-success', "Упражнение успешно обновлено!");
                 closeModal();
             } catch (error) {
-                console.error('Ошибка при обновлении упражнения:', error);
-                emit('show-error', `Ошибка при обновлении упражнения: ${error}`);
+                if (axios.isAxiosError(error)) {
+                    console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                    if (error.response?.status === 418) {
+                        console.error('Достигнуто максимальное количество упражнений:', error.response?.data.message || error.message);
+                        emit('show-error', 'Достигнуто максимальное количество упражнений.');
+                    } else {
+                        console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.response?.data.message || error.message}`);
+                    }
+                } else {
+                    console.error('Неизвестная ошибка:', error);
+                    emit('show-error', `Неизвестная ошибка: ${error}`)
+                }
             }
         };
 
