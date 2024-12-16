@@ -6,7 +6,8 @@
     </div>
     <TableLevelEditor v-else :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
         @createButtonClick="openModal" @levelClick="handleLevelClick" />
-    <CreateLevelWindow @show-error="showToast" :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
+    <CreateLevelWindow @show-error="showToast" @level-added="handleLevelAdd" :isVisible="isModalVisible"
+        @update:isVisible="isModalVisible = $event">
     </CreateLevelWindow>
     <EditLevelWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="selectedLevelData.zones"
         :difficulty-id="selectedLevelUid" :minCount="selectedLevelData.min_length"
@@ -45,6 +46,14 @@ const tableData = ref<{ level: number; name: string; uid: string }[]>([]); // Д
 const openModal = () => {
     isModalVisible.value = true;
 };
+
+const handleLevelAdd = (newLevel: { name: string; level: number; uid: string }) => {
+    console.log(`handleLevelAdd ${JSON.stringify(newLevel)}`);
+    tableData.value.push(newLevel);
+
+    // Сортируем массив по полю level
+    tableData.value.sort((a, b) => a.level - b.level);
+}
 
 // Метод для загрузки данных с сервера
 const fetchLevels = async () => {
