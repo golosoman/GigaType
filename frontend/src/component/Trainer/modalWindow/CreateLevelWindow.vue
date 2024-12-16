@@ -67,7 +67,7 @@ export default defineComponent({
         const maxCountChar = ref<number>(80);
         const timePressKey = ref<number>(1.5);
         const selectedOptions = ref<string[]>([]);
-        const extractedZones = ref<{ keys: string, uid: string }[]>([]);
+        const extractedZones = ref<{ keys: string, uid: string }[]>([]); // Монтируется при создании компонента, нельзя удалять
 
         const minCountError = ref('');
         const maxCountError = ref('');
@@ -79,7 +79,6 @@ export default defineComponent({
             maxCountChar.value = 80;
             timePressKey.value = 1.5;
             selectedOptions.value = [];
-            extractedZones.value = [];
 
             minCountError.value = "";
             maxCountError.value = "";
@@ -140,13 +139,14 @@ export default defineComponent({
 
             const uids = getUidsFromSelectedOptions(selectedOptions.value, extractedZones.value, ZoneToNameZone);
             const payload = {
-                name: 0,
+                name: "",
                 min_length: minCountChar.value,
                 max_length: maxCountChar.value,
                 key_press_time: timePressKey.value,
                 max_mistakes: Math.floor((minCountChar.value + maxCountChar.value) / 2 * 0.1),
                 zones: uids
             };
+            console.log(payload)
 
             try {
                 const response = await axios.post('/api/difficulty/create', payload, {
@@ -157,6 +157,11 @@ export default defineComponent({
                 });
                 console.log('Ответ от сервера:', response);
                 emit('show-success', "Уровень сложности успешно создан!");
+                emit('level-added', {
+                    name: `Уровень - ${response.data[0].name}`, // Предполагается, что API возвращает имя
+                    level: response.data[0].name, // или нужное значение уровня
+                    uid: response.data[0].uid // Предполагается, что API возвращает uid
+                });
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {

@@ -63,12 +63,6 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ["TRAINEE", "ADMIN"] },
     },
     {
-      path: "/app/cabinet/trainee/:uuid",
-      name: "cabinet",
-      component: CabinetView,
-      meta: { requiresAuth: true, roles: ["ADMIN"] },
-    },
-    {
       path: "/app/edit/level",
       name: "edit_level",
       component: LevelEditorView,

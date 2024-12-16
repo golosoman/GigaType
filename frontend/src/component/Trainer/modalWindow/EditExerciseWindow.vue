@@ -34,8 +34,8 @@
                     </BaseButton>
                 </div>
             </div>
-            <BaseInputTextArea :allowedCharacters="getAllowedCharacters(keyboardZones)" :modelValue="textsExercise"
-                @update:modelValue="changeTextExercise" />
+            <BaseInputTextArea :allowedCharacters="getAllowedCharacters(keyboardZones)" v-model="textsExercise"
+                inputPlaceholder="Введите текст упражнения:" @update:modelValue="changeTextExercise" />
             <div v-if="textError" style="color: red;">{{ textError }}</div>
             <BaseButton
                 customStyle="width: 150px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 41px; color: #012E4A;"
@@ -145,7 +145,21 @@ export default defineComponent({
             zoneKeyboard.value = values;
             validateZones(zoneKeyboard.value, zoneError);
             console.log(`Появились изменения cew ${zoneKeyboard.value}`);
+            checkTextSymbols()
         };
+
+        const checkTextSymbols = () => {
+            // Получаем разрешенные символы
+            const allowedCharacters = getAllowedCharacters(zoneKeyboard.value);
+            console.log(allowedCharacters)
+            // Фильтруем символы в textExercise
+            textsExercise.value = textsExercise.value
+                .split('')
+                .filter(char => allowedCharacters.includes(char))
+                .join('');
+            console.log(`Обновленный текст упражнения: ${textsExercise.value}`);
+            // validateTextExercise(textExercise, props.minCount, props.maxCount, textError);
+        }
 
         const changeTextExercise = (value: string) => {
             textsExercise.value = value;
@@ -175,6 +189,7 @@ export default defineComponent({
                 content: textsExercise.value,
                 zones: getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone)
             };
+
             console.log(requestBody)
             try {
 

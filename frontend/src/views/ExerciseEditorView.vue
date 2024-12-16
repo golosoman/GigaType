@@ -9,9 +9,10 @@
     <TableExerciseEditor v-else :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
         :isLoading="isLoading" @addButtonClicked="openModal" @exerciseClick="handleExerciseClick" />
 
-    <CreateExerciseWindow @show-error="showToast" :isVisible="isModalVisible" :keyboardZones="keyboardZones"
-        :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
-        :difficulty-id="selectedOption?.value" @update:isVisible="isModalVisible = $event" />
+    <CreateExerciseWindow @show-error="showToast" @exercise-added="handleExerciseAdded" :isVisible="isModalVisible"
+        :keyboardZones="keyboardZones" :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes"
+        :timePressKey="keyPressTime" :difficulty-id="selectedOption?.value"
+        @update:isVisible="isModalVisible = $event" />
 
     <EditExerciseWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="keyboardZones"
         :keyboardZonesForTask="zonesTask" :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes"
@@ -137,6 +138,12 @@ const fetchTasksForSelectedLevel = async (uid: string) => {
         isLoading.value = false; // Завершаем загрузку
     }
 };
+
+const handleExerciseAdded = (newExercise: { name: string; value: string; level: string; uid: string }) => {
+    console.log(newExercise)
+    tableData.value.push(newExercise); // Добавляем новый элемент в массив tableData
+};
+
 
 const handleExerciseClick = async (uid: string) => {
     try {

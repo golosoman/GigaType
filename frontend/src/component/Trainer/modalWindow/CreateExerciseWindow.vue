@@ -182,22 +182,26 @@ export default defineComponent({
                 emit('show-error', textError.value);
                 return;
             }
-
+            const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);
+            console.log(uids)
+            const playload = {
+                name: "",
+                content: textExercise.value,
+                difficulty_id: props.difficultyId,
+                zones: uids
+            }
+            console.log(playload)
             try {
-                const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);
-                const response = await axios.post('/api/task/create', {
-                    content: textExercise.value,
-                    difficulty_id: props.difficultyId, // Используем переданный difficulty_id
-                    zones: uids
-                });
+
+                const response = await axios.post('/api/task/create', playload);
                 console.log('Сохраненные значения:', response.data);
                 emit('show-success', "Упражнение успешно создано!");
                 // Эмитируем добавленное упражнение
                 emit('exercise-added', {
-                    name: response.data.name, // Предполагается, что API возвращает имя
-                    value: textExercise.value,
-                    level: props.difficultyId, // или нужное значение уровня
-                    uid: response.data.uid // Предполагается, что API возвращает uid
+                    name: `Упражнение - ${response.data[0].name}`, // Предполагается, что API возвращает имя
+                    value: response.data[0].name,
+                    level: response.data[0].difficulty.name, // или нужное значение уровня
+                    uid: response.data[0].uid // Предполагается, что API возвращает uid
                 });
                 closeModal();
             } catch (error) {

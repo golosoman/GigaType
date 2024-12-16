@@ -95,7 +95,7 @@ export default defineComponent({
         const timePressKey = ref(props.timePressKey);
         const maxErrors = ref(props.maxErrors);
         const zoneKeyboard = ref(transformZones(props.keyboardZones));
-        const extractedZones = ref<{ keys: string, uid: string }[]>([]);
+        const extractedZones = ref<{ keys: string, uid: string }[]>([]); // Монтируется при создании компонента, нельзя удалять
 
         // Валидационные ошибки
         const minCountError = ref('');
@@ -108,7 +108,6 @@ export default defineComponent({
             maxCountChar.value = props.maxCount;
             timePressKey.value = props.timePressKey;
             zoneKeyboard.value = transformZones(props.keyboardZones);
-            extractedZones.value = [];
 
             minCountError.value = "";
             maxCountError.value = "";
@@ -173,6 +172,8 @@ export default defineComponent({
                 max_mistakes: maxErrors.value,
                 zones: getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone)
             };
+
+            console.log(payload)
 
             try {
                 const response = await axios.patch('/api/difficulty/update', payload, {
