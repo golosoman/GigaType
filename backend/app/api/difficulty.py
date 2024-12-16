@@ -40,6 +40,27 @@ def create():
             if not zone:
                 return message("Неверный uid зоны клавиатуры", 404)
             zones.append(zone[0])
+
+        # Проверка уникальности по параметрам
+        existing_difficulties = db.session.execute(
+            select(Difficulty).where(
+                    Difficulty.min_length == data['min_length'],
+                    Difficulty.max_length == data['max_length'],
+                    Difficulty.key_press_time == data['key_press_time'],
+                    Difficulty.max_mistakes == int(data['max_mistakes']),
+            )
+        ).all()
+
+        for existing_difficulty_tuple in existing_difficulties:
+            existing_difficulty = existing_difficulty_tuple[0]  # Извлекаем объект Difficulty
+            existing_zones = existing_difficulty.zones  # Получаем связанные зоны
+            existing_zone_ids = {zone.uid for zone in existing_zones}
+            # print(existing_zone_ids)
+            new_zone_ids = set(data['zones'])
+            # print(new_zone_ids)
+            if existing_zone_ids == new_zone_ids:
+                return message("Уровень сложности с такими параметрами уже существует", 406)
+            
         try:
             db.session.add(
                 Difficulty(
@@ -47,12 +68,17 @@ def create():
                     data['min_length'],
                     data['max_length'],
                     data['key_press_time'],
-                    util_round(int(data['max_length'])*0.1),
+                    int(data['max_mistakes']),
                     zones
                 )
             )
             db.session.commit()
-            return message("Okay", 200)
+            difficulty = db.session.execute(select(Difficulty).where(Difficulty.name == data['name'])).first()
+            if not difficulty:
+                return message("Неверный uid.", 404)
+            difficulty: Difficulty = difficulty[0]
+            return send_json_data(make_json_response(difficulty, additional=['uid'], exclude=["difficulty"]))
+            # return send_json_data(make_json_response(last_difficulty, additional=['uid'], exclude=["difficulty"]))
         except BaseException as e:
             print(str(e))
             db.session.rollback()
@@ -78,6 +104,25 @@ def update_():
         difficulty: Difficulty = difficulty[0]
         data.pop('uid')
         try:
+            # Проверка уникальности по параметрам
+            existing_difficulties = db.session.execute(
+                select(Difficulty).where(
+                        Difficulty.min_length == data['min_length'],
+                        Difficulty.max_length == data['max_length'],
+                        Difficulty.key_press_time == data['key_press_time'],
+                        Difficulty.max_mistakes == int(data['max_mistakes']),
+                )
+            ).all()
+
+            for existing_difficulty_tuple in existing_difficulties:
+                existing_difficulty = existing_difficulty_tuple[0]  # Извлекаем объект Difficulty
+                existing_zones = existing_difficulty.zones  # Получаем связанные зоны
+                existing_zone_ids = {zone.uid for zone in existing_zones}
+                # print(existing_zone_ids)
+                new_zone_ids = set(data['zones'])
+                # print(new_zone_ids)
+                if existing_zone_ids == new_zone_ids:
+                    return message("Уровень сложности с такими параметрами уже существует", 406)
             for arg in data:
                 if arg == "zones":
                     zones: List["KeyBoardZone"] = []
