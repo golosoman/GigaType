@@ -20,7 +20,7 @@ const props = defineProps<{
     customStyle?: string;
 }>();
 
-const headers = ['Упражнение', 'Статус', 'Скорость', 'Ошибки', 'Время'];
+const headers = ['Упражнение', 'Статус', 'Скорость', 'Ошибки', 'Время', 'Дата'];
 </script>
 
 <style scoped>

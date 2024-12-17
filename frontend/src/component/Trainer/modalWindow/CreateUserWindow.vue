@@ -5,13 +5,13 @@
                 Создание нового пользователя
             </div>
             <BaseInputWithLabel label="Логин" inputPlaceholder="Введите логин:" :modelValue="login"
-                @update:modelValue="validateLogin"
+                @update:modelValue="onLoginInput"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
             <div v-if="loginError" style="color: red;">{{ loginError }}</div>
 
             <BaseInputWithLabel label="Пароль" inputPlaceholder="Введите пароль:" :modelValue="password"
-                inputType="password" @update:modelValue="validatePassword"
+                inputType="password" @update:modelValue="onPasswordInput"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px; margin-top:10px;" />
             <div v-if="passwordError" style="color: red;">{{ passwordError }}</div>
@@ -31,7 +31,8 @@
 import { defineComponent, ref } from 'vue';
 import axios from 'axios'; // Импортируем axios
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
-import CloseUrl from '@/assets/Close.png'
+import CloseUrl from '@/assets/Close.png';
+import { validateLogin, validatePassword } from '@/utils';
 
 export default defineComponent({
     name: 'CreateUser ',
@@ -52,35 +53,26 @@ export default defineComponent({
         const loginError = ref('');
         const passwordError = ref('');
 
-        const validateLogin = (value: string) => {
-            if (value.length < 4) {
-                loginError.value = 'Логин должен содержать минимум 4 символа.';
-            } else if (value.length > 10) {
-                loginError.value = 'Логин не может превышать 10 символов.';
-            } else {
-                loginError.value = '';
-            }
-            login.value = value; // Обновляем значение логина
-        };
-
-        const validatePassword = (value: string) => {
-            if (value.length < 4) {
-                passwordError.value = 'Пароль должен содержать минимум 4 символа.';
-            } else if (value.length > 10) {
-                passwordError.value = 'Пароль не может превышать 10 символов.';
-            } else {
-                passwordError.value = '';
-            }
-            password.value = value; // Обновляем значение пароля
-        };
-
-        const closeModal = () => {
-            emit('update:isVisible', false);
-            // Сбрасываем значения и ошибки при закрытии модального окна
+        const resetValues = () => {
             login.value = '';
             password.value = '';
             loginError.value = '';
             passwordError.value = '';
+        }
+
+        const closeModal = () => {
+            resetValues()
+            emit('update:isVisible', false);
+        };
+
+        const onLoginInput = (value: string) => {
+            login.value = value; // Обновляем значение логина
+            validateLogin(value, loginError); // Обновляем ошибку
+        };
+
+        const onPasswordInput = (value: string) => {
+            password.value = value; // Обновляем значение пароля
+            validatePassword(value, passwordError); // Обновляем ошибку
         };
 
         const registerUser = async () => {
@@ -96,19 +88,30 @@ export default defineComponent({
                     password: password.value,
                 });
 
+                emit("new-user-add", {
+                    name: login.value, // Используем логин
+                    uuid: response.data.uuid, // UUID нового пользователя
+                    isBanned: false // Новый пользователь не заблокирован
+                });
+
                 // Обработка успешного ответа
                 console.log('Пользователь успешно создан:', response.data);
                 closeModal(); // Закрываем модальное окно после успешного создания
             } catch (error) {
-                // Обработка ошибок от сервера
-                if (error.response && error.response.status === 418) {
-                    emit('show-error', 'Пользователь с таким логином уже существует.');
+                // Приведение типа ошибки
+                if (axios.isAxiosError(error) && error.response) {
+                    if (error.response.status === 418) {
+                        emit('show-error', 'Пользователь с таким логином уже существует.');
+                    } else {
+                        const errorMessage = 'Ошибка регистрации. Пожалуйста, попробуйте еще раз.';
+                        emit('show-error', errorMessage);
+                    }
                 } else {
-                    const errorMessage = 'Ошибка регистрации. Пожалуйста, попробуйте еще раз.';
-                    emit('show-error', errorMessage);
+                    emit('show-error', 'Неизвестная ошибка. Пожалуйста, попробуйте еще раз.');
                 }
             }
         };
+
 
         return {
             login,
@@ -117,25 +120,15 @@ export default defineComponent({
             passwordError,
             CloseUrl,
             closeModal,
-            validateLogin,
-            validatePassword,
-            registerUser   // Возвращаем метод для использования в шаблоне
+            onLoginInput,
+            onPasswordInput,
+            registerUser
         };
     },
 });
 </script>
 
 <style scoped>
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type="number"] {
-    -moz-appearance: textfield;
-}
-
 .title {
     font-size: 20px;
     margin-bottom: 10px;
@@ -173,3 +166,5 @@ input[type="number"] {
     font-size: 20px;
 }
 </style>
+
+Найти еще

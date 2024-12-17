@@ -4,7 +4,7 @@ import { BaseInputWithLabel, BaseButton, BaseLink } from "@/component/UI";
 import { defineComponent, ref } from 'vue';
 import { useUser } from '@/store'; // Импортируем store
 import { useRouter } from 'vue-router'; // Импортируем useRouter
-import type axios from "axios";
+import { validateLogin, validatePassword, validateRepeatPassword } from "@/utils";
 
 export default defineComponent({
     name: 'RegisterForm',
@@ -40,35 +40,19 @@ export default defineComponent({
         const passwordError = ref('');
         const repeatPasswordError = ref('');
 
-        const validateLogin = (login: string) => {
-            if (login.length < 4) {
-                loginError.value = 'Логин должен содержать минимум 4 символа.';
-            } else if (login.length > 10) {
-                loginError.value = 'Логин не может превышать 10 символов.';
-            } else {
-                loginError.value = '';
-            }
-            emit('update:login', login);
+        const handleLoginInput = (value: string) => {
+            validateLogin(value, loginError);
+            emit('update:login', value);
         };
 
-        const validatePassword = (password: string) => {
-            if (password.length < 4) {
-                passwordError.value = 'Пароль должен содержать минимум 4 символа.';
-            } else if (password.length > 10) {
-                passwordError.value = 'Пароль не может превышать 10 символов.';
-            } else {
-                passwordError.value = '';
-            }
-            emit('update:password', password);
+        const handlePasswordInput = (value: string) => {
+            validatePassword(value, passwordError);
+            emit('update:password', value);
         };
 
-        const validateRepeatPassword = (repeatPassword: string) => {
-            if (repeatPassword !== props.password) {
-                repeatPasswordError.value = 'Пароли не совпадают.';
-            } else {
-                repeatPasswordError.value = '';
-            }
-            emit('update:repeatPassword', repeatPassword);
+        const handleRepeatPasswordInput = (value: string) => {
+            validateRepeatPassword(value, props.password, repeatPasswordError);
+            emit('update:repeatPassword', value);
         };
 
         const handleSubmit = async () => {
@@ -100,6 +84,9 @@ export default defineComponent({
             loginError,
             passwordError,
             repeatPasswordError,
+            handleLoginInput,
+            handlePasswordInput,
+            handleRepeatPasswordInput
         };
     }
 });
@@ -112,14 +99,14 @@ export default defineComponent({
                 <form @submit.prevent="handleSubmit">
                     <div class="formGroup">
                         <BaseInputWithLabel label="Логин" inputPlaceholder="Введите логин:" :modelValue="login"
-                            @update:modelValue="validateLogin" style="margin-top: 46px;"
+                            @update:modelValue="handleLoginInput" style="margin-top: 46px;"
                             customStyleForInput="width: 450px; height: 57px; font-size: 32px;"
                             customStyleForLabel="font-size: 32px;">
                         </BaseInputWithLabel>
                         <div v-if="loginError" style="color: red;">{{ loginError }}</div>
 
                         <BaseInputWithLabel label="Пароль" inputPlaceholder="Введите пароль:" :modelValue="password"
-                            inputType="password" @update:modelValue="validatePassword" style="margin-top: 38px;"
+                            inputType="password" @update:modelValue="handlePasswordInput" style="margin-top: 38px;"
                             customStyleForInput="width: 450px; height: 57px; font-size: 32px;"
                             customStyleForLabel="font-size: 32px;">
                         </BaseInputWithLabel>
@@ -127,7 +114,7 @@ export default defineComponent({
 
                         <BaseInputWithLabel label="Подтверждение пароля" inputPlaceholder="Подтвердите пароль:"
                             inputType="password" :modelValue="repeatPassword"
-                            @update:modelValue="validateRepeatPassword" style="margin-top: 38px;"
+                            @update:modelValue="handleRepeatPasswordInput" style="margin-top: 38px;"
                             customStyleForInput="width: 450px; height: 57px; font-size: 32px;"
                             customStyleForLabel="font-size: 32px;">
                         </BaseInputWithLabel>

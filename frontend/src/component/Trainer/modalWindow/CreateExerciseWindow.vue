@@ -54,8 +54,10 @@ import { defineComponent, ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { KeyboardWithBlockCheckBox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
-import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
+import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer';
 import CloseUrl from '@/assets/Close.png';
+import { ZoneToNameZone } from '@/types';
+import { validateLengthExercise, validateTextExercise, validateZones } from '@/utils';
 
 export default defineComponent({
     name: 'CreateExerciseWindow',
@@ -105,6 +107,22 @@ export default defineComponent({
         const lengthError = ref('');
         const textError = ref('');
         const zoneError = ref('');
+        const sendingZones = ref(zoneKeyboard.value);
+
+        const resetValues = () => {
+            textExercise.value = '';
+            lengthExercise.value = '';
+            zoneKeyboard.value = props.keyboardZones;
+
+            lengthError.value = "";
+            textError.value = "";
+            zoneError.value = "";
+        }
+
+        const closeModal = () => {
+            resetValues();
+            emit('update:isVisible', false);
+        };
 
         watch(() => props.keyboardZones, (newZones) => {
             zoneKeyboard.value = newZones;
@@ -113,23 +131,33 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
-            validateSelectedZones();
+            console.log(`Поменяли, поменяли !${zoneKeyboard.value}`)
+            validateZones(zoneKeyboard.value, zoneError);
             console.log(`Появились изменения cew ${zoneKeyboard.value}`);
+            checkTextSymbols()
         };
 
+        const checkTextSymbols = () => {
+            // Получаем разрешенные символы
+            const allowedCharacters = getAllowedCharacters(zoneKeyboard.value);
+            console.log(allowedCharacters)
+            // Фильтруем символы в textExercise
+            textExercise.value = textExercise.value
+                .split('')
+                .filter(char => allowedCharacters.includes(char))
+                .join('');
+            console.log(`Обновленный текст упражнения: ${textExercise.value}`);
+            // validateTextExercise(textExercise, props.minCount, props.maxCount, textError);
+        }
+
         const changeTextExercise = (value: string) => {
-            validateTextExercise();
             textExercise.value = value;
+            validateTextExercise(textExercise, props.minCount, props.maxCount, textError);
         };
 
         const changeLengthExercise = (value: number) => {
             lengthExercise.value = value;
-            validateLengthExercise();
-        };
-
-        const closeModal = () => {
-            textExercise.value = '';
-            emit('update:isVisible', false);
+            validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
         };
 
         const extractedZones = ref<{ keys: string, uid: string }[]>([]);
@@ -148,55 +176,43 @@ export default defineComponent({
             fetchZones();
         });
 
-        const validateSelectedZones = () => {
-            if (zoneKeyboard.value.length === 0) {
-                zoneError.value = "Нужно выбрать хотя бы одну зону!"
-            } else {
-                zoneError.value = '';
-            }
-        };
-
-        const validateLengthExercise = () => {
-            const length = Number(lengthExercise.value);
-            if (length < props.minCount || length > props.maxCount) {
-                lengthError.value = `Количество символов должно быть от ${props.minCount} до ${props.maxCount}.`;
-            } else {
-                lengthError.value = '';
-            }
-        };
-
-        const validateTextExercise = () => {
-            if (textExercise.value.length < props.minCount) {
-                textError.value = `Текст упражнения должен содержать минимум ${props.minCount} символов.`;
-            } else {
-                textError.value = '';
-            }
-        };
-
         const saveChanges = async () => {
-            validateTextExercise();
+            validateTextExercise(textExercise, props.minCount, props.maxCount, textError);
             if (textError.value) {
                 emit('show-error', textError.value);
                 return;
             }
-
+            const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);
+            console.log(uids)
+            const playload = {
+                name: "",
+                content: textExercise.value,
+                difficulty_id: props.difficultyId,
+                zones: uids
+            }
+            console.log(playload)
             try {
-                const response = await axios.post('/api/task/create', {
-                    content: textExercise.value,
-                    difficulty_id: props.difficultyId // Используем переданный difficulty_id
-                });
+
+                const response = await axios.post('/api/task/create', playload);
                 console.log('Сохраненные значения:', response.data);
                 emit('show-success', "Упражнение успешно создано!");
+                // Эмитируем добавленное упражнение
+                emit('exercise-added', {
+                    name: `Упражнение - ${response.data[0].name}`, // Предполагается, что API возвращает имя
+                    value: response.data[0].name,
+                    level: response.data[0].difficulty.name, // или нужное значение уровня
+                    uid: response.data[0].uid // Предполагается, что API возвращает uid
+                });
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
-                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
+                    console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
                     if (error.response?.status === 418) {
-                        console.error('Достигнуто максимальное количество упражнений:', error.response.data);
+                        console.error('Достигнуто максимальное количество упражнений:', error.response?.data.message || error.message);
                         emit('show-error', 'Достигнуто максимальное количество упражнений.');
                     } else {
-                        console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
-                        emit('show-error', `Ошибка при отправке запроса: ${error.message}`);
+                        console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.response?.data.message || error.message}`);
                     }
                 } else {
                     console.error('Неизвестная ошибка:', error);
@@ -206,36 +222,12 @@ export default defineComponent({
         };
 
         const generateExercise = async () => {
-            validateSelectedZones()
-            validateLengthExercise();
+            validateZones(zoneKeyboard.value, zoneError);
+            validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
             if (lengthError.value || zoneError.value) {
                 emit('show-error', lengthError.value || zoneError.value);
                 return;
             }
-            type ZoneKey =
-                | "Зона 1 (ФЫВАОЛДЖ)"
-                | "Зона 2 (ПР)"
-                | "Зона 3 (КЕНГ)"
-                | "Зона 4 (МИТЬ)"
-                | "Зона 5 (УСШБ)"
-                | "Зона 6 (ЦЧЩЮ)"
-                | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-                | "Зона 8 (1234567890)"
-                | "Зона 9 (символы)"
-                | "Зона Пробела";
-
-            const ZoneToNameZone: Record<ZoneKey, string> = {
-                "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-                "Зона 2 (ПР)": "пр",
-                "Зона 3 (КЕНГ)": "кенг",
-                "Зона 4 (МИТЬ)": "мить",
-                "Зона 5 (УСШБ)": "усшб",
-                "Зона 6 (ЦЧЩЮ)": "цчщю",
-                "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-                "Зона 8 (1234567890)": "1234567890",
-                "Зона 9 (символы)": '!"№;%:?*()_-+=',
-                "Зона Пробела": " ",
-            };
 
             try {
                 const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);

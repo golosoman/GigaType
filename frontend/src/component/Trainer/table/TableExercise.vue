@@ -50,6 +50,7 @@ const handleExerciseClick = (levelId: string, taskId: string) => {
     flex-direction: column;
     width: 100%;
     border: 1px solid #012E4A;
+    color: #012e4a;
 }
 
 .table-header {

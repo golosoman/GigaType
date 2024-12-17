@@ -6,22 +6,23 @@
             </div>
             <KeyboardWithCheckbox @update:selectedValues="handleSelectedValues" :keyboard-zones="zoneKeyboard" />
             <div v-if="zoneError" style="color: red;">{{ zoneError }}</div>
-            <BaseInputWithLabel label="Минимальное количество символов"
+            <BaseInputWithLabel label="Минимальное количество символов" inputType="number"
                 inputPlaceholder="Введите минимальное количество символов:" :modelValue="minCountChar"
                 @update:modelValue="changeMinCountChar"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
             <div v-if="minCountError" style="color: red;">{{ minCountError }}</div>
 
-            <BaseInputWithLabel label="Максимальное количество символов"
+            <BaseInputWithLabel label="Максимальное количество символов" inputType="number"
                 inputPlaceholder="Введите максимальное количество символов:" :modelValue="maxCountChar"
                 @update:modelValue="changeMaxCountChar"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
             <div v-if="maxCountError" style="color: red;">{{ maxCountError }}</div>
 
-            <BaseInputWithLabel label="Время нажатия на клавишу" inputPlaceholder="Введите время нажатия на клавишу:"
-                :modelValue="timePressKey" @update:modelValue="changeTimePressKey"
+            <BaseInputWithLabel label="Время нажатия на клавишу" inputType="number"
+                inputPlaceholder="Введите время нажатия на клавишу:" :modelValue="timePressKey"
+                @update:modelValue="changeTimePressKey"
                 customStyleForInput="width: 500px; height: 30px; font-size: 20px; background-color: #B7BBBC;"
                 customStyleForLabel="font-size: 20px;" />
             <div v-if="timePressError" style="color: red;">{{ timePressError }}</div>
@@ -44,7 +45,9 @@ import { KeyboardWithCheckbox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
 import axios from 'axios';
-import { transformZones, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
+import { transformZones, getUidsFromSelectedOptions } from '@/component/Trainer';
+import { ZoneToNameZone } from '@/types';
+import { validateMaxCountChar, validateMinCountChar, validateTimePressKey, validateZones } from '@/utils';
 
 export default defineComponent({
     name: 'EditLevelWindow',
@@ -82,39 +85,35 @@ export default defineComponent({
         difficultyId: {
             type: String,
             required: false,
-            default: null,
-        },
-        taskId: {
-            type: String,
-            required: true,
+            default: null
         }
     },
     setup(props, { emit }) {
-        const ZoneToNameZone = {
-            "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-            "Зона 2 (ПР)": "пр",
-            "Зона 3 (КЕНГ)": "кенг",
-            "Зона 4 (МИТЬ)": "мить",
-            "Зона 5 (УСШБ)": "усшб",
-            "Зона 6 (ЦЧЩЮ)": "цчщю",
-            "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-            "Зона 8 (1234567890)": "1234567890",
-            "Зона 9 (символы)": '!"№;%:?*()_-+=',
-            "Зона Пробела": " ",
-        };
 
         const minCountChar = ref(props.minCount);
         const maxCountChar = ref(props.maxCount);
         const timePressKey = ref(props.timePressKey);
         const maxErrors = ref(props.maxErrors);
         const zoneKeyboard = ref(transformZones(props.keyboardZones));
-        const extractedZones = ref<{ keys: string, uid: string }[]>([]);
+        const extractedZones = ref<{ keys: string, uid: string }[]>([]); // Монтируется при создании компонента, нельзя удалять
 
         // Валидационные ошибки
         const minCountError = ref('');
         const maxCountError = ref('');
         const timePressError = ref('');
         const zoneError = ref('');
+
+        const resetValues = () => {
+            minCountChar.value = props.minCount;
+            maxCountChar.value = props.maxCount;
+            timePressKey.value = props.timePressKey;
+            zoneKeyboard.value = transformZones(props.keyboardZones);
+
+            minCountError.value = "";
+            maxCountError.value = "";
+            timePressError.value = "";
+            zoneError.value = "";
+        }
 
         const fetchZones = async () => {
             try {
@@ -131,67 +130,34 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
-            validateZones();
+            validateZones(zoneKeyboard.value, zoneError);
         };
 
         const changeMinCountChar = (value: number) => {
             minCountChar.value = value;
-            validateMinCountChar();
+            validateMinCountChar(minCountChar, minCountError);
         };
 
         const changeMaxCountChar = (value: number) => {
             maxCountChar.value = value;
-            validateMaxCountChar();
+            validateMaxCountChar(maxCountChar, minCountChar, maxCountError);
         };
 
         const changeTimePressKey = (value: number) => {
             timePressKey.value = value;
-            validateTimePressKey();
-        };
-
-        const validateZones = () => {
-            if (zoneKeyboard.value.length === 0) {
-                zoneError.value = "Нужно выбрать хотя бы одну зону!";
-            } else {
-                zoneError.value = '';
-            }
-        };
-
-        const validateMinCountChar = () => {
-            if (minCountChar.value < 20 || minCountChar.value > 80) {
-                minCountError.value = 'Минимальное количество символов должно быть от 20 до 80.';
-            } else {
-                minCountError.value = '';
-            }
-        };
-
-        const validateMaxCountChar = () => {
-            if (maxCountChar.value < 20 || maxCountChar.value > 80) {
-                maxCountError.value = 'Максимальное количество символов должно быть от 20 до 80.';
-            } else if (maxCountChar.value <= minCountChar.value + 9) {
-                maxCountError.value = 'Максимальное количество символов должно быть больше минимального на 10.';
-            } else {
-                maxCountError.value = '';
-            }
-        };
-
-        const validateTimePressKey = () => {
-            if (timePressKey.value < 0.5 || timePressKey.value > 1.5) {
-                timePressError.value = 'Время нажатия на клавишу должно быть от 0.5 до 1.5.';
-            } else {
-                timePressError.value = '';
-            }
+            validateTimePressKey(timePressKey, timePressError);
         };
 
         const closeModal = () => {
+            resetValues();
             emit('update:isVisible', false);
         };
 
         const saveChanges = async () => {
-            validateMinCountChar();
-            validateMaxCountChar();
-            validateTimePressKey();
-            validateZones();
+            validateMinCountChar(minCountChar, minCountError);
+            validateMaxCountChar(maxCountChar, minCountChar, maxCountError);
+            validateTimePressKey(timePressKey, timePressError);
+            validateZones(zoneKeyboard.value, zoneError);
 
             if (minCountError.value || maxCountError.value || timePressError.value || zoneError.value) {
                 emit('show-error', minCountError.value || maxCountError.value || timePressError.value || zoneError.value);
@@ -207,6 +173,8 @@ export default defineComponent({
                 zones: getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone)
             };
 
+            console.log(payload)
+
             try {
                 const response = await axios.patch('/api/difficulty/update', payload, {
                     headers: {
@@ -219,8 +187,8 @@ export default defineComponent({
                 closeModal();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
-                    console.error('Ошибка при отправке запроса:', error.response?.data || error.message);
-                    emit('show-error', `Ошибка при отправке запроса: ${error.response?.data || error.message}`)
+                    console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                    emit('show-error', `Ошибка при отправке запроса: ${error.response?.data.message || error.message}`)
                 } else {
                     console.error('Неизвестная ошибка:', error);
                     emit('show-error', `Неизвестная ошибка: ${error}`)

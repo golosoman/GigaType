@@ -7,3 +7,4 @@ export * from "./statistic";
 export * from "./auth";
 export * from "./modalWindow";
 export * from "./util";
+export * from "./pagination";

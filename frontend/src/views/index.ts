@@ -9,6 +9,8 @@ import CabinetAdminView from "./CabinetAdminView.vue";
 import LevelEditorView from "./LevelEditorView.vue";
 import UserEditorView from "./UserEditorView.vue";
 import ExerciseEditorView from "./ExerciseEditorView.vue";
+import NotFoundView from "./NotFoundView.vue";
+import ForbiddenView from "./ForbiddenView.vue";
 
 export {
   AboutDevelopersView,
@@ -22,4 +24,6 @@ export {
   LevelEditorView,
   UserEditorView,
   ExerciseEditorView,
+  NotFoundView,
+  ForbiddenView,
 };

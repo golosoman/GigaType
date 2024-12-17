@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Keyboard, TypingTrainer, NavigationBarForTrainee, FinishExerciseWindow } from '@/component/trainer';
+import { Keyboard, TypingTrainer, NavigationBarForTrainee, FinishExerciseWindow } from '@/component/Trainer';
 import { BaseCheckbox } from '@/component/UI';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
@@ -94,8 +94,8 @@ const sendCompletionData = async (success: boolean) => {
 
 onMounted(async () => {
     const { params } = route;
-    const levelId = params.levelId; // id уровня сложности из URL
-    const exerciseId = params.exerciseId; // id упражнения из URL
+    const levelId = Array.isArray(params.levelId) ? params.levelId[0] : params.levelId; // id уровня сложности из URL
+    const exerciseId = Array.isArray(params.exerciseId) ? params.exerciseId[0] : params.exerciseId; // id упражнения из URL
     console.log(params)
 
     const difficultyData = await fetchDifficultyData(levelId);

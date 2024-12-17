@@ -15,15 +15,22 @@
                         customStyleForLabel="font-size: 32px; pointer-events: none;">
                     </BaseInputWithLabel>
                 </div>
+                <!-- Кнопка "Выход" -->
+                <div class="logout-button-container">
+                    <BaseButton @click="handleLogout"
+                        customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; background-color: #FF8080; margin-left: 10px;">
+                        Выход
+                    </BaseButton>
+                </div>
             </div>
-            <div>
+            <!-- <div>
                 <BaseButton
                     customStyle="width: 350px; height: 57px; border-radius: 15px; margin-top: 41px; font-size: 32px; color: #012E4A;">
                     Изменить фотографию
                 </BaseButton>
-            </div>
+            </div> -->
             <div>
-                <h2>Статистика</h2>
+                <h1>Статистика</h1>
                 <div>
                     <BaseButton @click="setActiveTab('exercise')"
                         customStyle="width: 254px; height: 57px; border-radius: 15px; font-size: 32px; color: #012E4A; margin-left: 20px;">
@@ -55,11 +62,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, type Ref } from 'vue';
-import { NavigationBarForAdmin, RatingTable } from '@/component/trainer';
+import { NavigationBarForAdmin, RatingTable } from '@/component/Trainer';
 import { BaseImage, BaseButton, BaseInputWithLabel, BaseDropdown } from '@/component/UI';
 import UserImage from '@/assets/User.png';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { useUser } from '@/store'; // Импортируем store
+
+// Инициализация store
+const userStore = useUser();
+
+
 
 interface DifficultyLevel {
     name: string;
@@ -87,6 +100,16 @@ interface ExerciseData {
     name: string;       // Имя упражнения
 }
 
+// Функция для выхода из аккаунта
+const handleLogout = async () => {
+    try {
+        await userStore.logout(); // Вызов метода logout из store
+        window.location.href = '/'; // Перенаправление на главную страницу (или другую страницу)
+    } catch (error) {
+        console.error('Ошибка при выходе:', error);
+    }
+};
+
 // Определяем тип для данных гистограммы
 interface ChartData {
     labels: string[];
@@ -113,7 +136,6 @@ const chartData: Ref<ChartData> = ref({
         },
     ],
 });
-
 const chartOptions = ref({
     responsive: true,
     scales: {
@@ -187,16 +209,42 @@ const fetchExerciseData = async (difficultyUid: string) => {
         }
         const data: ExerciseData[] = await response.json();
 
+        console.log('Полученные данные:', data); // Проверка полученных данных
+
         // Проверка, есть ли данные, и обновление данных для гистограммы
         if (data.length > 0) {
-            chartData.value.labels = data.map((item: ExerciseData) => `Упражнение ${item.name}`);
-            chartData.value.datasets[0].data = data.map((item: ExerciseData) => item.attempts[0]); // Верные решения
-            chartData.value.datasets[1].data = data.map((item: ExerciseData) => item.attempts[1]); // Ошибочные решения
+            chartData.value = {
+                labels: data.map((item: ExerciseData) => `Упражнение ${item.name}`),
+                datasets: [
+                    {
+                        label: 'Верные решения',
+                        data: data.map((item: ExerciseData) => item.attempts[1]), // Успешные попытки
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    },
+                    {
+                        label: 'Ошибочные решения',
+                        data: data.map((item: ExerciseData) => item.attempts[0] - item.attempts[1]), // Неудачные попытки
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    },
+                ],
+            };
         } else {
             // Если данных нет, обнуляем массивы
-            chartData.value.labels = [];
-            chartData.value.datasets[0].data = [0];
-            chartData.value.datasets[1].data = [0];
+            chartData.value = {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Верные решения',
+                        data: [0],
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    },
+                    {
+                        label: 'Ошибочные решения',
+                        data: [0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    },
+                ],
+            };
         }
     } catch (error) {
         console.error('Ошибка при получении данных по упражнениям:', error);
@@ -223,6 +271,14 @@ const setActiveTab = (tab: string) => {
 </script>
 
 <style scoped>
+h1 {
+    color: #012e4a;
+}
+
+h2 {
+    color: #012e4a;
+}
+
 .content {
     display: flex;
     flex-direction: column;
@@ -232,6 +288,8 @@ const setActiveTab = (tab: string) => {
     display: flex;
     align-items: flex-start;
     margin-top: 20px;
+    justify-content: space-between;
+    /* Добавлено для выравнивания по краям */
 }
 
 .input-container {
@@ -240,6 +298,15 @@ const setActiveTab = (tab: string) => {
     justify-content: flex-start;
     margin-left: 50px;
     margin-top: 50px;
+}
+
+.logout-button-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    /* Выровнять кнопку по правому краю */
+    margin-top: 50px;
+    /* Добавить отступ сверху для выравнивания */
 }
 
 .BaseImage {

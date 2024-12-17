@@ -1,30 +1,34 @@
 <template>
     <NavigationBarForAdmin></NavigationBarForAdmin>
-    <h2>Редактор упражнений</h2>
-    <BaseDropdown v-model="selectedOption" :options="options" placeholder="Выберите уровень сложности" />
-    <TableExerciseEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
-        @addButtonClicked="openModal" @exerciseClick="handleExerciseClick" />
+    <h1>Редактор упражнений</h1>
+    <BaseDropdown custom-style="margin-left: 15px;" v-model="selectedOption" :options="options"
+        placeholder="Выберите уровень сложности" />
+    <div v-if="isLoading">
+        <SpinLoader v-if="isLoading"></SpinLoader>
+    </div>
+    <TableExerciseEditor v-else :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
+        :isLoading="isLoading" @addButtonClicked="openModal" @exerciseClick="handleExerciseClick" />
 
-    <CreateExerciseWindow @show-error="showToast" :isVisible="isModalVisible" :keyboardZones="keyboardZones"
-        :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
-        :difficulty-id="selectedOption?.value" @update:isVisible="isModalVisible = $event" />
+    <CreateExerciseWindow @show-error="showToast" @exercise-added="handleExerciseAdded" :isVisible="isModalVisible"
+        :keyboardZones="keyboardZones" :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes"
+        :timePressKey="keyPressTime" :difficulty-id="selectedOption?.value"
+        @update:isVisible="isModalVisible = $event" />
 
     <EditExerciseWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="keyboardZones"
-        :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes" :timePressKey="keyPressTime"
-        :taskId="tableData[0]?.uid" :difficultyId="selectedOption?.value" :textExercise="currentExerciseContent"
-        @update:isVisible="isEditModalVisible = $event" />
+        :keyboardZonesForTask="zonesTask" :minCount="minCount" :maxCount="maxCount" :numberErrors="maxMistakes"
+        :timePressKey="keyPressTime" :taskId="uidTask" :difficultyId="selectedOption?.value"
+        :textExercise="currentExerciseContent" @update:isVisible="isEditModalVisible = $event" />
     <Toast v-if="toastVisible" v-model="toastVisible" :message="toastMessage" type="error"
         @close="toastVisible = false" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { NavigationBarForAdmin, TableExerciseEditor, CreateExerciseWindow, EditExerciseWindow } from '@/component/trainer';
-import { BaseDropdown } from '@/component/UI';
-import { transformZones } from '@/component/Trainer/modalWindow';
+import { NavigationBarForAdmin, TableExerciseEditor, CreateExerciseWindow, EditExerciseWindow, transformZones } from '@/component/Trainer';
+import { BaseDropdown, SpinLoader } from '@/component/UI';
 
 import { Toast } from '@/component/UI';
-
+const isLoading = ref(true); // Состояние загрузки
 const toastVisible = ref(false)
 const toastMessage = ref('')
 
@@ -51,12 +55,15 @@ interface Task {
     name: string;
     content: string;
     difficulty_id: string;
+    zones: { keys: string; uid: string }[];
     uid: string;
 }
 
 const isModalVisible = ref(false);
 const isEditModalVisible = ref(false);
 const currentExerciseContent = ref('');
+const zonesTask = ref([])
+const uidTask = ref('')
 
 const options = ref<{ label: string; value: string }[]>([]);
 const selectedOption = ref<{ label: string; value: string } | null>(null);
@@ -101,6 +108,7 @@ const fetchDifficultyLevels = async () => {
 };
 
 const fetchTasksForSelectedLevel = async (uid: string) => {
+    isLoading.value = true; // Начинаем загрузку
     try {
         const response = await fetch(`/api/difficulty/get?uid=${uid}`);
         if (!response.ok) {
@@ -124,11 +132,18 @@ const fetchTasksForSelectedLevel = async (uid: string) => {
                 uid: task.uid
             }));
         }
-
     } catch (error) {
         console.error('Ошибка при получении задач для уровня сложности:', error);
+    } finally {
+        isLoading.value = false; // Завершаем загрузку
     }
 };
+
+const handleExerciseAdded = (newExercise: { name: string; value: string; level: string; uid: string }) => {
+    console.log(newExercise)
+    tableData.value.push(newExercise); // Добавляем новый элемент в массив tableData
+};
+
 
 const handleExerciseClick = async (uid: string) => {
     try {
@@ -140,6 +155,8 @@ const handleExerciseClick = async (uid: string) => {
         if (data.length > 0) {
             const exercise = data[0];
             currentExerciseContent.value = exercise.content; // Содержимое упражнения
+            zonesTask.value = exercise.zones;
+            uidTask.value = exercise.uid;
             // Установить другие свойства, если необходимо
             isEditModalVisible.value = true; // Открыть модальное окно редактирования
         }
@@ -162,4 +179,10 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+h1 {
+    margin-left: 15px;
+    color: #012e4a;
+    font-family: "Alegreya Sans SC";
+}
+</style>

@@ -2,6 +2,7 @@
     <div class="trainer-container">
         <div class="full-width">
             <div>Упражнение {{ level }}.{{ exercise }}</div>
+            <div>Количество символов {{ textFromInput.length }}/{{ textToType.length }}</div>
             <div>Скорость: {{ speed }} симв/мин</div>
             <div>Ошибки: {{ errorsCount }}/{{ maxErrors }}</div>
             <div>Время: {{ elapsedTime }} сек</div>
@@ -68,6 +69,7 @@ export default defineComponent({
         const timerRunning = ref(false);
         let timer: ReturnType<typeof setInterval>;
         let pressTimer: ReturnType<typeof setInterval>;
+        let beginningTimeExercise = ref(0);
 
         const calculateScore = () => {
             const timeBonus = Math.max(0, 120 - elapsedTime.value);
@@ -95,26 +97,42 @@ export default defineComponent({
             }
         }
 
+        const calculatingExactTime = () => {
+            const timeSpent = ((Date.now() - beginningTimeExercise.value) / 1000);
+            speed.value = Math.max(0, Math.round((textFromInput.value.length * 60) / timeSpent));
+            return timeSpent;
+        }
+
         const checkLastKeyPressTime = () => {
             const currentTime = Date.now();
             if (currentTime - lastKeyPressTime.value > props.maxKeyPressInterval) {
+                const timeSpent = calculatingExactTime()
                 console.log(`Превышено ожидание нажатия на клавишу! ${currentTime - lastKeyPressTime.value} против ${props.maxKeyPressInterval}`);
                 resetStatistics();
+                emit('error-completion', [
+                    props.level,
+                    props.exercise,
+                    speed.value,
+                    errorsCount.value,
+                    timeSpent,
+                    score.value,
+                    textFromInput.value.length
+                ])
             }
             lastKeyPressTime.value = currentTime;
         };
 
         const handleCompletion = (inputText: string) => {
             console.log('Завершено:', inputText);
-            clearInterval(timer);
-            timerRunning.value = false; // Остановить таймер
+            const timeSpent = calculatingExactTime()
+            stopProgram()
             // Эмитируем успешное завершение
             emit('success-completion', [
                 props.level,
                 props.exercise,
                 speed.value,
                 errorsCount.value,
-                elapsedTime.value,
+                timeSpent,
                 score.value,
                 textFromInput.value.length
             ]);
@@ -127,6 +145,7 @@ export default defineComponent({
                 console.log(`Неверный символ: ${invalidChar}`);
             }
             if (errorsCount.value >= props.maxErrors) {
+                const timeSpent = calculatingExactTime()
                 console.log('Тренировка завершена из-за превышения максимального количества ошибок.');
                 resetStatistics();
                 // Эмитируем завершение с ошибками
@@ -135,7 +154,7 @@ export default defineComponent({
                     props.exercise,
                     speed.value,
                     errorsCount.value,
-                    elapsedTime.value,
+                    timeSpent,
                     score.value,
                     textFromInput.value.length
                 ]);
@@ -143,12 +162,16 @@ export default defineComponent({
         };
 
         const resetStatistics = () => {
+            score.value = 0;
+            stopProgram()
+        };
+
+        const stopProgram = () => {
             clearInterval(timer);
             clearInterval(pressTimer);
-            score.value = 0;
             trackClicks.value = false;
             timerRunning.value = false; // Остановить таймер
-        };
+        }
 
         const startTimer = () => {
             if (!timerRunning.value) {
@@ -158,6 +181,7 @@ export default defineComponent({
                 textFromInput.value = "";
                 trackClicks.value = true;
                 lastKeyPressTime.value = Date.now();
+                beginningTimeExercise.value = Date.now();
                 timerRunning.value = true; // Установить флаг, что таймер запущен
                 timer = setInterval(() => {
                     elapsedTime.value += 1;
@@ -196,6 +220,7 @@ export default defineComponent({
             textFromInput,
             timerRunning,
             textPreview,
+            beginningTimeExercise,
             handleThrowCurrentCharacter,
             handleCompletion,
             handleInvalidCharacter,

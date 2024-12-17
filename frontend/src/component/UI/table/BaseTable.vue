@@ -1,18 +1,20 @@
 <template>
-    <div class="base-table" :style="customStyle">
-        <div class="table-header">
-            <div class="header-cell" v-for="(header, index) in headers" :key="index">
-                {{ header }}
-            </div>
-        </div>
-        <div class="table-body">
-            <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
-                <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
+    <table class="base-table" :style="customStyle">
+        <thead>
+            <tr class="table-header">
+                <th v-for="(header, index) in headers" :key="index">
+                    {{ header }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
+                <td v-for="(header, colIndex) in headers" :key="colIndex">
                     {{ row[header] }}
-                </div>
-            </div>
-        </div>
-    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </template>
 
 <script setup lang="ts">
@@ -27,42 +29,29 @@ const props = defineProps<{
 
 <style scoped>
 .base-table {
-    display: flex;
-    flex-direction: column;
     width: 100%;
+    border-collapse: collapse;
+    /* Убирает двойные границы между ячейками */
     border: 1px solid #012E4A;
+    color: #012e4a;
     /* Темный синий цвет для границы таблицы */
 }
 
 .table-header {
-    display: flex;
     background-color: #81BECE;
     /* Светлый голубой цвет для фона заголовков */
 }
 
-.header-cell {
-    flex: 1;
-    padding: 10px;
-    font-weight: bold;
-    text-align: left;
-    border: 1px solid #012E4A;
-    /* Темный синий цвет для границ ячеек заголовка */
-}
-
-.table-body {
-    display: flex;
-    flex-direction: column;
-}
-
-.table-row {
-    display: flex;
-}
-
-.cell {
-    flex: 1;
-    padding: 10px;
+th,
+td {
+    padding: 15px;
+    /* Увеличение отступов для ячеек */
     border: 1px solid #012E4A;
     /* Темный синий цвет для границ ячеек */
+    text-align: center;
+    /* Выравнивание текста в ячейках по центру */
+    min-width: 100px;
+    /* Минимальная ширина ячейки */
 }
 
 .table-row:hover {

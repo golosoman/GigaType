@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue';
 import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
 
@@ -42,7 +42,12 @@ const props = defineProps<{
     customStyle?: string;
 }>();
 
+const exercises = ref(props.data)
 
+watch(() => props.data, (exerciseData) => {
+    exercises.value = exerciseData;
+    console.log(`Уровни изменились! ${exerciseData}`);
+});
 
 const emit = defineEmits<{
     (e: 'addButtonClicked'): void;
@@ -73,6 +78,7 @@ const handleAddButtonClick = () => {
     flex-direction: column;
     width: 100%;
     border: 1px solid #012E4A;
+    color: #012e4a;
 }
 
 .table-header {
@@ -101,6 +107,7 @@ const handleAddButtonClick = () => {
     flex: 1;
     padding: 10px;
     border: 1px solid #012E4A;
+    text-align: center;
 }
 
 .table-row:hover {

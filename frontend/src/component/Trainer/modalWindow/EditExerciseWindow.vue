@@ -34,8 +34,8 @@
                     </BaseButton>
                 </div>
             </div>
-            <BaseInputTextArea :allowedCharacters="getAllowedCharacters(keyboardZones)" :modelValue="textsExercise"
-                @update:modelValue="changeTextExercise" />
+            <BaseInputTextArea :allowedCharacters="getAllowedCharacters(keyboardZones)" v-model="textsExercise"
+                inputPlaceholder="Введите текст упражнения:" @update:modelValue="changeTextExercise" />
             <div v-if="textError" style="color: red;">{{ textError }}</div>
             <BaseButton
                 customStyle="width: 150px; height: 30px; font-size: 20px; border-radius: 15px; margin-top: 41px; color: #012E4A;"
@@ -55,7 +55,9 @@ import { KeyboardWithBlockCheckBox } from '../keyboard';
 import { BaseInputWithLabel, BaseButton, ButtonWithImage, BaseInput, BaseInputTextArea } from '@/component/UI';
 import CloseUrl from '@/assets/Close.png';
 import axios from 'axios';
-import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer/modalWindow';
+import { getZoneNameFromSelectedOptions, getUidsFromSelectedOptions } from '@/component/Trainer';
+import { ZoneToNameZone } from '@/types';
+import { validateLengthExercise, validateTextExercise, validateZones } from '@/utils';
 
 export default defineComponent({
     name: 'EditExerciseWindow',
@@ -73,6 +75,10 @@ export default defineComponent({
             required: true,
         },
         keyboardZones: {
+            type: Array as () => string[],
+            required: true,
+        },
+        keyboardZonesForTask: {
             type: Array as () => string[],
             required: true,
         },
@@ -95,7 +101,7 @@ export default defineComponent({
         difficultyId: {
             type: String,
             required: false,
-            default: undefined,
+            default: null,
         },
         taskId: {
             type: String,
@@ -115,6 +121,16 @@ export default defineComponent({
         const textError = ref('');
         const zoneError = ref('');
 
+        const resetValues = () => {
+            textsExercise.value = props.textExercise;
+            lengthExercise.value = '';
+            zoneKeyboard.value = props.keyboardZones;
+
+            lengthError.value = "";
+            textError.value = "";
+            zoneError.value = "";
+        }
+
         watch(() => props.keyboardZones, (newZones) => {
             zoneKeyboard.value = newZones;
             console.log(`Зоны изменились! ${newZones}`);
@@ -127,26 +143,41 @@ export default defineComponent({
 
         const handleSelectedValues = (values: string[]) => {
             zoneKeyboard.value = values;
-            validateSelectedZones();
+            validateZones(zoneKeyboard.value, zoneError);
             console.log(`Появились изменения cew ${zoneKeyboard.value}`);
+            checkTextSymbols()
         };
+
+        const checkTextSymbols = () => {
+            // Получаем разрешенные символы
+            const allowedCharacters = getAllowedCharacters(zoneKeyboard.value);
+            console.log(allowedCharacters)
+            // Фильтруем символы в textExercise
+            textsExercise.value = textsExercise.value
+                .split('')
+                .filter(char => allowedCharacters.includes(char))
+                .join('');
+            console.log(`Обновленный текст упражнения: ${textsExercise.value}`);
+            // validateTextExercise(textExercise, props.minCount, props.maxCount, textError);
+        }
 
         const changeTextExercise = (value: string) => {
             textsExercise.value = value;
-            validateTextExercise();
+            validateTextExercise(textsExercise, props.minCount, props.maxCount, textError);
         };
 
         const changeLengthExercise = (value: number) => {
             lengthExercise.value = value;
-            validateLengthExercise();
+            validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
         };
 
         const closeModal = () => {
+            resetValues();
             emit('update:isVisible', false);
         };
 
         const saveChanges = async () => {
-            validateTextExercise();
+            validateTextExercise(textsExercise, props.minCount, props.maxCount, textError);
             if (textError.value) {
                 emit('show-error', textError.value);
                 return;
@@ -155,29 +186,36 @@ export default defineComponent({
             const requestBody = {
                 uid: props.taskId,
                 difficulty_id: props.difficultyId,
-                content: textsExercise.value
+                content: textsExercise.value,
+                zones: getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone)
             };
 
+            console.log(requestBody)
             try {
-                const response = await fetch('/api/task/update', {
-                    method: 'PATCH',
+
+                const response = await axios.patch('/api/task/update', requestBody, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestBody),
                 });
 
-                if (!response.ok) {
-                    throw new Error('Ошибка при обновлении упражнения');
-                }
-
-                const result = await response.json();
-                console.log('Упражнение обновлено успешно:', result);
+                console.log('Упражнение обновлено успешно:', response.data);
                 emit('show-success', "Упражнение успешно обновлено!");
                 closeModal();
             } catch (error) {
-                console.error('Ошибка при обновлении упражнения:', error);
-                emit('show-error', `Ошибка при обновлении упражнения: ${error}`);
+                if (axios.isAxiosError(error)) {
+                    console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                    if (error.response?.status === 418) {
+                        console.error('Достигнуто максимальное количество упражнений:', error.response?.data.message || error.message);
+                        emit('show-error', 'Достигнуто максимальное количество упражнений.');
+                    } else {
+                        console.error('Ошибка при отправке запроса:', error.response?.data.message || error.message);
+                        emit('show-error', `Ошибка при отправке запроса: ${error.response?.data.message || error.message}`);
+                    }
+                } else {
+                    console.error('Неизвестная ошибка:', error);
+                    emit('show-error', `Неизвестная ошибка: ${error}`)
+                }
             }
         };
 
@@ -197,63 +235,13 @@ export default defineComponent({
             fetchZones();
         });
 
-        const validateSelectedZones = () => {
-            if (zoneKeyboard.value.length === 0) {
-                zoneError.value = "Нужно выбрать хотя бы одну зону!";
-            } else {
-                zoneError.value = '';
-            }
-        };
-
-        const validateLengthExercise = () => {
-            const length = Number(lengthExercise.value);
-            if (length < props.minCount || length > props.maxCount) {
-                lengthError.value = `Количество символов должно быть от ${props.minCount} до ${props.maxCount}.`;
-            } else {
-                lengthError.value = '';
-            }
-        };
-
-        const validateTextExercise = () => {
-            if (textsExercise.value.length < props.minCount) {
-                textError.value = `Текст упражнения должен содержать минимум ${props.minCount} символов.`;
-            } else {
-                textError.value = '';
-            }
-        };
-
         const generateExercise = async () => {
-            validateSelectedZones();
-            validateLengthExercise();
+            validateZones(zoneKeyboard.value, zoneError);
+            validateLengthExercise(lengthExercise, props.minCount, props.maxCount, lengthError);
             if (lengthError.value || zoneError.value) {
                 emit('show-error', lengthError.value || zoneError.value);
                 return;
             }
-
-            type ZoneKey =
-                | "Зона 1 (ФЫВАОЛДЖ)"
-                | "Зона 2 (ПР)"
-                | "Зона 3 (КЕНГ)"
-                | "Зона 4 (МИТЬ)"
-                | "Зона 5 (УСШБ)"
-                | "Зона 6 (ЦЧЩЮ)"
-                | "Зона 7 (ЁЙЯЗХЪЭ.,)"
-                | "Зона 8 (1234567890)"
-                | "Зона 9 (символы)"
-                | "Зона Пробела";
-
-            const ZoneToNameZone: Record<ZoneKey, string> = {
-                "Зона 1 (ФЫВАОЛДЖ)": "фываолдж",
-                "Зона 2 (ПР)": "пр",
-                "Зона 3 (КЕНГ)": "кенг",
-                "Зона 4 (МИТЬ)": "мить",
-                "Зона 5 (УСШБ)": "усшб",
-                "Зона 6 (ЦЧЩЮ)": "цчщю",
-                "Зона 7 (ЁЙЯЗХЪЭ.,)": "ёйязхъэ.,",
-                "Зона 8 (1234567890)": "1234567890",
-                "Зона 9 (символы)": '!"№;%:?*()_-+=',
-                "Зона Пробела": " ",
-            };
 
             try {
                 const uids = getUidsFromSelectedOptions(zoneKeyboard.value, extractedZones.value, ZoneToNameZone);

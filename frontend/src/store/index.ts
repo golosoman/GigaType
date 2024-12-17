@@ -76,8 +76,23 @@ export const useUser = defineStore("user", () => {
     }
   };
 
-  const logout = () => {
-    clearAuth();
+  const logout = async () => {
+    try {
+      // Отправка запроса на сервер для выхода
+      const response = await axios.post(
+        "/api/user/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        clearAuth(); // Очищаем состояние после успешного выхода
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
   };
 
   // Новое действие для сохранения выбранного уровня сложности и упражнения

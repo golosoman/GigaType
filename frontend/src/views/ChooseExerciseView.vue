@@ -3,14 +3,15 @@
         <NavigationBarForTrainee></NavigationBarForTrainee>
         <div>
             <div>
-                <h2>
+                <h1>
                     Выбрать список упражнений
-                </h2>
+                </h1>
                 <BaseDropdown v-model="selectedOption" :options="options" placeholder="Выберите уровень сложности" />
             </div>
             <div>
                 <h2>Таблица Упражнений</h2>
-                <TableExercise :headers="headers" :data="tableData" custom-style="width: 600px;" />
+                <SpinLoader v-if="isLoading"></SpinLoader>
+                <TableExercise v-else :headers="headers" :data="tableData" custom-style="width: 600px;" />
             </div>
 
         </div>
@@ -19,18 +20,15 @@
 
 
 <script setup lang="ts">
-import { NavigationBarForTrainee, TableExercise } from '@/component/trainer';
-import { BaseDropdown } from '@/component/UI';
+import { NavigationBarForTrainee, TableExercise } from '@/component/Trainer';
+import { BaseDropdown, SpinLoader } from '@/component/UI';
 import { ref, onMounted, watch } from 'vue'
+const isLoading = ref(true); // Состояние загрузки
+
 
 interface DifficultyLevel {
     name: string;
     uid: string;
-    min_length: number;
-    max_length: number;
-    key_press_time: number;
-    max_mistakes: number;
-    zones: { keys: string; uid: string }[];
     tasks: Task[];
 }
 
@@ -70,6 +68,7 @@ const fetchDifficultyLevels = async () => {
 };
 
 const fetchTasksForSelectedLevel = async (uid: string) => {
+    isLoading.value = true;
     try {
         const response = await fetch(`/api/difficulty/get?uid=${uid}`);
         if (!response.ok) {
@@ -91,6 +90,8 @@ const fetchTasksForSelectedLevel = async (uid: string) => {
 
     } catch (error) {
         console.error('Ошибка при получении задач для уровня сложности:', error);
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -110,4 +111,9 @@ const headers = ['Упражнение', 'Название'];
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.content {
+    color: #012e4a;
+    margin-left: 15px;
+}
+</style>

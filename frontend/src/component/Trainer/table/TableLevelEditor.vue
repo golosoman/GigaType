@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="table-body">
-            <div class="table-row" v-for="(row, rowIndex) in data" :key="rowIndex">
+            <div class="table-row" v-for="(row, rowIndex) in levels" :key="rowIndex">
                 <div class="cell" v-for="(header, colIndex) in headers" :key="colIndex">
                     <template v-if="'Название' === header">
                         <BaseLink href="#" target="_blank"
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, watch, ref } from 'vue';
 import { ButtonWithImage, BaseLink } from '@/component/UI';
 import PlusUrl from '@/assets/Plus.png';
 
@@ -41,6 +41,14 @@ const props = defineProps<{
     data: Array<{ level: number; name: string; uid: string }>; // Теперь добавлено поле uid
     customStyle?: string;
 }>();
+
+const levels = ref(props.data)
+
+watch(() => props.data, (levelData) => {
+    levels.value = levelData;
+    console.log(`Уровни изменились! ${levelData}`);
+});
+
 
 const emit = defineEmits<{
     (e: 'createButtonClick'): void; // Определяем событие addButtonClicked
@@ -70,6 +78,7 @@ const handleLevelClick = (uid: string) => {
     flex-direction: column;
     width: 100%;
     border: 1px solid #012E4A;
+    color: #012e4a;
 }
 
 .table-header {
@@ -98,6 +107,7 @@ const handleLevelClick = (uid: string) => {
     flex: 1;
     padding: 10px;
     border: 1px solid #012E4A;
+    text-align: center;
 }
 
 .table-row:hover {

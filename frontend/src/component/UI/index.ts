@@ -6,3 +6,4 @@ export * from "./notification";
 export * from "./link";
 export * from "./image";
 export * from "./table";
+export * from "./loader";

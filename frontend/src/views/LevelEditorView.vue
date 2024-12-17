@@ -1,9 +1,13 @@
 <template>
     <NavigationBarForAdmin></NavigationBarForAdmin>
-    <h2>Редактор уровня</h2>
-    <TableLevelEditor :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
+    <h1>Редактор уровня</h1>
+    <div v-if="isLoading">
+        <SpinLoader v-if="isLoading"></SpinLoader>
+    </div>
+    <TableLevelEditor v-else :headers="tableHeaders" :data="tableData" customStyle="margin: 20px; width: 500px"
         @createButtonClick="openModal" @levelClick="handleLevelClick" />
-    <CreateLevelWindow @show-error="showToast" :isVisible="isModalVisible" @update:isVisible="isModalVisible = $event">
+    <CreateLevelWindow @show-error="showToast" @level-added="handleLevelAdd" :isVisible="isModalVisible"
+        @update:isVisible="isModalVisible = $event">
     </CreateLevelWindow>
     <EditLevelWindow @show-error="showToast" :isVisible="isEditModalVisible" :keyboardZones="selectedLevelData.zones"
         :difficulty-id="selectedLevelUid" :minCount="selectedLevelData.min_length"
@@ -18,10 +22,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { NavigationBarForAdmin } from '@/component/trainer';
-import { TableLevelEditor, CreateLevelWindow, EditLevelWindow } from '@/component/trainer';
-import { Toast } from '@/component/UI';
-
+import { TableLevelEditor, CreateLevelWindow, EditLevelWindow, NavigationBarForAdmin } from '@/component/Trainer';
+import { Toast, SpinLoader } from '@/component/UI';
+const isLoading = ref(true); // Состояние загрузки
 const toastVisible = ref(false)
 const toastMessage = ref('')
 
@@ -33,10 +36,9 @@ const showToast = (message: string) => {
     }, 3000);
 }
 
-
 const isModalVisible = ref(false);
 const isEditModalVisible = ref(false); // Новая переменная для управления видимостью модального окна редактирования
-const selectedLevelUid = ref<string | null>(null);
+const selectedLevelUid = ref<string | undefined>(undefined); // Изменено на string | undefined
 const selectedLevelData = ref<any>(null); // Данные уровня сложности
 const tableHeaders = ['Уровень', 'Название']; // Заголовки таблицы
 const tableData = ref<{ level: number; name: string; uid: string }[]>([]); // Динамические данные таблицы
@@ -45,8 +47,17 @@ const openModal = () => {
     isModalVisible.value = true;
 };
 
+const handleLevelAdd = (newLevel: { name: string; level: number; uid: string }) => {
+    console.log(`handleLevelAdd ${JSON.stringify(newLevel)}`);
+    tableData.value.push(newLevel);
+
+    // Сортируем массив по полю level
+    tableData.value.sort((a, b) => a.level - b.level);
+}
+
 // Метод для загрузки данных с сервера
 const fetchLevels = async () => {
+    isLoading.value = true; // Начинаем загрузку
     try {
         const response = await axios.get('/api/difficulty/get', { withCredentials: true });
         // Фильтруем данные, чтобы использовать только те уровни, которые имеют подлинные значения
@@ -59,6 +70,8 @@ const fetchLevels = async () => {
             }));
     } catch (error) {
         console.error('Ошибка при загрузке уровней:', error);
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -87,4 +100,10 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+h1 {
+    margin-left: 15px;
+    color: #012e4a;
+    font-family: "Alegreya Sans SC";
+}
+</style>
