@@ -125,11 +125,7 @@ export default defineComponent({
         const handleCompletion = (inputText: string) => {
             console.log('Завершено:', inputText);
             const timeSpent = calculatingExactTime()
-            // console.log(`Затраченное время timeSpent = ${timeSpent}, время работы таймера = ${elapsedTime.value}, 
-            //     текущая скорость = ${speed.value}, рассчитанная скорость = ${}
-            //      то что лежит по факту = ${Math.max(0, Math.round((textFromInput.value.length * 60) / timeSpent))}`)
-            clearInterval(timer);
-            timerRunning.value = false; // Остановить таймер
+            stopProgram()
             // Эмитируем успешное завершение
             emit('success-completion', [
                 props.level,
@@ -166,12 +162,16 @@ export default defineComponent({
         };
 
         const resetStatistics = () => {
+            score.value = 0;
+            stopProgram()
+        };
+
+        const stopProgram = () => {
             clearInterval(timer);
             clearInterval(pressTimer);
-            score.value = 0;
             trackClicks.value = false;
             timerRunning.value = false; // Остановить таймер
-        };
+        }
 
         const startTimer = () => {
             if (!timerRunning.value) {

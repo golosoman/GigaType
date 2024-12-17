@@ -218,12 +218,12 @@ const fetchExerciseData = async (difficultyUid: string) => {
                 datasets: [
                     {
                         label: 'Верные решения',
-                        data: data.map((item: ExerciseData) => item.attempts[0]),
+                        data: data.map((item: ExerciseData) => item.attempts[1]), // Успешные попытки
                         backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     },
                     {
                         label: 'Ошибочные решения',
-                        data: data.map((item: ExerciseData) => item.attempts[1]),
+                        data: data.map((item: ExerciseData) => item.attempts[0] - item.attempts[1]), // Неудачные попытки
                         backgroundColor: 'rgba(255, 99, 132, 0.6)',
                     },
                 ],
