@@ -153,7 +153,6 @@ def get():
 
     elif "user_uuid" in request.args:
         user = db.session.execute(select(User).where(User.uuid == request.args["user_uuid"])).first()
-        print(user)
         if not user:
             return message("Неверный uuid пользователя.", 404)
         user: User = user[0]
@@ -188,16 +187,13 @@ def top():
             )
         ).group_by(Statistic.user_id)
         .join(User).select_from(Statistic))
-    print(query)
     statistics = db.session.execute(query).all()
-    print(statistics)
     top_list = []
     for statistic in statistics:
         temp = TopInfo()
         temp.login = statistic[0]
         temp.scores = int(statistic[1])
         top_list.append(temp)
-    print(top_list)
     top_list.sort(key=lambda x: x.scores)
     top_list.reverse()
     return send_json_data(make_json_response(top_list))

@@ -3,6 +3,7 @@ from typing import List
 from uuid import uuid4
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, Table, Column
+from datetime import datetime, timezone
 
 from app import db
 
@@ -164,7 +165,7 @@ class Statistic(Base):
     user: Mapped["User"] = relationship(back_populates="statistic")
     task_id: Mapped[int] = mapped_column(ForeignKey("task.id", ondelete="CASCADE"))
     task: Mapped["Task"] = relationship()
-    timestamp: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now())
+    timestamp: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
     used_time: Mapped[float]
     mistakes: Mapped[int]
     # average_key_press_time: Mapped[float]
@@ -182,7 +183,7 @@ class Statistic(Base):
                  success: bool,
                  score: int,
                  clicks_per_minute: int = None,
-                 timestamp: datetime.datetime = None
+                 timestamp: datetime = None
                  ):
         self.user_id = user_id
         self.task_id = task_id
