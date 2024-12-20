@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app import db
 from app.models import KeyBoardZone
-from app.utils import login_required, send_json_data, make_json_response
+from app.utils import login_required, send_json_data, make_json_response, message
 
 # Создаем Blueprint для клавиатурных зон
 keyboard_zone_api = Blueprint('keyboard_zone_api', __name__, url_prefix="/zone")
