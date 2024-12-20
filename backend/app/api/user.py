@@ -52,7 +52,11 @@ def register():
                 return send_cookie(new_user.id, new_user.uuid, new_user.login)
             exist_user: User = exist_user[0]
             if exist_user.login == "admin":
-                return message("Пользователь создан")
+                return send_json_data(make_json_response(
+                        new_user,
+                        additional=["uuid", "status_id"],
+                        exclude=["statistic", "password_hash"],
+                    ))
             else:
                 return send_cookie(new_user.id, new_user.uuid, new_user.login)
         except BaseException as e:
