@@ -15,9 +15,10 @@
             <BaseLink customStyle="width: 254px; height: 57px;; border-radius: 15px;" class="for-link"
                 href="/app/edit/user">Редактор
                 пользователей</BaseLink>
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/system">О
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/public/AboutSystem.html">О
                 системе</BaseLink>
-            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;" href="/app/information/developer">О
+            <BaseLink customStyle="width: 254px; height: 57px; border-radius: 15px;"
+                href="/public/AboutDevelopers.html">О
                 разработчиках
             </BaseLink>
             <ImageLink url="/app/cabinet/admin" :imageSrc="userUrl" altText="ЛК"
