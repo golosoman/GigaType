@@ -199,5 +199,8 @@ def check_content(task: Task, zones: List["KeyBoardZone"]):
         if zone not in zones:
             shouldRegenerate = True
     if shouldRegenerate:
-        request.json['length'] = len(task.content)
+        if task.difficulty.min_length > len(task.content):
+            request.json['length'] = task.difficulty.min_length
+        else:
+            request.json['length'] = len(task.content)
         task.content = json.loads(generate()[0])['content']
