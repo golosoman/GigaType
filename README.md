@@ -32,7 +32,7 @@ GigaType — веб-приложение, предназначенное для 
 
 ### Локальный запуск
 
-- Склонировать проект `git clone https://github.com/yourusername/GigaType.git`
+- Склонировать проект `git clone https://github.com/golosoman/GigaType.git`
 - Установить **Python 3.12**, **MySQL 8**, **Node.js**
 - Перейти в директорию проекта и выполнить команды:
 
@@ -40,7 +40,7 @@ GigaType — веб-приложение, предназначенное для 
 
     ```bash
     python -m venv .venv
-    . .venv/Scripts/activate
+    .venv/Scripts/activate
     pip install -r requirements.txt
     alembic upgrade head
     python db_init.py
