@@ -85,7 +85,7 @@ GigaType — веб-приложение, предназначенное для 
 				<sub><b>Александр</b></sub>
 			</a>
 			<br />
-			<sub>Дизайнер</br>Тестировщик</sub>
+			<sub>Designer</br>Tester</sub>
 		</td>
 	</tr>
 </table>
