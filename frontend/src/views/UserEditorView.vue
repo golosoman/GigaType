@@ -72,6 +72,7 @@ const headers = ['Пользователь', 'Действие'];
 const users = ref<{ id: number; name: string; uuid: string; isBanned: boolean }[]>([]);
 
 const handleUserAdd = (user: { name: string, uuid: string, isBanned: boolean }) => {
+    console.log(user.uuid);
     users.value.push({
         id: users.value.length + 1,
         name: user.name,

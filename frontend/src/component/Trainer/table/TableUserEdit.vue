@@ -64,7 +64,7 @@ const handleAddButtonClick = () => {
 const removeUser = async (uuid: string, isBanned: boolean) => {
     const url = isBanned ? '/api/user/unblock' : '/api/user/block';
     const body = { "uuid": uuid };
-
+    console.log(body.uuid)
     try {
         const response = await axios.post(url, body, {
             headers: {

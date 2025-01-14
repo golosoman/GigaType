@@ -87,10 +87,11 @@ export default defineComponent({
                     login: login.value,
                     password: password.value,
                 });
-
+                console.log(`response: ` + response.data[0].uuid);
+                console.log(response.data)
                 emit("new-user-add", {
                     name: login.value, // Используем логин
-                    uuid: response.data.uuid, // UUID нового пользователя
+                    uuid: response.data[0].uuid, // UUID нового пользователя
                     isBanned: false // Новый пользователь не заблокирован
                 });
 
