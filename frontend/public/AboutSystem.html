@@ -5,32 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>О системе</title>
     <style>
-
-        body{
+        body {
             font-family: Arial, Helvetica, sans-serif;
             margin: 30px;
             background-color: #81BECE; 
         }
 
-        p{
+        p, ul {
             font-size: 20px;
         }
 
-        ul{
-            font-size: 20px;
-        }
-
-        h1{
+        h1 {
             text-align: center;
             font-size: 40px;
         }
 
-        img{
+        img {
             width: 50%;
             margin-left: 10px;
         }
         
-        .container{
+        .container {
             background-color: #FFFFFF;
             display: flex;
             justify-content: space-between;
@@ -41,6 +36,28 @@
             padding: 10px;
         }
 
+        /* Стиль для кнопки "Наверх" */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #012e4a;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            display: none; /* Скрыть кнопку по умолчанию */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .scroll-to-top:hover {
+            background-color: #0a4d8c;
+        }
     </style>
 </head>
 <body>
@@ -48,15 +65,15 @@
     <div class="container">
         <div class="text-container">
             <h2>Клавиатурный тренажер</h2>
-         <p>Клавиатурный тренажёр – прошрамма, предназначенная для обучения 
-        набору на компьютерной клавиатуре. Основными целями тренажера являются: </p>
-        <ul>
-        <li>научить слепому методу печати;</li>
-        <li>научить использовать  для набора все десять пальцев рук;</li>
-        <li>увеличить скорость набора;</li>
-        <li>уменьшить количество опечаток;</li>
-        <li>улучшить ритмичность набора (что позволяет уменьшить усталость при наборе).</li>
-        </ul>
+            <p>Клавиатурный тренажёр – программа, предназначенная для обучения 
+            набору на компьютерной клавиатуре. Основными целями тренажера являются:</p>
+            <ul>
+                <li>научить слепому методу печати;</li>
+                <li>научить использовать для набора все десять пальцев рук;</li>
+                <li>увеличить скорость набора;</li>
+                <li>уменьшить количество опечаток;</li>
+                <li>улучшить ритмичность набора (что позволяет уменьшить усталость при наборе).</li>
+            </ul>
         </div>
     </div>
 
@@ -153,8 +170,30 @@
     </div>
 
    
+    <!-- Кнопка "Наверх" -->
+    <button class="scroll-to-top" id="scrollToTopBtn" title="Наверх">↑</button>
 
-    
+    <script>
+        // Получаем кнопку
+        const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+        // Показать кнопку при прокрутке вниз
+        window.onscroll = function() {
+            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+                scrollToTopBtn.style.display = "flex";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        };
+
+        // Функция для прокрутки к верху страницы
+        scrollToTopBtn.onclick = function() {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth" // Плавная прокрутка
+            });
+        };
+    </script>
 
 </body>
 </html>

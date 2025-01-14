@@ -22,7 +22,7 @@ export const useUser = defineStore("user", () => {
     login.value = loginValue;
 
     // Устанавливаем роль в зависимости от логина
-    role.value = loginValue === "admin" ? "ADMIN" : "TRAINEE";
+    role.value = loginValue.toLowerCase() === "admin" ? "ADMIN" : "TRAINEE";
     userId.value = uid; // Сохраняем uid пользователя
 
     // Сохраняем состояние в localStorage
