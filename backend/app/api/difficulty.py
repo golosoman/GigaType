@@ -113,7 +113,7 @@ def update_():
                         Difficulty.max_mistakes == int(data['max_mistakes']),
                 )
             ).all()
-
+            # print("Тут говоно")
             for existing_difficulty_tuple in existing_difficulties:
                 existing_difficulty = existing_difficulty_tuple[0]  # Извлекаем объект Difficulty
                 existing_zones = existing_difficulty.zones  # Получаем связанные зоны

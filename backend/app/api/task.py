@@ -67,10 +67,16 @@ def create():
                 )
             )
             db.session.commit()
-            task = db.session.execute(select(Task).where(Task.name == data['name'])).first()
+            task = db.session.execute(select(Task).where(
+                and_(
+                    Task.difficulty_id == difficulty.id,
+                    Task.name == data['name']
+                )
+            )).first()
             if not task:
                 return message("Неверный uid задания", 404)
             task: Task = task[0]
+            # print(task.uid)
             return send_json_data(make_json_response(task, additional=['uid'], exclude=["difficulty", "difficulty_id"], get={"difficulty": ["uid", "name"]}))
         except BaseException as e:
             print(str(e))
